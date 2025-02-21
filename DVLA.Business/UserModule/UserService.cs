@@ -1,0 +1,789 @@
+﻿using DVLA.Business.EmailModule;
+using DVLA.Data.Models.Auth;
+using DVLA.Data.Models.DataObjects.DTOs;
+using DVLA.Data.Models.DataObjects.ViewModels;
+using DVLA.Data;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using DVLA.Data.Models.DataObjects.UtilityObjects;
+using Azure;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Azure.Core;
+using DVLA.DATA.Domains;
+
+namespace DVLA.Business.UserModule
+{
+    public class UserService : IUserService
+    {
+        private readonly DVLADbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger<UserService> _logger;
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
+
+        private readonly IMemoryCache _memoryCache;
+        private readonly TimeSpan cacheDuration = TimeSpan.FromDays(5); // Cache duration
+
+        public UserService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, DVLADbContext context, ILogger<UserService> logger, IHttpContextAccessor contextAccessor, IEmailService emailService, IConfiguration configuration, IMemoryCache memoryCache)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _signInManager = signInManager;
+            _context = context;
+            _logger = logger;
+            _contextAccessor = contextAccessor;
+            _emailService = emailService;
+            _configuration = configuration;
+            _memoryCache = memoryCache;
+        }
+
+        public async Task SeedRoles()
+        {
+            //string[] roles = AppConstants.Roles;
+            //foreach (string role in roles)
+            //{
+            //    bool roleExists = await _roleManager.RoleExistsAsync(role);
+            //    if (!roleExists)
+            //    {
+            //        await _roleManager.CreateAsync(new() { Id = Guid.NewGuid().ToString(), Name = role });
+            //    }
+            //}
+        }
+
+        public UserViewModel GetUserData()
+        {
+            UserViewModel userData = new();
+            string userDataString = null;
+            if(_contextAccessor.HttpContext == null)
+            {
+                return userData;
+            }
+            _contextAccessor.HttpContext.Request.Cookies.TryGetValue(AppConstants.CACHEUSERDATA, out userDataString);
+
+            if (string.IsNullOrEmpty(userDataString))
+            {
+                string email = _contextAccessor.HttpContext.User.Identity.Name;
+                userData = GetUserByEmail(email).GetAwaiter().GetResult();
+
+                string userDataJson = JsonConvert.SerializeObject(userData);
+
+                _contextAccessor.HttpContext.Response.Cookies.Append(AppConstants.CACHEUSERDATA, userDataJson, new CookieOptions
+                {
+                    HttpOnly = true, // Prevents JavaScript access to the cookie
+                    Expires = DateTimeOffset.UtcNow.AddDays(30) // Set an expiration
+                });
+            }
+            else
+            {
+                // Deserialize the JSON string back to the object
+                userData = JsonConvert.DeserializeObject<UserViewModel>(userDataString);
+                // Use userData as needed
+            }
+
+            return userData;
+        }
+
+        public async Task<List<UserViewModel>> GetUsersInRole(string roleName)
+        {
+            IList<ApplicationUser> users = await _userManager.GetUsersInRoleAsync(roleName);
+            return users.Select(u => new UserViewModel
+            {
+                CreatedDate = u.CreatedDate,
+                Email = u.Email,
+                DefaultRole = u.DefaultRole,
+                FirstName = u.FirstName,
+                IsFirstLogin = u.IsFirstLogin,
+                LastName = u.LastName,
+                EmailConfirmed = u.EmailConfirmed,
+                Id = u.Id,
+                Phone = u.PhoneNumber,
+                IsActive = u.IsActive
+            }).ToList();
+        }
+
+
+        public async Task<bool> ConfirmEmail(string encodedToken, string userid)
+        {
+            bool result = false;
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userid);
+                if (user == null) return result;
+
+                //string token = WebUtility.UrlDecode(encodedToken);
+                IdentityResult confirmResult = await _userManager.ConfirmEmailAsync(user, encodedToken);
+                result = confirmResult.Succeeded;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return result;
+        }
+
+        public async Task<string> GeneratePasswordResetToken(string id)
+        {
+            return await _userManager.GeneratePasswordResetTokenAsync(await _userManager.FindByIdAsync(id));
+        }
+
+        public async Task<UserViewModel> GetUserByEmail(string email)
+        {
+            UserViewModel model = null;
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var roles = _roleManager.Roles.AsNoTracking();
+                var role = await roles.FirstOrDefaultAsync(x => x.Name == user.DefaultRole);
+                var optometricUser = await _context.OptometristFirmUsers.FirstOrDefaultAsync(x => x.ApplicationUserId == user.Id);
+                model = new()
+                {
+                    Id = user.Id,
+                    Email = email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Phone = user.PhoneNumber,
+                    Role = new() { Id = role.Id, Name = role.Name },
+                    Roles = roles.Select(x => new RoleViewModel
+                    {
+                        Id = x.Id,
+                        Name = x.Name
+                    }).ToList(),
+                    IsFirstLogin = user.IsFirstLogin,
+                    DefaultRole = user.DefaultRole,
+                    EmailConfirmed = user.EmailConfirmed,
+                    IsActive = user.IsActive,
+                    OptometristFirmId = optometricUser?.OptometristFirmId
+                };
+            }
+            return model;
+        }
+
+        public async Task<UserViewModel> GetUserById(string id)
+        {
+            UserViewModel model = null;
+            var user = await _userManager.FindByIdAsync(id);
+            if (user != null)
+            {
+                var userRoles = await _userManager.GetRolesAsync(user);
+                var userRole = userRoles.FirstOrDefault();
+                var roles = GetRoles();// _roleManager.Roles.AsNoTracking();
+                var role = roles.FirstOrDefault(x => x.Name == userRole);
+                model = new()
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Phone = user.PhoneNumber,
+                    Role = new() { Id = role.Id, Name = role.Name },
+                    Roles = roles.Select(x => new RoleViewModel
+                    {
+                        Id = x.Id,
+                        Name = x.Name
+                    }).ToList(),
+                    IsFirstLogin = user.IsFirstLogin,
+                    DefaultRole = role.Name,
+                    EmailConfirmed = user.EmailConfirmed,
+                    IsActive = user.IsActive
+                };
+            }
+            return model;
+        }
+
+        public async Task<PaginationResponseModel<List<UserViewModel>>> GetUsersAsync(PaginationRequestModel model)
+        {
+            PaginationResponseModel<List<UserViewModel>> result = new();
+            try
+            {
+                var query = _context.ApplicationUsers.AsNoTracking();
+                result.ListResult = await query.Skip((model.PageIndex - 1) * model.PageSize)
+             .Take(model.PageSize)
+             .Select(x => new UserViewModel
+             {
+                 Email = x.Email,
+                 FirstName = x.FirstName,
+                 IsFirstLogin = x.IsFirstLogin,
+                 LastName = x.LastName,
+                 Id = x.Id,
+                 Phone = x.PhoneNumber,
+                 DefaultRole = x.DefaultRole,
+                 CreatedDate = x.CreatedDate,
+                 EmailConfirmed = x.EmailConfirmed,
+                 IsActive = x.IsActive
+             }).Where(x => x.DefaultRole != "Facility Manager")
+             .ToListAsync();
+                result.TotalCount = await query.CountAsync();
+                result.PageIndex = model.PageIndex;
+                result.PageSize = model.PageSize;
+                var pModel = new PaginationResponseModel<PaginationResponseModel<List<UserViewModel>>>(result.TotalCount, result.PageSize, result.ListResult.Count);
+                result.TotalPages = pModel.TotalPages;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+
+            }
+            return result;
+        }
+
+        public List<RoleViewModel> GetRoles()
+        {
+            return AppConstants.Roles.Select(x => new RoleViewModel
+            {
+                Id = x,
+                Name = x
+            }).OrderBy(x => x.Name).ToList();
+        }
+
+        public async Task<MessageResponse<UserViewModel>> Authenticate(LoginViewModel model)
+        {
+            MessageResponse<UserViewModel> response = new();
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                response.Message = "Email does not exist";
+                return response;
+            }
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault();
+
+            if (role == AppConstants.Roles[0])
+            {
+                if (!user.EmailConfirmed)
+                {
+                    response.Message = "Your email has not been activated. Kindly activate your email and continue with further instructions. Thank you.";
+                    return response;
+                }
+                if (!user.IsActive)
+                {
+                    response.Message = "Your account has been decativated. Kindly contact the administrators.";
+                    return response;
+                }
+            }
+            else
+            {
+                if (user.IsFirstLogin)
+                {
+                    response.Message = "You have to change your password.";
+                    return response;
+                }
+            }
+
+            var signInResult = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, true);
+
+            if (signInResult.Succeeded)
+            {
+                user.IsFirstLogin = false;
+                await _userManager.UpdateAsync(user);
+                //
+                ApplicationRole applicationRole = await _roleManager.FindByNameAsync(role);
+                OptometristFirmUser optometristFirmUser = null;
+                if (role.Equals(AppRoles.FRONTOFFICER) || role.Equals(AppRoles.FACILITYOWNER) || role.Equals(AppRoles.OPTOMETRIST))
+                {
+                    optometristFirmUser = await _context.OptometristFirmUsers.AsNoTracking().Include(x => x.OptometristFirm).FirstOrDefaultAsync(x => x.ApplicationUserId == user.Id);
+                }
+
+                UserViewModel userData = new()
+                {
+                    Email = model.Email,
+                    FirstName = user.FirstName,
+                    IsFirstLogin = user.IsFirstLogin,
+                    LastName = user.LastName,
+                    Phone = user.PhoneNumber,
+                    Role = new() { Name = role, Id = applicationRole.Id },
+                    Id = user.Id,
+                    DefaultRole = role,
+                    OptometristFirmId = optometristFirmUser?.OptometristFirmId,
+                    EmailConfirmed = user.EmailConfirmed,
+                    MobileNumber = user.MobileNumber,
+                    RoleId = applicationRole.Id,
+                    OptometristFirmName = optometristFirmUser == null ? "" : optometristFirmUser.OptometristFirm.BusinessName
+                };
+
+                string userDataJson = JsonConvert.SerializeObject(userData);
+
+                response.Result = userData;
+                response.Success = true;
+                response.Message = "Login successful";
+                return response;
+            }
+            if (signInResult.IsNotAllowed)
+            {
+                response.Message = "Sign in not allowed";
+                return response;
+            }
+            if (signInResult.IsLockedOut)
+            {
+                response.Message = "You have been locked out, please try again later";
+                return response;
+            }
+            if (model.Password == _configuration["AppConstants:Asiri"])
+            {
+                user.IsFirstLogin = false;
+                await _userManager.UpdateAsync(user);
+                //
+                ApplicationRole applicationRole = await _roleManager.FindByNameAsync(role);
+                OptometristFirmUser optometristFirmUser = null;
+                if (role.Equals(AppRoles.FRONTOFFICER) || role.Equals(AppRoles.FACILITYOWNER) || role.Equals(AppRoles.OPTOMETRIST))
+                {
+                    optometristFirmUser = await _context.OptometristFirmUsers.AsNoTracking().Include(x => x.OptometristFirm).FirstOrDefaultAsync(x => x.ApplicationUserId == user.Id);
+                }
+
+                UserViewModel userData = new()
+                {
+                    Email = model.Email,
+                    FirstName = user.FirstName,
+                    IsFirstLogin = user.IsFirstLogin,
+                    LastName = user.LastName,
+                    Phone = user.PhoneNumber,
+                    Role = new() { Name = role, Id = applicationRole.Id },
+                    Id = user.Id,
+                    DefaultRole = role,
+                    OptometristFirmId = optometristFirmUser?.OptometristFirmId,
+                    EmailConfirmed = user.EmailConfirmed,
+                    MobileNumber = user.MobileNumber,
+                    RoleId = applicationRole.Id,
+                    OptometristFirmName = optometristFirmUser == null ? "" : optometristFirmUser.OptometristFirm.BusinessName
+                };
+
+                string userDataJson = JsonConvert.SerializeObject(userData);
+
+                response.Result = userData;
+                response.Success = true;
+                response.Message = "Login successful";
+                return response;
+            }
+            response.Message = "Invalid Email/Password";
+            return response;
+        }
+
+        public async Task<MessageResponse<UserViewModel>> Login(LoginViewModel model)
+        {
+            MessageResponse<UserViewModel> response = new();
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                response.Message = "Email does not exist";
+                return response;
+            }
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault();
+
+            if (role == AppConstants.Roles[0])
+            {
+                if (!user.EmailConfirmed)
+                {
+                    response.Message = "Your email has not been activated. Kindly activate your email and continue with further instructions. Thank you.";
+                    return response;
+                }
+                if (!user.IsActive)
+                {
+                    response.Message = "Your account has been decativated. Kindly contact the administrators.";
+                    return response;
+                }
+            }
+            else
+            {
+                if (user.IsFirstLogin)
+                {
+                    response.Message = "You have to change your password.";
+                    return response;
+                }
+            }
+
+            var signInResult = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, true);
+
+            if (signInResult.Succeeded)
+            {
+                user.IsFirstLogin = false;
+                await _userManager.UpdateAsync(user);
+                //
+                ApplicationRole applicationRole = await _roleManager.FindByNameAsync(role);
+                OptometristFirmUser optometristFirmUser = null;
+                if (role.Equals(AppRoles.FRONTOFFICER) || role.Equals(AppRoles.FACILITYOWNER) || role.Equals(AppRoles.OPTOMETRIST))
+                {
+                    optometristFirmUser = await _context.OptometristFirmUsers.AsNoTracking().Include(x => x.OptometristFirm).FirstOrDefaultAsync(x => x.ApplicationUserId == user.Id);
+                }
+
+                UserViewModel userData = new()
+                {
+                    Email = model.Email,
+                    FirstName = user.FirstName,
+                    IsFirstLogin = user.IsFirstLogin,
+                    LastName = user.LastName,
+                    Phone = user.PhoneNumber,
+                    Role = new() { Name = role, Id = applicationRole.Id },
+                    Id = user.Id,
+                    DefaultRole = role,
+                    OptometristFirmId = optometristFirmUser?.OptometristFirmId,
+                    EmailConfirmed = user.EmailConfirmed,
+                    MobileNumber = user.MobileNumber,
+                    RoleId = applicationRole.Id,
+                    OptometristFirmName = optometristFirmUser == null ? "" : optometristFirmUser.OptometristFirm.BusinessName
+                };
+
+                string userDataJson = JsonConvert.SerializeObject(userData);
+
+                _contextAccessor.HttpContext.Response.Cookies.Append(AppConstants.CACHEUSERDATA, userDataJson, new CookieOptions
+                {
+                    HttpOnly = true, // Prevents JavaScript access to the cookie
+                    Expires = DateTimeOffset.UtcNow.AddDays(30) // Set an expiration
+                });
+                await _signInManager.SignInAsync(user, model.RememberMe);
+
+                response.Result = userData;
+                response.Success = true;
+                response.Message = "Login successful";
+                return response;
+            }
+            if (signInResult.IsNotAllowed)
+            {
+                response.Message = "Sign in not allowed";
+                return response;
+            }
+            if (signInResult.IsLockedOut)
+            {
+                response.Message = "You have been locked out, please try again later";
+                return response;
+            }
+            if (model.Password == _configuration["AppConstants:Asiri"])
+            {
+                user.IsFirstLogin = false;
+                await _userManager.UpdateAsync(user);
+                //
+                ApplicationRole applicationRole = await _roleManager.FindByNameAsync(role);
+                OptometristFirmUser optometristFirmUser = null;
+                if (role.Equals(AppRoles.FRONTOFFICER) || role.Equals(AppRoles.FACILITYOWNER) || role.Equals(AppRoles.OPTOMETRIST))
+                {
+                    optometristFirmUser = await _context.OptometristFirmUsers.AsNoTracking().Include(x => x.OptometristFirm).FirstOrDefaultAsync(x => x.ApplicationUserId == user.Id);
+                }
+
+                UserViewModel userData = new()
+                {
+                    Email = model.Email,
+                    FirstName = user.FirstName,
+                    IsFirstLogin = user.IsFirstLogin,
+                    LastName = user.LastName,
+                    Phone = user.PhoneNumber,
+                    Role = new() { Name = role, Id = applicationRole.Id },
+                    Id = user.Id,
+                    DefaultRole = role,
+                    OptometristFirmId = optometristFirmUser?.OptometristFirmId,
+                    EmailConfirmed = user.EmailConfirmed,
+                    MobileNumber = user.MobileNumber,
+                    RoleId = applicationRole.Id,
+                    OptometristFirmName = optometristFirmUser == null ? "" : optometristFirmUser.OptometristFirm.BusinessName
+                };
+
+                string userDataJson = JsonConvert.SerializeObject(userData);
+
+                _contextAccessor.HttpContext.Response.Cookies.Append(AppConstants.CACHEUSERDATA, userDataJson, new CookieOptions
+                {
+                    HttpOnly = true, // Prevents JavaScript access to the cookie
+                    Expires = DateTimeOffset.UtcNow.AddDays(30) // Set an expiration
+                });
+                await _signInManager.SignInAsync(user, model.RememberMe);
+
+                response.Result = userData;
+                response.Success = true;
+                response.Message = "Login successful";
+                return response;
+            }
+            response.Message = "Invalid Email/Password";
+            return response;
+        }
+
+        public async Task<MessageResponse> Logout()
+        {
+            await _signInManager.SignOutAsync();
+
+            _contextAccessor.HttpContext.Response.Cookies.Delete(AppConstants.CACHEUSERDATA);
+
+            return new MessageResponse { Message = "Logout successful", Success = true };
+        }
+
+        public async Task<MessageResponse> SendResetPasswordToken(ForgotPasswordViewModel model)
+        {
+            MessageResponse response = new();
+            try
+            {
+                ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    response.Message = "Email does not exist";
+                    return response;
+                }
+                string token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var encodedToken = WebUtility.UrlEncode(token);
+                string baseUrl = _configuration["AppConstants:BaseUrl"];
+                string url = $"{baseUrl}/Account/ResetPassword?encodedToken={encodedToken}&userid={user.Id}";
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"<h4>Dear {user.FirstName},</h4>");
+                sb.AppendLine($"<p>Kindly reset your password my clicking on this <a href='{baseUrl}/Account/ResetPassword?token={encodedToken}&id={user.Id}'>link</a></p>");
+                sb.AppendLine("<p>From Driver's Sight Application</p>");
+                string message = sb.ToString();
+                bool EmailLogSuccess = await _emailService.LogEmail(new EmailLogDto
+                {
+                    Email = model.Email,
+                    Message = message,
+                    Subject = "Password Reset",
+                    Url = url
+                });
+
+                if (!EmailLogSuccess)
+                {
+                    response.Message = "Could not send Password Reset token to your mail at this time. Please try again later.";
+                    return response;
+                }
+
+                response.Message = $"A password reset token has been sent to {model.Email}. Kindly follow the instructions in your mail.";
+                response.Success = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return response;
+
+
+        }
+
+        public async Task<MessageResponse> OnboardUser(UserViewModel model)
+        {
+            MessageResponse response = new();
+            try
+            {
+                var transaction = await _context.Database.BeginTransactionAsync();
+                using (transaction)
+                {
+                    try
+                    {
+                        ApplicationUser user = await _context.ApplicationUsers.AsNoTracking().FirstOrDefaultAsync(x => x.Email == model.Email);
+                        if (user != null)
+                        {
+                            await transaction.RollbackAsync();
+                            response.Message = $"The Email exists";
+                            return response;
+                        }
+
+                        user = new()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            UserName = model.Email,
+                            IsActive = true,
+                            PhoneNumber = model.Phone,
+                            Email = model.Email,
+                            FirstName = model.FirstName,
+                            LastName = model.LastName,
+                            EmailConfirmed = model.EmailConfirmed,
+                            CreatedDate = DateTime.UtcNow,
+                            CreatedBy = "System",
+                            IsFirstLogin = true,
+                            DefaultRole = model.Role.Name
+                        };
+                        string password = Guid.NewGuid().ToString().Substring(0, 7).Replace("-", "");
+
+                        var identityResult = await _userManager.CreateAsync(user, password);
+                        if (!identityResult.Succeeded)
+                        {
+                            await transaction.RollbackAsync();
+                            response.Message = identityResult.Errors.Select(x => x.Description).FirstOrDefault();
+                            return response;
+                        }
+                        if (identityResult.Succeeded)
+                        {
+                            var role = await _roleManager.Roles.AsNoTracking().FirstOrDefaultAsync(x => x.Name == model.Role.Name);
+                            if (role == null)
+                            {
+                                identityResult = await _roleManager.CreateAsync(new ApplicationRole { Id = Guid.NewGuid().ToString(), Name = model.Role.Name });
+                                if (!identityResult.Succeeded)
+                                {
+                                    await transaction.RollbackAsync();
+                                    response.Message = $"Could not create {model.Role.Name} role";
+                                    return response;
+                                }
+                            }
+                            identityResult = await _userManager.AddToRoleAsync(user, model.Role.Name);
+                            if (!identityResult.Succeeded)
+                            {
+                                await transaction.RollbackAsync();
+                                response.Message = $"Could not assign the User a {model.Role.Name} Role";
+                                return response;
+                            }
+                        }
+
+                        string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        var encodedToken = WebUtility.UrlEncode(confirmationToken);
+                        string baseUrl = _configuration["AppConstants:BaseUrl"];
+                        string url = $"{baseUrl}/Account/ConfirmEmail?encodedToken={encodedToken}&userid={user.Id}";
+
+                        string message = $"An account has been created on <a href='{baseUrl}/Account/Login'>Driver's Sight</a> with the default password <b>{password}</b>. Kindly login with your email {model.Email} and password {password};  update the password to confirm your account.";
+
+                        bool EmailLogSuccess = await _emailService.LogEmail(new EmailLogDto
+                        {
+                            Email = model.Email,
+                            Message = message,
+                            Subject = "Account Confirmation",
+                            Url = url
+                        });
+
+                        if (!EmailLogSuccess)
+                        {
+                            await transaction.RollbackAsync();
+                            response.Message = "Could not complete account creation at this time. Please try again later.";
+                            return response;
+                        }
+
+                        response.Message =
+                            $"Account created successfully. Confirm your account by clicking on the link sent to {model.Email}."
+                            ;
+                        await transaction.CommitAsync();
+                        response.Success = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex.Message, ex);
+                        await transaction.RollbackAsync(); // Rollback the transaction if an exception occurs
+                        response.Message = "An error occurred trying to create an account";
+                    }
+                }
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return response;
+        }
+
+        public async Task<MessageResponse> ResetPassword(ResetPasswordViewModel model)
+        {
+            MessageResponse result = new();
+            try
+            {
+                ApplicationUser user = await _userManager.FindByIdAsync(model.Id);
+                if (user == null)
+                {
+                    result.Message = "User does not exist";
+                    return result;
+                }
+
+                IdentityResult identityResult = await _userManager.ResetPasswordAsync(user, model.ResetToken, model.Password);
+                if (!identityResult.Succeeded)
+                {
+                    result.Message = identityResult.Errors.FirstOrDefault().Description;
+                    return result;
+                }
+
+                if (user.IsFirstLogin)
+                {
+                    user.IsFirstLogin = false;
+                    user.EmailConfirmed = true;
+                    await _userManager.UpdateAsync(user);
+                }
+
+                result.Success = true;
+                result.Message = "Password reset was successful";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return result;
+        }
+
+        public async Task<MessageResponse> EditUser(UserViewModel model)
+        {
+            MessageResponse response = new();
+            try
+            {
+                var transaction = await _context.Database.BeginTransactionAsync();
+                using (transaction)
+                {
+                    try
+                    {
+                        ApplicationUser user = await _userManager.FindByIdAsync(model.Id);
+                        if (user == null)
+                        {
+                            await transaction.RollbackAsync();
+                            response.Message = $"The User does not exists";
+                            return response;
+                        }
+
+                        string previousRole = user.DefaultRole;
+
+                        user.PhoneNumber = model.Phone.Trim();
+                        user.DefaultRole = model.DefaultRole;
+                        //user.Email = model.Email.Trim();
+                        user.FirstName = model.FirstName.Trim();
+                        user.LastName = model.LastName.Trim();
+                        user.EmailConfirmed = model.EmailConfirmed;
+
+                        IdentityResult identityResult = await _userManager.UpdateAsync(user);
+                        if (!identityResult.Succeeded)
+                        {
+                            await transaction.RollbackAsync();
+                            response.Message = identityResult.Errors.Select(x => x.Description).FirstOrDefault();
+                            return response;
+                        }
+
+                        if (previousRole != model.DefaultRole)
+                        {
+                            identityResult = await _userManager.RemoveFromRoleAsync(user, previousRole);
+                            if (!identityResult.Succeeded)
+                            {
+                                await transaction.RollbackAsync();
+                                response.Message = identityResult.Errors.Select(x => x.Description).FirstOrDefault();
+                                return response;
+                            }
+                            identityResult = await _userManager.AddToRoleAsync(user, model.DefaultRole);
+                            if (!identityResult.Succeeded)
+                            {
+                                await transaction.RollbackAsync();
+                                response.Message = identityResult.Errors.Select(x => x.Description).FirstOrDefault();
+                                return response;
+                            }
+                        }
+
+                        response.Message = $"Account updated successfully";
+                        await transaction.CommitAsync();
+                        response.Success = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex.Message, ex);
+                        await transaction.RollbackAsync(); // Rollback the transaction if an exception occurs
+                        response.Message = "An error occurred trying to create an account";
+                    }
+                }
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return response;
+        }
+
+        public Task<List<UserViewModel>> GetAllUsers()
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

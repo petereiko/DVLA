@@ -1,0 +1,373 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.Enumerables
+@model VisualAssessmentResultModel
+
+@{
+    int counter = 0;
+    string area = (string)ViewData["Area"];
+    string nameTitle = "";
+    string dob = "";
+    string resultServiceType = "";
+    string age = "";
+    string passOrFail = "";
+    string testdate = "";
+    string learnerType = "";
+    if (Model != null)
+    {
+
+        //if (Model.NameTitle.HasValue)
+        //{
+        //    if ((int)Model.NameTitle.Value == 1) { nameTitle = "Mr."; }
+        //    else if ((int)Model.NameTitle.Value == 2) { nameTitle = "Mrs."; }
+        //    else { nameTitle = ""; }
+        //}
+
+        if (Model.ResultServiceType.HasValue)
+        {
+            resultServiceType = EnumHelper<ResultServiceType>.GetDisplayValue(Model.ResultServiceType.Value);
+        }
+        if (Model.LearnerDriversLicence.HasValue)
+        {
+            learnerType = EnumHelper<LearnerDriversLicenceType>.GetDisplayValue(Model.LearnerDriversLicence.Value);
+        }
+
+        if (Model.DOB.HasValue)
+        {
+            dob = Model.DOB.Value.ToShortDateString();
+            age = (DateTime.Now.Year - Model.DOB.Value.Year).ToString();
+        }
+
+        if (Model.TestDate.HasValue)
+        {
+            testdate = Model.TestDate.Value.ToShortDateString();
+        }
+        if (Model.PassOrFail.HasValue)
+        {
+            if (Model.PassOrFail.Value == PassOrFail.Pass) { passOrFail = "Pass"; }
+            else if (Model.PassOrFail.Value == PassOrFail.Fail) { passOrFail = "Fail"; }
+        }
+    }
+}
+
+@if (Model != null)
+{
+
+    <div class="row">
+        <div class="col-md-3" style="margin: 0 20px 20px 20px">
+            <img src="~/logos/logo.png" width="100" />
+        </div>
+        <div class="col-md-9"></div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <h2>
+                Driver And Vehicle Licensing Authority
+            </h2>
+        </div>
+        <div class="col-md-2"></div>
+        <div class="col-md-6">
+            <div style="text-align:right">
+                @if (Model.TestDate.HasValue)
+                {
+                    <div><b>DVLA/VTRF/@(Model.TestDate.Value.Day.ToString("D2") + Model.Id.ToString("D8")
+                      ) – FORM</b></div>
+                }
+                else
+                {
+                    <div>
+                        <b>
+                            DVLA/VTRF/@Model.Id.ToString("D8")
+                      ) – FORM
+                        </b>
+                    </div>
+                }
+                <h5>VISUAL ASSESSMENT REPORT OF AN APPLICANT FOR DRIVER’S LICENCE</h5>
+            </div>
+            <div style="border:1px solid #48b96e; padding-top:5px; padding-bottom:5px; padding-left:15px;">
+                <table>
+                    <tr>
+                        <td>DVLA Number: <b>@Model.DVLAReferenceNo</b></td>
+                        <td>&nbsp;Reference Number: <b>@Model.ReferenceNumber</b></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-warning text-sm-left" style="font-size:12px !important">
+                This Report is certified by @Model.Optometrist.ToUpper()
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-5">
+                    <div><b><u>SERVICE TYPE:</u></b></div>
+                    <div><b>@resultServiceType</b></div>
+                </div>
+
+                <div class="col-md-6">
+                    <div style="display:@(Model.LearnerDriversLicence.HasValue ? "block" : "none")">
+                        <div><b><u>Learner Driver’s licence Type</u></b></div>
+                        <div><b>@learnerType</b></div>
+                    </div>
+
+                </div>
+                <div class="col-md-1">
+                </div>
+            </div>
+
+
+            <br />
+            <div>
+                <div style="color: white;background-color: #48b96e; padding-left:10px;">Details of Applicant</div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td>Surname: <b><u>@Model.Surname</u></b></td>
+                        <td>Firstname: <b><u>@Model.FirstName</u></b></td>
+                        <td>Othername: <b><u>@Model.OtherName</u></b></td>
+                    </tr>
+                    <tr>
+                        <td>Date of Birth: <b><u>@dob</u></b></td>
+                        <td>Age: <b><u>@age</u></b></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            Digital/Residential Address:<br />
+                            @Model.PostalAddress
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Contact Number: <b><u>@Model.ContactNumber</u></b></td>
+                        <td colspan="2">Tax Identification Number (TIN): <b><u>@Model.TaxIdentificationNumber</u></b></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            Email: <b><u><a href="mailto:@Model.Email">@Model.Email</a></u></b>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div>
+                <div style="color: white;background-color: #48b96e; padding-left:10px;">Visual Tests Result</div>
+                <div><b><u>1. VISUAL ACUITY</u></b></div>
+                <div style="padding-left:10px">UNAIDED</div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td>OD: <b><u>@Model.Unaided_OD</u></b></td>
+                        <td>OS: <b><u>@Model.Unaided_OS</u></b></td>
+                        <td>OU: <b><u>@Model.Unaided_OU</u></b></td>
+                    </tr>
+                </table>
+                <div style="padding-left:10px">BCV</div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td>OD: <b><u>@Model.BCV_OD</u></b></td>
+                        <td>OS: <b><u>@Model.BCV_OS</u></b></td>
+                        <td>OU: <b><u>@Model.BCV_OU</u></b></td>
+                    </tr>
+                </table>
+
+
+                <div><b><u>2. VISUAL FIELD</u></b></div>
+                <div style="padding-left:10px">HX BCV</div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td>OD: <b><u>@Model.HX_BCV_OD</u></b></td>
+                        <td>OS: <b><u>@Model.HX_BCV_OS</u></b></td>
+                        <td></td>
+                    </tr>
+                </table>
+
+
+                <div><b><u>3. CONTRAST SENSITIVITY</u></b></div>
+                <div style="padding-left:10px">SINGLE IMAGE (BCV):</div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td>OD: <b><u>@Model.SingleImage_BCV_OU</u></b></td>
+                    </tr>
+                </table>
+
+
+                @*<div><b><u>4. CONTRAST SENSITIVITY BCV</u></b></div>
+            <table class="table table-bordered">
+            <tr>
+            <td><b><u>@Model.ContrastSensitivity_BCV</u></b></td>
+            </tr>
+            </table>*@
+
+
+                <div><b><u>4. GLARE TEST</u></b></div>
+                <div style="padding-left:10px">BCV</div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td>OD: <b><u>@Model.GlareTest_BCV_OD</u></b></td>
+                        <td>OS: <b><u>@Model.GlareTest_BCV_OS</u></b></td>
+                        <td>OU: <b><u>@Model.GlareTest_BCV_OU</u></b></td>
+                    </tr>
+                </table>
+
+
+                <div><b><u>5. COLOUR VISION </u></b></div>
+                <div style="padding-left:10px">BCV</div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td>OU: <b><u>@Model.ColourVision_BCV_OU</u></b></td>
+                    </tr>
+                </table>
+
+
+                <div><b><u>6. PATHOLOGICAL REMARKS</u></b></div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td><b><u>@Model.PathologicalRemarks</u></b></td>
+                    </tr>
+                </table>
+
+
+                <div><b><u>7. RESULT CONCLUSION</u></b></div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td><b><u>@Model.ResultConclusion</u></b></td>
+                    </tr>
+                </table>
+
+                <div><b><u>8. RESULTS BASED ON CONCLUSION(S) ABOVE </u></b></div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td><b><u>@passOrFail</u></b></td>
+                    </tr>
+                </table>
+
+
+            </div>
+        </div>
+        <div class="col-md-4">
+            <center>
+                <img src="@Model.PassportImageUrl" style="width:150px; height:150px" />
+                <div style="border:1px solid #48b96e; padding:5px;">
+                    <div div style="font-size:12px;">
+                        <u>
+                            <b>
+                                DVLA APPROVED VISUAL TEST QUALIFICATION STANDARDS
+                            </b>
+                        </u>
+                    </div>
+                    <div>
+                        <div style="text-align:left; font-size:12px;">
+                            <b>Learner Driver’s Licence:</b>
+                            <ul>
+                                <li>Better Eye: Minimum aided 6/12</li>
+                                <li>Worse Eye: minimum aided 6/60</li>
+                                <li>Minimum uninterrupted horizontal visual field of 60 degrees with each eye</li>
+                                <li>best corrected. (Total of 120° horizontal for both eyes)</li>
+                            </ul>
+                        </div>
+                        <div style="text-align:left; font-size:12px;">
+                            <b>Upgrade of existing Driver’s licence:</b>
+                            <ul>
+                                <li>Better Eye: Minimum aided 6/9</li>
+                                <li>Worse Eye: minimum aided  6/60</li>
+                                <li>
+                                    Minimum uninterrupted horizontal visual field of 60 degrees with each eye
+                                    best corrected. (Total of 120° horizontal for both eyes).
+                                </li>
+                            </ul>
+                        </div>
+                        <div style="text-align:left; font-size:12px;">
+                            <b>Note:</b>
+                            <div>Results for visual test 4 to 6 are strictly advisory and do not constitute a fail or pass.</div>
+                        </div>
+                    </div>
+                </div>
+            </center>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <b>DISCLAIMER:</b>
+            <div>Passing this visual assessment does not guarantee the grant of a Driver’s Licence.</div>
+
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-12">
+            <div>
+                <div style="color: white;background-color: #48b96e; padding-left:10px;">Details of Optalmologist/Optometrist</div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td colspan="2">Name: <b><u>@Model.BusinessName</u></b></td>
+                        <td>Accreditation Number: <b><u>@Model.AccreditationNumber</u></b></td>
+                        <td>Name of Test Center: <b><u>@Model.BusinessAddress</u></b></td>
+                    </tr>
+                    <tr>
+                        <td>Location: <b><u>@Model.BusinessAddress</u></b></td>
+                        <td>District: <b><u>@Model.DistrictName</u></b></td>
+                        <td>Region: <b><u>@Model.RegionName</u></b></td>
+                        <td>Test Date: <b><u>@testdate</u></b></td>
+                    </tr>
+                </table>
+            </div>
+            <div>
+                <div style="font-size:12px">NB:</div>
+                <div style="font-size:12px"><b>VALIDITY PERIOD:  PASSED VISUAL TEST REPORTS ARE VALID FOR TWELEVE (12) MONTHS FROM THE DATE OF ISSUE.</b></div>
+
+                <div style="font-size:9px">
+                    <div>DEFINATIONS</div>
+                    <div>NPL – NO PERCEPTION OF LIGHT.</div>
+                    <div>PL – PERCEPTION OF LIGHT.</div>
+                    <div>OD – RIGHT EYE.</div>
+                    <div>OS – LEFT EYE.</div>
+                    <div>OU – BOTH EYES.</div>
+                    <div>BCV – BEST CORRECTED VISION.</div>
+                    <div>HX BCV – HORIZONTAL BEST CORRECTED VISION</div>
+                </div>
+            </div>
+
+            <div class="caption" style="margin: 40px 0px 0px 0px; background-color:#a5dfb5">
+                <h5><b>Disclaimer:</b></h5>
+                <p><b>Passing this eye exam does not guarantee the applicant a driver's license. The issuance of the license is the sole prerogative of the DVLA</b></p>
+                <h6><b>Qualification standards</b></h6>
+                <h6><b>Basic:</b></h6>
+                <p>
+                    With or without best correction:
+                    <ul>
+                        <li>At least 6/12 in the better eye and at least 6/60 in the worse eye </li>
+                        <li>An uninterrupted horizontal visual field of at least 120 degrees equally shared in both eyes.</li>
+                    </ul>
+                </p>
+                <h6><b>Upgrade:</b></h6>
+                <p>
+                    With or without best correction:
+                    <ul>
+                        <li>At least 6/9 in the better eye and at least 6/24 in the worse eye. </li>
+                        <li>An uninterrupted horizontal visual field of at least 120 degrees equally shared in both eyes.</li>
+                    </ul>
+                </p>
+
+                <p><b>Notwithstanding the above, the presence of certain diseases/conditions, may result in disqualification of the applicant based on the clinical judgement of the clinician when other tests are performed.</b></p>
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+}
+else
+{
+    <div class="text-danger">Sorry! No matching record found for your search.</div>
+}

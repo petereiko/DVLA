@@ -1,0 +1,61 @@
+﻿@using DVLA.Data.Models.DataObjects.ViewModels
+@model ClientViewModel
+@{
+    ViewBag.Title = "Applicant Search";
+}
+
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">Applicant Search</h4>
+            </div>
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+
+
+                        <div>
+                            <form asp-action="ApplicantSearch" asp-controller="ReportManagement" method="post">
+                                <table>
+                                    <tr>
+                                        <td>@*@Html.TextBoxFor(x => x.SearchParameter.ApplicantName, new { placeholder = "Applicant Name", @class = "form-control" })*@</td>
+                                        <td>@Html.TextBoxFor(x => x.SearchParameter.DriversLicenceNumber, new { placeholder = "Drivers Licence Number", @class = "form-control" })</td>
+                                        <td>@Html.TextBoxFor(x => x.SearchParameter.DVLANumber, new { placeholder = "DVLA Number", @class = "form-control" })</td>
+                                        <td>@Html.TextBoxFor(x => x.SearchParameter.ReferenceNumber, new { placeholder = "VAS Reference Number", @class = "form-control" })</td>
+                                        <td><input type="submit" value="Search Client" class="btn btn-primary" /></td>
+                                    </tr>
+
+                                </table>
+                            </form>
+
+
+                        </div>
+                        <div>
+                            <partial name="_ClientSearch" model="Model.Clients" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+@section Scripts {
+    <script>
+
+    </script>
+}
+
+
+

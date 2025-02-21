@@ -1,0 +1,68 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@model IEnumerable<ClientModel>
+@{
+    int counter = 0;
+}
+
+
+<table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+    <thead>
+        <tr>
+            <th>
+                #
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Address
+            </th>
+            <th>
+                company
+            </th>
+            <th>
+                D. Licence
+            </th>
+            <th>DVLA No</th>
+            <th>Ref No</th>
+            <th>Test Date</th>
+            <th></th>
+        </tr>
+
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            counter = counter + 1;
+            <tr>
+                <td>
+                    @counter
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PostalAddress)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OptometristCenter)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DriversLicence)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DVLAReferenceNo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ReferenceNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TestDate)
+                </td>
+                <td>
+                    <a href="@Url.Action("VisualAssessmentDetails","ReportManagement", new { driverslicence=item.DriversLicence, dvlaReferenceNo=item.DVLAReferenceNo, vasReferenceNo=item.ReferenceNumber})">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

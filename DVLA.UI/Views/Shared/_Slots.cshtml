@@ -1,0 +1,118 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.Enumerables
+@model IEnumerable<SlotRequestModel>
+@{
+    int counter = 0;
+}
+
+
+<div class="table-responsive">
+
+    <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+        <thead>
+            <tr>
+                <th>Ref No.</th>
+                <th>
+                    Business
+                </th>
+                <th>Amt.</th>
+                <th>
+                    Tel.
+                </th>
+                <th>
+                    Qty
+                </th>
+                <th>
+                    Type
+                </th>
+                <th>
+                    Status
+                </th>
+                <th>Created On</th>
+                <th></th>
+            </tr>
+
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                counter = counter + 1;
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ReferenceNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.BusinessName)
+                    </td>
+                    <td>@Html.DisplayFor(modelItem => item.AmountPaid)</td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TelephoneNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Quantity)
+                    </td>
+                    <td>
+                        @(item.AccessType == 0 ? "" : item.AccessType.ToString())
+                    </td>
+                    <td>
+                        @if (item.Status == SlotRequestStatus.Pending)
+                        {
+                            <span class="mb-1 badge rounded-pill text-bg-warning">@item.Status</span>
+                        }
+                        else if (item.Status == SlotRequestStatus.Opened)
+                        {
+                            <span class="mb-1 badge rounded-pill text-bg-warning">@item.Status</span>
+                        }
+                        else if (item.Status == SlotRequestStatus.Approved)
+                        {
+                            <span class="mb-1 badge rounded-pill text-bg-success">@item.Status</span>
+                        }
+                        else if (item.Status == SlotRequestStatus.Reject)
+                        {
+                            <span class="mb-1 badge rounded-pill text-bg-danger">Reject</span>
+                        }
+                    </td>
+                    <td>
+                        @item.DateCreated.ToString("yyyy/MM/dd")
+                    </td>
+                    <td style="text-align:right;">
+                        @if (item.Status != SlotRequestStatus.Approved && item.Status != SlotRequestStatus.Reject)
+                        {
+                            <div class="btn-group">
+                                <button class="btn btn-primary dropdown-toggle show" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="true">
+                                    Action
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(0px, 40.8px, 0px);">
+                                    @if (item.Status == SlotRequestStatus.Pending || item.Status == SlotRequestStatus.Opened)
+                                    {
+                                        <li>
+                                            <a onclick="PreviewRequest(@item.Id, '@item.PaymentProof')" href="#" class="dropdown-item">Review</a>
+                                        </li>
+                                    }
+                                    @if (item.Status == SlotRequestStatus.Pending || item.Status == SlotRequestStatus.Opened)
+                                    {
+                                        <li>
+                                            <a href="#" onclick="ApproveRequest(@item.Id)" class="dropdown-item">Approve</a>
+                                        </li>
+                                    }
+                                    @if (item.Status == SlotRequestStatus.Pending || item.Status == SlotRequestStatus.Opened)
+                                    {
+                                        <a href="#" onclick="RejectRequest(@item.Id)" class="dropdown-item">Reject</a>
+                                    }
+
+                                </ul>
+                            </div>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+@section Scripts{
+    <script>
+
+    </script>
+}

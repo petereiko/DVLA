@@ -1,0 +1,111 @@
+﻿@using DVLA.DATA.Domains
+@using DVLA.Data
+
+@model IEnumerable<EmailTemplate>
+@{
+    ViewBag.Title = "Email Template";
+}
+
+<div class="datatables">
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">@ViewBag.Title</h4>
+            </div>
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+                        <div class="table-responsive">
+                            @if (Model != null && Model.Any())
+                            {
+                                <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                -#-
+                                            </th>
+                                            <th>
+                                                Code
+                                            </th>
+                                            <th>
+                                                Name
+                                            </th>
+                                            <th>
+                                                Subject
+                                            </th>
+                                            <th>
+                                                Action
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    @{
+                                        var rowCount = 0;
+                                    }
+                                    @foreach (var item in Model)
+                                    {
+
+                                        <tr>
+                                            <td class="text-center">
+                                                @Html.Raw(rowCount += 1)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Code)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.EmailName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.EmailSubject)
+                                            </td>
+                                            <td>
+                                                <a class="btn btn-primary mb-2 btn-sm" href="@Url.Action("Edit","EmailTemplate",new { emailCode= Utility.Encrypt(item.Id.ToString())})">Edit</a>
+                                            </td>
+                                        </tr>
+
+                                    }
+                                </table>
+                            }
+                            else
+                            {
+                                <span>No Application(s) found</span>
+                            }
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    <script src="~/summernote.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            $(document).ready(function () {
+
+                "use strict"; // Start of use strict
+                //summernote
+                $('#summernote').summernote({
+                    height: 300, // set editor height
+                    minHeight: null, // set minimum height of editor
+                    maxHeight: null, // set maximum height of editor
+                    focus: true                  // set focus to editable area after initializing summernote
+                });
+
+
+            });
+
+        });
+
+
+    </script>
+}
+
+
+

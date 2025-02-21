@@ -1,0 +1,405 @@
+﻿@using DVLA.DATA.Domains
+@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.Enumerables
+@model ApplicantModel
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_GeneralLayout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-12">
+        <!-- ----------------------------------------- -->
+        <!-- 1. Basic Form -->
+        <!-- ----------------------------------------- -->
+        <!-- start Basic Form -->
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Fill Form</h4>
+                <div id="DivIdToPrint">
+                    <div class="card form-card">
+                        <div class="card-body">
+
+                            
+
+                            <form asp-action="Create" asp-controller="OnlineApplicant" method="post" enctype="multipart/form-data">
+                                
+                                <div class="container">
+
+                                    <br />
+                                    <div id="loading" style="display: none;">
+                                        <table style="height: 100%; border: 0; width: 100%; position: fixed; top: 0; left: 0; background-color: #FAFAFA; opacity: 0.8; filter: alpha(opacity=80); z-index: 9000;">
+                                            <tbody>
+                                                <tr>
+                                                    <td style="width: 100%; text-align:center; vertical-align : middle;">
+                                                        <div id="Loadingtext" style="font-family: Arial; font-size: 24px; opacity: 1; filter: alpha(opacity=100); font-weight: bold; color: #000000; text-align: center; padding-top: 5px;"><img src="//i.stack.imgur.com/FhHRx.gif" />&nbsp;Please wait...</div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4" style="padding:0px">
+                                            <video id="video" autoplay style="height: 200px;clip-path: inset(0px 20px 0px 20px); border:1px solid black"></video>
+                                            <button onclick="Capture()" style="margin-left:20px" id="capture" class="btn btn-primary">Capture</button>
+                                        </div>
+                                        <div class="col-sm-4" style="padding:0px">
+                                            <canvas id="canvas" width="200" height="200" />
+                                            <img src="" id="photo" style="height: 200px; width:200px; border:1px solid black" />
+
+
+                                        </div>
+                                        <div class="col-sm-4">
+                                            Upload Image
+                                            <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                                <input type="file" asp-for="Image" class="form-control" accept="image/jpeg" />
+                                                @Html.ValidationMessageFor(m => m.Image, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+
+                                </div>
+
+                                <input type="hidden" asp-for="PassportImageUrl"/>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <select asp-for="OptometristFirmId" class="form-control" required>
+                                                <option value="">Select Optometrist Firm</option>
+                                                @foreach (OptometristFirm item in (List<OptometristFirm>)ViewBag.OptometristFirms)
+                                                {
+                                                    <option value="@item.Id">@item.BusinessName</option>
+                                                }
+                                            </select>
+                                            <label for="OptometristFirmId">Optometrist Firm</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" asp-for="InvoiceNumber" placeholder="Enter DVLA Invoice Number" required>
+                                            <label for="InvoiceNumber">DVLA Invoice Number</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <select asp-for="ResultServiceType" class="form-control" required asp-items="@Html.GetEnumSelectList<ResultServiceType>()">
+                                                <option value="">Select Test Type</option>
+                                            </select>
+                                            <label for="ResultServiceType">Service Type</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4" id="LearnerType" style="display:none">
+                                        <div class="form-floating mb-3">
+                                            <select asp-for="LearnerDriversLicence" class="form-control" required asp-items="@Html.GetEnumSelectList<LearnerDriversLicenceType>()">
+                                                <option value="">Select Test Type</option>
+                                            </select>
+                                            <label for="ResultServiceType">Learners Driver's License Type</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <select asp-for="TestType" class="form-control" required asp-items="@Html.GetEnumSelectList<TestType>()">
+                                            </select>
+                                            <label for="TestType">Test Type</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" asp-for="DriversLicence" placeholder="Enter Driver's License Number" required>
+                                            <label for="DriversLicence">Driver's License</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" asp-for="DVLAReferenceNo" placeholder="Enter DVLA Reference No" required>
+                                            <label for="DVLAReferenceNo">DVLA Reference No</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" asp-for="Surname" placeholder="Enter Surname" required>
+                                            <label for="Surname">Surname</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" asp-for="FirstName" placeholder="Enter Firsr Name" required>
+                                            <label for="FirstName">First Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" asp-for="OtherName" placeholder="Enter Other Name">
+                                            <label for="OtherName">Other Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" asp-for="DateOfBirth" data-date-format="yyyy-mm-dd" placeholder="Enter Date of Birth" required>
+                                            <label for="DOB">Date of Birth</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-floating mb-3">
+                                            <textarea asp-for="PostalAddress" placeholder="Enter Digital/Postal Address" required class="form-control"></textarea>
+                                            <label for="PostalAddress">Digital/Residential Address</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" asp-for="ContactNumber" placeholder="Enter Contact Number" required>
+                                            <label for="ContactNumber">Contact</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" asp-for="TaxIdentificationNumber" placeholder="Enter Tax Identification Number" required>
+                                            <label for="TaxIdentificationNumber">Tax Identification Number(TIN)</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <input type="email" class="form-control" asp-for="Email" placeholder="Enter Email Address">
+                                            <label for="Email">Email</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-md-flex align-items-center">
+                                        @* <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                                        <label class="form-check-label" for="flexCheckDefault">
+                                        Remember me
+                                        </label>
+                                        </div> *@
+                                        <div class="ms-auto mt-3 mt-md-0">
+                                            <button type="submit" class="btn btn-primary hstack gap-6">
+                                                @* <i class="ti ti-send fs-4"></i> *@
+                                                Submit
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+@section scripts
+{
+    <script>
+
+        
+
+
+        $(function () {
+
+            document.getElementById('Image').addEventListener('change', function (event) {
+                debugger
+                const file = event.target.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        const preview = document.getElementById('photo');
+                        preview.src = e.target.result;
+                        preview.style.display = 'block'; // Show the image tag
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            $("#DateOfBirth").datepicker({
+                dateFormat: "yyyy-mm-dd"
+            });
+
+
+            let currentYear = (new Date).getFullYear();
+            let currentMonth = (new Date).getMonth();
+            let currentDay = (new Date).getDate();
+
+            // $('#DOB').on('changeDate', function (e) {
+            //     var date = e.date;
+            //     var day = ('0' + date.getDate()).slice(-2);
+            //     var month = ('0' + (date.getMonth() + 1)).slice(-2);
+            //     var year = date.getFullYear();
+            //     $('#DateOfBirth').val(year + '-' + month + '-' + day);
+
+            // });
+
+
+            StartCam();
+
+            load();
+
+
+
+            $('#ResultServiceType').change(function () {
+                var serviceType = $(this).val();
+                if (serviceType == 1) {
+                    $("#LearnerType").css("display", "block");
+                    $('#LearnerDriversLicenceType').rules('add', { required: true, messages: "Learner Drivers Licence Type is required" });
+                } else {
+                    $("#LearnerType").css("display", "none");
+                    $('#LearnerDriversLicenceType').rules('remove', 'required')
+                }
+
+            });
+
+            let isSubmitted = false;
+
+            $("input[name = 'SubmitResult']").click(function () {
+
+                if (!isSubmitted) {
+
+                    $('#Action').val('2')
+
+                    if ($(this).val() == "Finalize & Submit") {
+                        $('#Action').val('1')
+                    }
+
+                    $("input[name='SubmitResult']").val('Submitting.. Please Wait..');
+                    $("input[name='SubmitResult']").prop('disabled', true);
+                    isSubmitted = true;
+                    $("#target").submit();
+                    return true;
+                }
+                else {
+                    return false;
+                }
+
+
+            });
+
+
+        });
+
+
+        function StartCam() {
+            // Access the webcam
+            const video = document.getElementById("video");
+            video.style.display = "block";
+
+            const photo = document.getElementById("photo");
+            photo.style.display = "none";
+
+            //const canvas = document.getElementById("canvas");
+            //canvas.style.display = "block";
+
+            navigator.mediaDevices
+                .getUserMedia({ video: true })
+                .then((stream) => {
+                    video.srcObject = stream; // Set the stream to the video element
+                })
+                .catch((error) => {
+                    console.error("Error accessing webcam:", error);
+                });
+        }
+
+        function Capture() {
+            let photo = document.getElementById('photo');
+            let video = document.getElementById('video');
+            let canvas = document.getElementById('canvas');
+            // Draw the current frame from the video to the canvas
+            const context = canvas.getContext("2d");
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Get the image data from the canvas as a data URL (base64 encoded image)
+            const imageData = canvas.toDataURL("image/png");
+
+            // Set the captured image as the source of the img element
+            photo.src = imageData;
+
+            //document.getElementById("PassportUrl").value = imageData;
+
+            $('#PassportImageUrl').val(imageData);
+
+            console.log('Image', imageData);
+
+            // Display the captured image
+            photo.style.display = "block";
+
+            //video.style.display = "none";
+        }
+
+
+
+        function load() {
+
+            $('#PassResultId').empty();
+
+            var id = $('#PassOrFail').val();
+            var appId = $('#Id').val();
+            if (appId != null) {
+                if (id == 2 || id == null || id == '') {
+                    $('#PassResultId').empty()
+                    $('#PassResultId').hide()
+                    return false;
+                }
+                $('#PassResultId').show()
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("GetPassResult", "VisualAssessmentResult")",
+                    datatype: "Json",
+                    data: { passOrFail: id },
+                    success: function (data) {
+                        debugger;
+
+                        $('#PassResultId').append('<option value="">Select pass type</option>');
+                        $.each(data, function (index, value) {
+                            $('#PassResultId').append('<option value="' + value.value + '">' + value.text + '</option>');
+                        });
+                        var passOrFail = $('#PassOrFail').val();
+                        $('#PassResultId').val(passOrFail);
+                    }
+                });
+            }
+
+
+        }
+
+        document.getElementById('image').onchange = function (e) {
+
+            const size =
+                (this.files[0].size / 1024 / 1024).toFixed(2);
+
+            if (size > 4) {
+                alert("File must be less than 4 MB");
+                this.value = ''
+                return false
+            }
+
+            var img = new Image();
+            img.onload = draw;
+            img.onerror = failed;
+            img.src = URL.createObjectURL(this.files[0]);
+        };
+
+    </script>
+}
+

@@ -1,0 +1,40 @@
+﻿@using DVLA.DATA.Domains
+@model VisualAssessmentResult
+@{
+    ViewData["Title"] = "AssessmentDetails";
+}
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-success">Visual Assessment successfully created. Kindly see details</div>
+        <table class="table table-borderless">
+            <tr>
+                <td style="width:120px">First Name</td>
+                <th style="width:220px">@Model.FirstName</th>
+                <td style="width:120px">Last Name</td>
+                <th>@Model.Surname</th>
+                <td style="width:120px">Other Name</td>
+                <th>@Model.OtherName</th>
+            </tr>
+            <tr>
+                <td>Access Type</td>
+                <th>@DVLA.Data.EnumExtensions.GetDisplayName(@Model.AccessType)</th>
+                <td>Contact</td>
+                <th>@Model.ContactNumber</th>
+                <td>Email</td>
+                <th>@Model.Email</th>
+            </tr>
+            <tr>
+                <td>Reference</td>
+                <th>@Model.ReferenceNumber</th>
+                <td>Remarks</td>
+                <th>@Model.PathologicalRemarks</th>
+                <td>Result</td>
+                <th>@Model.ResultConclusion</th>
+            </tr>
+        </table>
+        <br />
+        <a asp-action="Index" asp-controller="VisualAssessmentResult" asp-area="Customer" class="btn btn-primary btn-sm">Visual Assessment List</a>
+    </div>
+</div>
+

@@ -1,0 +1,400 @@
+﻿@using DVLA.Data.Models.DataObjects.ViewModels
+@model VisualAssessmentPrintResultViewModel
+@{
+    ViewBag.Title = "Visual Assessment Results";
+    Layout = "~/Views/Shared/_GeneralLayout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-12">
+        <!-- ----------------------------------------- -->
+        <!-- 1. Basic Form -->
+        <!-- ----------------------------------------- -->
+        <!-- start Basic Form -->
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Fill Form</h4>
+
+                <div id="DivIdToPrint">
+                    <style type="text/css">
+                        @@media print {
+                            /* Make all your non-canvas things (divs and stuff) disappear:*/
+                            .notCanvas, .alsoNotCanvas {
+                                display: none;
+                            }
+                            /*Center your canvas (optional):*/
+                            canvas {
+                                text-align: right
+                            }
+                        }
+                    </style>
+                    <div class="card form-card">
+                        <div class="card-body">
+
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-sm" style="padding:5px; text-align:right">
+                                        <img src="~/logos/logo.png" style="height: 80px;width: 80px;" />
+                                    </div>
+                                    <div class="col-sm" style="padding:5px; text-align:right">
+                                        <img src="~/Passports/@Model.PassportImageUrl" style="height: 100px;width: 140px;border: 2px solid #ccc;" alt="Red dot" />
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+                            @Html.HiddenFor(model => model.PassportImageUrl)
+                            @Html.HiddenFor(model => model.Id)
+
+                            <div class="container">
+
+                                <div class="row row-xs mg-b-10">
+                                    <div class="col-sm">
+                                        <b>DVLA Invoice Number</b>
+                                        <div class="col-sm-4">
+                                            @Model.OldDVLAReferenceNo
+                                        </div>
+                                    </div>
+                                    <div class="col-sm">
+                                        <b>Service Type</b>
+                                        <div>
+                                            @Model.ResultServiceType
+                                        </div>
+                                    </div>
+                                    <div class="col-sm">
+                                        <div style="display:@(Model.ResultServiceType.Equals("Learner Driver's Licence",StringComparison.OrdinalIgnoreCase) ? "block" : "none")">
+                                            <b>Learner Driver's Licence Type</b>
+                                            <div>
+                                                @Model.LearnerDriversLicenceType
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                                <div class="row row-xs mg-b-10">
+                                    <div class="col-sm">
+                                        <b>Test Type</b>
+                                        <div class="col-sm-4">
+                                            @Model.TestType
+                                        </div>
+                                    </div>
+                                    <div class="col-sm">
+                                        <b>Licence Number</b>
+                                        <div>
+                                            @Model.DriversLicence
+                                        </div>
+                                    </div>
+                                    <div class="col-sm mg-t-10 mg-sm-t-0">
+                                        <b>DVLA Reference Number</b>
+                                        <div>
+                                            @Model.DVLAReferenceNo
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+                                <div class="row row-xs mg-b-10">
+                                    @if (Model != null)
+                                    {
+                                        if (Model.Id != null && Model.Id != 0)
+                                        {
+                                            <div class="col-sm mg-t-10 mg-sm-t-0">
+                                                <b>Form Number</b>
+                                                <div class="label">
+                                                    <span id="HX_BCV_OU">
+                                                        @Html.DisplayFor(model => model.FormNumber)
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                        }
+                                    }
+                                </div>
+                                <div id="DetailsOfApplicant">
+                                    <ul class="nav nav-tabs" id="DetailsOfApplicantTab">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-toggle="tab">Details of Applicant</a>
+                                        </li>
+
+                                    </ul>
+
+                                    <div class="tab-content mb-4">
+                                        <div class="tab-pane active" id="DetailsTab">
+                                            <!--<div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    <b>Title</b>
+                                                    <div>
+                                            @(Model.NameTitle)
+                                                    </div>
+
+                                                </div>
+                                                <div class="col-sm">
+
+                                                </div>
+
+                                                <div class="col-sm">-->
+                                            @*<div id="Camera">
+                                            </div>
+                                            <input type="button" value="Capture" />
+                                            <img id="show" style="width: 320px; height: 240px; display:none" src="../../WebImages/person.jpg" />*@
+
+                                            <!--</div>
+                                            </div>-->
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    <b>Surname</b>
+                                                    <div>
+                                                        @Model.Surname
+                                                    </div>
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    <b>First Name</b>
+                                                    <div>
+                                                        @Model.FirstName
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm mg-t-10 mg-sm-t-0">
+                                                    <b>Othername</b>
+                                                    <div>
+                                                        @Model.OtherName
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm">
+                                                    <b>Date of Birth (DD/MM/YYYY)</b>
+                                                    <div class="input-group">
+                                                        <div>
+                                                            @Model.DOB.Value.ToString("dd/MM/yyyy")
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    <b>Postal Address</b>
+                                                    <div>
+                                                        @Model.PostalAddress
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    <b>Contact Number</b>
+                                                    <div>
+                                                        @Model.ContactNumber
+                                                    </div>
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    <b>Tax Identification Number (TIN)</b>
+                                                    <div>
+                                                        @Model.TaxIdentificationNumber
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm">
+                                                    <b>Email (if applicable)</b>
+                                                    <div>
+                                                        @Model.Email
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-lg-12 mb-2">
+                        <div class="row">
+                            <div class="col-lg-6 text-left">
+                                <a href="@Url.Action("Login","Account", new { area = "" })" class="btn btn-secondary">Close</a>
+                            </div>
+                            <div class="d-print-none col-lg-6 text-right">
+                                <button id="printreceipt" type="button" class="btn btn-primary">Print Result</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+@section scripts
+{
+
+    <script src="~/Scripts/jQuery-webcam-master/jquery.webcam.js"></script>
+    <script type="text/javascript">
+
+        $('#TestType').change(function () {
+            var testType = $('#TestType').val();
+
+            if (testType == 1 || testType == 0 || testType == null || testType == '') {
+                $('#OldDVLAReferenceNo').val("");
+                //$('#OldDVLAReferenceNo').hide();
+                $('#OldDVLAReferenceNo').attr("disabled", true);
+            }
+            else {
+                $('#OldDVLAReferenceNo').attr("disabled", false);
+                //$('#OldDVLAReferenceNo').show();
+            }
+
+        })
+
+        $('#HX_BCV_OD').change(function () {
+
+            if ($('#HX_BCV_OD').val() && $('#HX_BCV_OS').val()) {
+
+                $('#HX_BCV_OU').val(parseInt($('#HX_BCV_OD').val()) + parseInt($('#HX_BCV_OS').val()));
+            }
+        });
+
+        $('#HX_BCV_OS').change(function () {
+
+            if ($('#HX_BCV_OS').val() && $('#HX_BCV_OD').val()) {
+
+                $('#HX_BCV_OU').val(parseInt($('#HX_BCV_OD').val()) + parseInt($('#HX_BCV_OS').val()));
+            }
+        });
+
+        $('#PassOrFail').change(function () {
+
+            $('#PassResultId').empty();
+
+            var id = $('#PassOrFail').val();
+
+            if (id == 2 || id == null || id == '') {
+                $('#PassResultId').empty()
+                $('#PassResultId').hide()
+                return false;
+            }
+            $('#PassResultId').show()
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetPassResult", "VisualAssessmentResult")",
+                datatype: "Json",
+                data: { passOrFail: id },
+                success: function (data) {
+                    debugger;
+                    $('#PassResultId').append('<option value="">Select pass type</option>');
+                    $.each(data, function (index, value) {
+                        $('#PassResultId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                    });
+                }
+            });
+        });
+
+        function load() {
+
+            $('#PassResultId').empty();
+
+            var id = $('#PassOrFail').val();
+            var appId = $('#Id').val();
+            if (appId != null) {
+                if (id == 2 || id == null || id == '') {
+                    $('#PassResultId').empty()
+                    $('#PassResultId').hide()
+                    return false;
+                }
+                $('#PassResultId').show()
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("GetPassResult", "VisualAssessmentResult")",
+                    datatype: "Json",
+                    data: { passOrFail: id },
+                    success: function (data) {
+                        debugger;
+
+                        $('#PassResultId').append('<option value="">Select pass type</option>');
+                        $.each(data, function (index, value) {
+                            $('#PassResultId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                        });
+                        var passOrFail = $('#PassOrFail').val();
+                        $('#PassResultId').val(passOrFail);
+                    }
+                });
+            }
+
+
+        }
+        load()
+
+
+        var currentYear = (new Date).getFullYear();
+        var currentMonth = (new Date).getMonth();
+        var currentDay = (new Date).getDate();
+
+        $('.singledatepicker').on('changeDate', function (e) {
+            var date = e.date;
+            var day = ('0' + date.getDate()).slice(-2);
+            var month = ('0' + (date.getMonth() + 1)).slice(-2);
+            var year = date.getFullYear();
+            $('#DateOfBirth').val(year + '-' + month + '-' + day);
+
+        });
+
+
+
+        //$('body').on('click', 'button#printreceipt', function () {
+        //    var printWindow = window.open('', '', 'height=400,width=800');
+        //    var divContents = $("#DivIdToPrint").html() +
+        //        "<script>" +
+        //        "window.onload = function() {" +
+        //        "     window.print();" +
+        //        "};" +
+        //        "<" + "/script>";
+        //    printWindow.document.write("<link href=\"/son-vatebra.css\" rel=\"stylesheet\" type=\"text/css\">");
+        //    printWindow.document.write(divContents);
+        //    printWindow.document.close();
+
+        //});
+
+        $('body').on('click', 'button#printreceipt', function () {
+
+            var divToPrint = $('#DivIdToPrint').html();
+            //var printWindow = window.open('', '', 'height=400,width=800');
+            var newWin = window.open('', 'Print-Window');
+            //newWin.document.open();
+            newWin.document.write("<link href=\"/son-vatebra.css\" rel=\"stylesheet\" type=\"text/css\">");
+            //newWin.document.write("<script src=\"/LoadCanvas.js\" type=\"text/javascript\"><\/script>");
+            newWin.document.write('<html><body onload="window.print()">' + divToPrint + '</body></html>');
+            newWin.document.close();
+
+            setTimeout(function () { newWin.close(); }, 1000);
+
+        });
+
+    </script>
+}
+

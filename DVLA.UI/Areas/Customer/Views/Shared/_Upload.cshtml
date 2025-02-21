@@ -1,0 +1,53 @@
+﻿@using DVLA.Data.Models.DataObjects.ViewModels
+@model VisualAssessmentResultUploadViewModel
+
+
+<div id="bs-example-modal-md" class="modal fade" tabindex="-1" aria-labelledby="bs-example-modal-md" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header d-flex align-items-center">
+                <h6 class="modal-title" id="myModalLabel">
+                    Assessment Results Upload
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+
+
+
+
+                <form asp-action="Upload" asp-controller="VisualAssessmentResult" asp-area="Customer" method="post" enctype="multipart/form-data">
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <input type="file" name="file" class="form-control" />
+                        </div>
+                        <div class="col-sm-6">
+                            <a class="btn btn-primary" href="@Url.Content("~/Template/ResultUploadTemplate.xlsx")">Template</a>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <input type="submit" value="Upload Assessment Result" class="btn btn-success" />
+                        </div>
+                    </div>
+
+
+                </form>
+
+
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn bg-danger-subtle text-danger  waves-effect" data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

@@ -1,0 +1,122 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@model PaginationModel
+
+<style>
+    /* Pagination container */
+    .pagination {
+        display: flex;
+        justify-content: right;
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+    }
+
+        /* Pagination item */
+        .pagination .page-item {
+            margin: 0 5px;
+        }
+
+        /* Pagination link */
+        .pagination .page-link {
+            display: inline-block;
+            padding: 8px 16px;
+            color: #007bff;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+            /* Hover effect for page link */
+            .pagination .page-link:hover {
+                background-color: #007bff;
+                color: white;
+                border-color: #007bff;
+            }
+
+        /* Active page link */
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+            pointer-events: none;
+        }
+
+        /* Disabled page link (previous/next) */
+        .pagination .page-item.disabled .page-link {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border-color: #ddd;
+            pointer-events: none;
+        }
+
+        /* First and last page buttons */
+        .pagination .page-item:first-child .page-link,
+        .pagination .page-item:last-child .page-link {
+            padding: 8px 12px;
+        }
+
+        /* Pagination controls (First, Last, Previous, Next) */
+        .pagination .page-item .page-link {
+            font-weight: 500;
+        }
+
+            .pagination .page-item .page-link:focus {
+                box-shadow: none;
+            }
+
+    /* Responsive adjustments */
+    @@media (max-width: 767px) {
+        .pagination .page-link {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+    }
+
+</style>
+
+
+<div class="showing-info">
+    <div>
+        <strong>
+            Showing @Model.PageIndex to @Model.EndIndex of @Model.FilteredCount entries
+        </strong>
+        @if (Model.FilteredCount < Model.TotalCount)
+        {
+            <small>(filtered from @Model.TotalCount total entries)</small>
+        }
+    </div>
+</div>
+
+<div>
+    <ul class="pagination">
+        @if (Model.PageIndex > 1)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="@Model.Action" asp-controller="@Model.Controller" asp-route-page="1" asp-area="@Model.Area">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" asp-action="@Model.Action" asp-controller="@Model.Controller" asp-route-page="@(Model.PageIndex-1)" asp-area="@Model.Area">Previous</a>
+            </li>
+        }
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="@Model.Action" asp-controller="@Model.Controller" asp-route-page="@i" asp-area="@Model.Area">@i</a>
+            </li>
+        }
+        @if (Model.PageIndex < Model.TotalPages)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="@Model.Action" asp-controller="@Model.Controller" asp-route-page="@(Model.PageIndex+1)" asp-area="@Model.Area">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" asp-action="@Model.Action" asp-controller="@Model.Controller" asp-route-page="@Model.TotalPages" asp-area="@Model.Area">Last</a>
+            </li>
+        }
+    </ul>
+</div>
+
+

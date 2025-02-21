@@ -1,0 +1,104 @@
+﻿@using DVLA.Data.Models.DataObjects.ViewModels
+@using DVLA.Data.Models.Enumerables
+@model CreateSlotPriceViewModel
+@{
+    ViewBag.Title = "Create Access Price";
+}
+
+
+<div class="datatables">
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">@ViewBag.Title</h4>
+            </div>
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+
+                        <center>
+
+
+                            <section id="loginForm" style="width:60%; text-align:left">
+                                @if (Model.Errors.Count > 0)
+                                {
+                                    <div class="alert alert-danger">
+                                        @foreach (var item in Model.Errors)
+                                        {
+                                            <div>@item</div>
+                                        }
+                                    </div>
+                                }
+                                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                    Note that only one price can be active at any given time. To activate a particular price, deactivate the current active price and activate the new one.
+
+                                </div>
+
+                                <form asp-action="CreateSlotPrice" method="post" asp-route-returnUrl="@ViewBag.ReturnUrl">
+                                    
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="number" class="form-control" asp-for="FormData.Price" placeholder="Enter Price" required />
+                                                <label for="FormData_Price">Price</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-floating mb-3">
+                                                <select asp-for="FormData.AccessType" class="form-control" asp-items="@Html.GetEnumSelectList<AccessType>()" required>
+                                                    <option value="">Select Access Type</option>
+                                                </select>
+                                                <label for="FormData_AccessType">Access Type</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="d-md-flex align-items-center">
+
+                                                <div class="ms-auto mt-3 mt-md-0">
+                                                    <button type="submit" class="btn btn-primary hstack gap-6">
+
+                                                        Submit
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+
+
+                            </section>
+                        </center>
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts {
+    <script type="text/javascript">
+
+        function ClearForm() {
+            $('#FormData_OptometristFirmId').val('');
+            $('#FormData_Quantity').val('');
+            $('#FormData_Comment').val('');
+
+        }
+
+        $(function () {
+            ClearForm();
+        })
+    </script>
+}
+
+
+
+
+
+

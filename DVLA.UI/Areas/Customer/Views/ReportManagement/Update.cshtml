@@ -1,0 +1,430 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.Enumerables
+@model ApplicantModel
+@{
+    ViewBag.Title = "Registration";
+}
+
+
+
+
+<style type="text/css">
+</style>
+<div id="DivIdToPrint">
+    <div class="card form-card">
+        <div class="card-body">
+
+            <div class="container">
+
+                <br />
+                <div id="loading" style="display: none;">
+                    <table style="height: 100%; border: 0; width: 100%; position: fixed; top: 0; left: 0; background-color: #FAFAFA; opacity: 0.8; filter: alpha(opacity=80); z-index: 9000;">
+                        <tbody>
+                            <tr>
+                                <td style="width: 100%; text-align:center; vertical-align : middle;">
+                                    <div id="Loadingtext" style="font-family: Arial; font-size: 24px; opacity: 1; filter: alpha(opacity=100); font-weight: bold; color: #000000; text-align: center; padding-top: 5px;"><img src="//i.stack.imgur.com/FhHRx.gif" />&nbsp;Please wait...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4" style="padding:0px">
+                        <video id="video" autoplay style="height: 200px;clip-path: inset(0px 20px 0px 20px); border:1px solid black"></video>
+                        <button onclick="Capture()" style="margin-left:20px" id="capture" class="btn btn-primary">Capture</button>
+                    </div>
+                    <div class="col-sm-4" style="padding:0px">
+                        <canvas id="canvas" width="200" height="200" />
+                        <img src="" hidden id="photo" style="height: 200px; width:200px; border:1px solid black" />
+
+
+                    </div>
+                    <div class="col-sm-4">
+                        Upload Image
+                        <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                            @Html.TextBoxFor(m => m.Image, new { @class = "form-control", type = "file", accept = "image/jpeg", onchange = "handleImage(e)" })
+                            @Html.ValidationMessageFor(m => m.Image, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+
+            <form asp-action="Update" asp-controller="ReportManagement" enctype="multipart/form-data" id="target">
+                @Html.HiddenFor(model => model.PassportImageUrl)
+                @Html.HiddenFor(model => model.Id)
+                @Html.HiddenFor(model => model.OptometristFirmId)
+                @Html.HiddenFor(model => model.ReferenceNumber)
+                @Html.HiddenFor(model => model.IsRegistration)
+                @Html.HiddenFor(model => model.IsActive)
+                @Html.HiddenFor(model => model.Status)
+
+                <div class="container">
+                    <div class="row row-xs mg-b-10">
+                        <div class="col-sm-4">
+                            @Html.LabelFor(m => m.OptometristFirmId) <span class="text-danger">: </span>
+                            <b>@Html.DisplayFor(model => model.Optometrist)</b>
+                            @Html.HiddenFor(model => model.OptometristFirmId)
+                            @Html.HiddenFor(model => model.Optometrist)
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-4">
+                            Reference Number
+                            <input type="text" asp-for="ReferenceNumber" class="form-control" readonly />
+                        </div>
+                        <div class="col-sm-4">
+                            Service Type
+                            <select asp-for="ResultServiceType" class="form-control" asp-items="Html.GetEnumSelectList<ResultServiceType>()">
+                                <option>Select Service Type</option>
+                            </select>
+@*                             @Html.DropDownList("ResultServiceType", EnumHelper.GetSelectList(typeof(ResultServiceType)), "Select Service Type", new { @style = "width:100%;", @class = "form-control", @id = "ddlServiceType" })
+ *@                            @Html.ValidationMessageFor(model => model.ResultServiceType, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-sm-4">
+                            <div id="LearnerType" style="display:@(Model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? "block" : "none")">
+                                Learner Driver's Licence Type
+                                <select asp-for="LearnerDriversLicence" class="form-control" asp-items="Html.GetEnumSelectList<LearnerDriversLicenceType>()">
+                                    <option>Select Service Type</option>
+                                </select>
+                                @* @Html.DropDownList("LearnerDriversLicence", EnumHelper.GetSelectList(typeof(LearnerDriversLicenceType)), "Select Type", new { @style = "width:100%;", @class = "form-control", @id = "ddlLearnerType" }) *@
+                                @Html.ValidationMessageFor(model => model.LearnerDriversLicence, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <br/>
+                    
+                    <div id="DetailsOfApplicant">
+                        <ul class="nav nav-tabs" id="DetailsOfApplicantTab">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="tab">Details of Applicant</a>
+                            </li>
+
+                        </ul>
+                        <br />
+                        <div class="tab-content mb-4">
+                            <div class="tab-pane active" id="DetailsTab">
+                                <div class="row row-xs mg-b-10">
+
+                                    <div class="col-sm">
+                                        Title
+                                        <select asp-for="NameTitle" class="form-control" asp-items="Html.GetEnumSelectList<NameTitle>()">
+                                            <option>Select Name Title</option>
+                                        </select>
+                                        @Html.ValidationMessageFor(model => model.NameTitle, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-sm">
+                                    </div>
+                                </div>
+                                <br />
+                                <div class="row row-xs mg-b-10">
+
+                                    <div class="col-sm">
+                                        Surname
+                                        @Html.TextBoxFor(model => model.Surname, new { @class = "form-control", @placeholder = "Surname", @autocomplete = "off" })
+
+                                        @Html.ValidationMessageFor(model => model.Surname, "", new { @class = "text-danger" })
+
+                                    </div>
+                                    <div class="col-sm">
+                                        First Name
+                                        @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @placeholder = "First Name", @autocomplete = "off" })
+
+                                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-sm mg-t-10 mg-sm-t-0">
+                                        Other Name
+                                        @Html.TextBoxFor(model => model.OtherName, new { @class = "form-control", @placeholder = "Other Name", @autocomplete = "off" })
+
+                                    </div>
+                                    <div class="col-sm">
+                                        Date of Birth (DD/MM/YYYY)
+                                        <div class="input-group">
+                                            <input type="text" asp-for="DOB" value="@Model.DOB.GetValueOrDefault().ToString("dd/MM/yyyy")" class="form-control" autocomplete="off" data-date-format="dd/mm/yyyy" />
+
+                                            <div class="input-group-addon">
+                                                <span class="glyphicon glyphicon-th"></span>
+                                            </div>
+                                        </div>
+                                        @Html.ValidationMessageFor(model => model.DOB, "", new { @class = "text-danger" })
+                                        @Html.HiddenFor(model => model.DateOfBirth)
+                                    </div>
+                                </div>
+                                <br />
+                                <div class="row row-xs mg-b-10">
+
+                                    <div class="col-sm">
+                                        Postal Address
+
+                                        @Html.TextAreaFor(model => model.PostalAddress, new { @class = "form-control", @placeholder = "Postal Address" })
+                                        @Html.ValidationMessageFor(model => model.PostalAddress, "", new { @class = "text-danger" })
+
+                                    </div>
+
+                                </div>
+                                <br />
+                                <div class="row row-xs mg-b-10">
+
+                                    <div class="col-sm">
+                                        Contact Number
+                                        @Html.TextBoxFor(model => model.ContactNumber, new { @class = "form-control", @placeholder = "Contact Number", @autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.ContactNumber, "", new { @class = "text-danger" })
+
+                                    </div>
+                                    <div class="col-sm">
+                                        Tax Identification Number (TIN)
+                                        @Html.TextBoxFor(model => model.TaxIdentificationNumber, new { @class = "form-control", @placeholder = "Tax Identification Number", @autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.TaxIdentificationNumber, "", new { @class = "text-danger" })
+
+                                    </div>
+                                    <div class="col-sm">
+                                        Email (if applicable)
+                                        @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @placeholder = "Email", @autocomplete = "off" })
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-lg-12 mb-2">
+                            <div class="row">
+                                <div class="col-lg-6 text-left">
+                                    @* <a href="@Url.Action("BiodataUpdate","ReportManagement")" class="btn btn-secondary">Back to Application List</a> *@
+                                    <button onclick="history.back()" class="btn btn-secondary">Back to Application List</button>
+                                </div>
+                                <div class="col-lg-6 text-right">
+
+                                    <input type="submit" name="SubmitResult" class="btn btn-primary" value="Submit" />
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts
+{
+    <script>
+        $(function () {
+
+            $("#DOB").datepicker({
+                dateFormat: "dd-mm-yyyy"
+            });
+
+
+            let currentYear = (new Date).getFullYear();
+            let currentMonth = (new Date).getMonth();
+            let currentDay = (new Date).getDate();
+
+            let dob = new Date($('#DOB').val());
+            var _day = ('0' + dob.getDate()).slice(-2);
+            var _month = ('0' + (dob.getMonth() + 1)).slice(-2);
+            var _year = dob.getFullYear();
+            $('#DateOfBirth').val(_year + '-' + _month + '-' + _day);
+            
+
+            $('#DOB').on('changeDate', function (e) {
+                var date = e.date;
+                var day = ('0' + date.getDate()).slice(-2);
+                var month = ('0' + (date.getMonth() + 1)).slice(-2);
+                var year = date.getFullYear();
+                $('#DateOfBirth').val(year + '-' + month + '-' + day);
+
+            });
+
+
+            StartCam();
+
+            load();
+
+            
+
+            $('#PassOrFail').change(function () {
+
+                $('#PassResultId').empty();
+
+                var id = $('#PassOrFail').val();
+
+                if (id == 2 || id == null || id == '') {
+                    $('#PassResultId').empty()
+                    $('#PassResultId').hide()
+                    return false;
+                }
+                $('#PassResultId').show()
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("GetPassResult", "VisualAssessmentResult")",
+                    datatype: "Json",
+                    data: { passOrFail: id },
+                    success: function (data) {
+                        console.log(data);
+                        debugger;
+                        $('#PassResultId').append('<option value="">Select pass type</option>');
+                        $.each(data, function (index, value) {
+                            $('#PassResultId').append('<option value="' + value.value + '">' + value.text + '</option>');
+                        });
+                    }
+                });
+            });
+
+            $('#ResultServiceType').change(function () {
+                var serviceType = $(this).val();
+                if (serviceType == 1) {
+                    $("#LearnerType").css("display", "block");
+                    $('#LearnerDriversLicenceType').rules('add', { required: true, messages: "Learner Drivers Licence Type is required" });
+                } else {
+                    $("#LearnerType").css("display", "none");
+                    $('#LearnerDriversLicenceType').rules('remove', 'required')
+                }
+
+            });
+
+            let isSubmitted = false;
+
+            $("input[name = 'SubmitResult']").click(function () {
+
+                if (!isSubmitted) {
+
+                    $('#Action').val('2')
+
+                    if ($(this).val() == "Finalize & Submit") {
+                        $('#Action').val('1')
+                    }
+
+                    $("input[name='SubmitResult']").val('Submitting.. Please Wait..');
+                    $("input[name='SubmitResult']").prop('disabled', true);
+                    isSubmitted = true;
+                    $("#target").submit();
+                    return true;
+                }
+                else {
+                    return false;
+                }
+
+
+            });
+
+
+        });
+
+
+        function StartCam() {
+            // Access the webcam
+            const video = document.getElementById("video");
+            video.style.display = "block";
+
+            const photo = document.getElementById("photo");
+            photo.style.display = "none";
+
+            //const canvas = document.getElementById("canvas");
+            //canvas.style.display = "block";
+
+            navigator.mediaDevices
+                .getUserMedia({ video: true })
+                .then((stream) => {
+                    video.srcObject = stream; // Set the stream to the video element
+                })
+                .catch((error) => {
+                    console.error("Error accessing webcam:", error);
+                });
+        }
+
+        function Capture() {
+            let photo = document.getElementById('photo');
+            let video = document.getElementById('video');
+            let canvas = document.getElementById('canvas');
+            // Draw the current frame from the video to the canvas
+            const context = canvas.getContext("2d");
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Get the image data from the canvas as a data URL (base64 encoded image)
+            const imageData = canvas.toDataURL("image/png");
+
+            // Set the captured image as the source of the img element
+            photo.src = imageData;
+
+            //document.getElementById("PassportUrl").value = imageData;
+
+            $('#PassportImageUrl').val(imageData);
+
+            console.log('Image', imageData);
+
+            // Display the captured image
+            photo.style.display = "block";
+
+            //video.style.display = "none";
+        }
+
+
+
+        function load() {
+
+            $('#PassResultId').empty();
+
+            var id = $('#PassOrFail').val();
+            var appId = $('#Id').val();
+            if (appId != null) {
+                if (id == 2 || id == null || id == '') {
+                    $('#PassResultId').empty()
+                    $('#PassResultId').hide()
+                    return false;
+                }
+                $('#PassResultId').show()
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("GetPassResult", "VisualAssessmentResult")",
+                    datatype: "Json",
+                    data: { passOrFail: id },
+                    success: function (data) {
+                        debugger;
+
+                        $('#PassResultId').append('<option value="">Select pass type</option>');
+                        $.each(data, function (index, value) {
+                            $('#PassResultId').append('<option value="' + value.value + '">' + value.text + '</option>');
+                        });
+                        var passOrFail = $('#PassOrFail').val();
+                        $('#PassResultId').val(passOrFail);
+                    }
+                });
+            }
+
+
+        }
+
+        document.getElementById('image').onchange = function (e) {
+
+            const size =
+                (this.files[0].size / 1024 / 1024).toFixed(2);
+
+            if (size > 4) {
+                alert("File must be less than 4 MB");
+                this.value = ''
+                return false
+            }
+
+            var img = new Image();
+            img.onload = draw;
+            img.onerror = failed;
+            img.src = URL.createObjectURL(this.files[0]);
+        };
+
+    </script>
+} 

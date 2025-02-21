@@ -1,0 +1,293 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.DataObjects.ViewModels
+@using DVLA.Data;
+@using DVLA.Data.Models.Enumerables
+@using DVLA.Data;
+
+@{
+    ViewData["Title"] = "InitiateSlotRequest";
+}
+
+
+@model SlotRequestViewModel
+@{
+    ViewBag.Title = "Initiate Slot Request";
+}
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">Slot Request</h4>
+            </div>
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+
+                        <center>
+
+
+                            <section id="loginForm" style="width:50%; text-align:left">
+                                @if (Model.Errors.Count > 0)
+                                {
+                                    <div class="alert alert-danger">
+                                        @foreach (var item in Model.Errors)
+                                        {
+                                            <div>@item</div>
+                                        }
+                                    </div>
+                                }
+                                <form asp-action="InitiateSlotRequest" asp-controller="Slot" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post" enctype="multipart/form-data">
+
+
+                                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                                    @foreach (PriceModel item in Model.FormData.SlotPriceList)
+                                    {
+                                    <div class="alert alert-info">
+                                        <p><b>@item.AccessType.GetDisplayName()</b></p>:
+                                        Please note that the current price of a unit slot is @item.SlotMarketPrice GH₵. If you need 2 slots for example, you pay @(2 * item.SlotMarketPrice) GH₵. <br /><b>Quantity</b> field is readonly. You can only make changes to it by adjusting the Amount Paid field
+                                    </div>
+                                    }
+
+
+                                    <div class="form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                        <div class="col-sm">
+                                            Service Type
+                                            <select asp-for="FormData.AccessType" asp-items="Html.GetEnumSelectList<AccessType>()" onchange="AccessTypeChange()" class="form-control">
+                                                <option>Select Access Type</option>
+                                            </select>
+                                            @Html.ValidationMessageFor(m => m.FormData.AccessType, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                        <div mat-input-field id="email-mat-input-field" class="mat-input-field form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                            Amount Paid (GH₵)
+                                            <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                                @Html.TextBoxFor(m => m.FormData.AmountPaid, "", new { @class = "form-control", type = "number", onchange = "ComputeSlotQuantity(this)" })
+                                                @Html.ValidationMessageFor(m => m.FormData.AmountPaid, "", new { @class = "text-danger" })
+                                            </div>
+                                            <div class="text-warning" id="slot-computing-message" style="display:none">Computing number of slots</div>
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                        <div mat-input-field id="email-mat-input-field" class="mat-input-field form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                            Quantity (Number of Slots)
+                                            <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                                @Html.TextBoxFor(m => m.FormData.Quantity, new { @class = "form-control", type = "number", @readonly = true })
+                                                @Html.ValidationMessageFor(m => m.FormData.Quantity, "", new { @class = "text-danger" })
+                                            </div>
+                                            <div class="text-warning" id="slot-quantity-message" style="display:none">You cannot request for 0 slot</div>
+
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                        <div class="col-sm">
+                                            Payment Type
+                                            <select asp-for="FormData.PaymentMethod" asp-items="EnumExtensions.GetEnumSelectListWithDescriptions<PaymentMethod>()" onchange="PaymentMethodChange(this)" class="form-control">
+                                                <option>Select Payment Type</option>
+                                            </select>
+                                            @Html.ValidationMessageFor(m => m.FormData.AccessType, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div id="upload-section" class="form-group" style="display:none; margin-bottom:0px !important; padding-bottom:0px !important;">
+                                        <div mat-input-field id="password-mat-input-field" class="mat-input-field form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                            Upload Payment Proof
+                                            <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                                @Html.TextBoxFor(m => m.FormData.PostedFile, new { @class = "form-control", type = "file", accept = "application/pdf, image/jpeg", onchange = "readURL(this)" })
+                                                @Html.ValidationMessageFor(m => m.FormData.PostedFile, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="payment-proof-div" style="width:100%; display:none">
+                                        <br />
+                                        <center>
+                                            <iframe id="payment-proof-display" style="width:100%; height:400px; border:none; text-align:center">
+                                            </iframe>
+                                        </center>
+                                    </div>
+
+
+                                    <br />
+
+                                    <br />
+                                    <div class="form-group">
+                                        <input id="btnSubmit" style="display:none;" type="submit" value="Submit Request" class="btn btn-success" />
+                                        <input id="btnMakePayment" onclick="ProceedToPayment(this)" style="display:none;" type="button" value="Proceed to Payment" class="btn btn-success" />
+                                    </div>
+
+                                </form>
+
+
+                            </section>
+                        </center>
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts {
+    <script type="text/javascript">
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#payment-proof-div').show();
+                    $('#payment-proof-display').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function PaymentMethodChange(e){
+            console.log(e.value);
+            if (e.value == "Upload") {
+                $('#upload-section').show();
+                $('#btnSubmit').show();
+                $('#btnMakePayment').hide();
+            }
+            else {
+                $('#upload-section').hide();
+                $('#btnSubmit').hide();
+                $('#btnMakePayment').show();
+            }
+        }
+
+        function ProceedToPayment(e) {
+
+            //Validation
+            let accessType = $('#FormData_AccessType').val();
+            let amount = $('#FormData_AmountPaid').val();
+
+            if (accessType == '') {
+                $('#FormData_AccessType').focus();
+                return;
+            }
+            if (amount == '') {
+                $('#FormData_AmountPaid').focus();
+                return;
+            }
+
+            e.value = "Please wait...";
+            e.disabled = true;
+
+            let obj = {
+                AccessType: accessType,
+                Amount: amount
+            };
+
+            $.ajax({
+                url:'@Url.Action("ProceedToPayment","Slot",new{area="Customer"})',
+                type:'post',
+                contentType: 'application/json; charset=utf-8',
+                dataType:'json',
+                data:JSON.stringify(obj),
+                success: function (response) {
+                    console.log()
+                    if (response.status) {
+                        window.location.href = response.data.authorization_url
+                    }
+                    else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Sorry! we could not initiate your transaction at this time. Please try again later.',
+                            icon: 'error'
+                        });
+                    }
+                },
+                error: function (err) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Sorry! we could not initiate your transaction at this time. Please try again later.',
+                        icon: 'error'
+                    });
+                }
+            })
+        }
+
+        function ClearForm() {
+            $('#FormData_OptometristFirmId').val('');
+            $('#FormData_Quantity').val('');
+            $('#FormData_Comment').val('');
+
+        }
+
+        $(function () {
+            ClearForm();
+        });
+
+        function ComputeSlotQuantity(e) {
+            var amount = e.value;
+            FinalSlotQuantity(amount);
+        }
+
+        function AccessTypeChange() {
+            var amount = $("#FormData_AmountPaid").val();
+            //FinalSlotQuantity(amount);
+        }
+
+
+        function FinalSlotQuantity(amount) {
+            var accessType = $("#FormData_AccessType").val();
+            if (accessType == null || accessType == '') {
+                alert("Please select access type");
+                return;
+            }
+
+            if (amount == null || amount == '') {
+                alert("Please enter amount");
+                return;
+            }
+            
+            $('#slot-computing-message').show();
+            $.ajax({
+                url: '@Url.Action("ComputeSlotQuantity", "Slot", new { area = "Customer" })?amount=' + amount + '&accessType='+accessType,
+                type: 'get',
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status) {
+                        $('#FormData_Quantity').val(response.quantity);
+                        if ($('#FormData_Quantity').val() > 0) {
+                            document.getElementById('btnSubmit').disabled = false;
+                            $('#slot-quantity-message').hide();
+                        }
+                        else {
+                            $('#slot-quantity-message').show();
+                        }
+                        $('#slot-computing-message').hide();
+                    }
+                    else {
+                        swal({
+                            title: 'Error',
+                            text: response.message,
+                            icon: 'error'
+                        });
+                        document.getElementById('btnSubmit').disabled = true;
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                    document.getElementById('btnSubmit').disabled = true;
+                }
+            })
+        }
+    </script>
+}
+
+
+
+

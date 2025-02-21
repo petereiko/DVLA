@@ -1,0 +1,277 @@
+﻿@using DVLA.Data.Models.DataObjects.ViewModels
+@model SlotUsageStatisticsViewModel
+
+@{
+    ViewBag.Title = "Dashboard";
+    
+
+}
+
+
+<div class="card form-card">
+    <div class="card-body">
+        <div id="admin-company-dashboard-component">
+
+            <div class="vatebra-pageheader">
+                <ol class="breadcrumb vatebra-breadcrumb text-white">
+                    <li class="breadcrumb-item text-white"></li>
+                    <li class="breadcrumb-item text-white font-weight-bold" aria-current="page">Dashboard</li>
+                </ol>
+                <h2 class="vatebra-pagetitle text-uppercase text-primary text-shadow-sm">Dashboard</h2>
+            </div>
+
+            <div class="row row-xs d-flex">
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card card-status bg-pink text-white border-0 shadow-lg">
+                        <div class="media tx-white">
+                            <i class="icon ion-android-hand tx-white"></i>
+
+
+                            <div class="media-body">
+                                <h1 class="text-white" id="_availableSlotsLearners"></h1>
+                                <p><b>Granted Access</b></p>
+                                <p>Learners Licence</p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card card-status bg-pink text-white border-0 shadow-lg">
+                        <div class="media">
+                            <i class="icon ion-ios-analytics"></i>
+
+                            <div class="media-body">
+                                <h1 class="text-white" id="_usedSlotsLearners"></h1>
+                                <p><b>Utilized Access</b></p>
+                                <p>Learner Licence</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card card-status bg-white border-0 shadow-lg">
+                        <div class="media tx-primary">
+                            <i class="icon ion-android-hand tx-primary"></i>
+                            <div class="media-body">
+                                <h1 class="tx-primary" id="_availableSlotsOthers"></h1>
+                                <p><b>Granted Access</b></p>
+                                <p>Other Licences</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <br />
+            <div class="row row-xs d-flex">
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card card-status bg-white border-0 shadow-lg">
+                        <div class="media tx-primary">
+                            <i class="icon ion-ios-analytics"></i>
+
+                            <div class="media-body">
+                                <h1 class="text-primary" id="_usedSlotsOthers"></h1>
+                                <p><b>Utilized Access</b></p>
+                                <p>Other Licences</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card card-status bg-purple text-white border-0 shadow-lg">
+                        <div class="media">
+                            <i class="icon ion-thumbsup"></i>
+                            <div class="media-body">
+                                <h1 class="tx-primary" id="_approvedApplications"></h1>
+                                <p>Approved Requests</p>
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card card-status bg-teal text-white border-0 shadow-lg">
+                        <div class="media">
+                            <i class="icon ion-thumbsdown"></i>
+                            <div class="media-body">
+                                <h1 class="text-white" id="_failedApplications"></h1>
+                                <p>Declined Requests</p>
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dropdown-divider mt-3 mb-3"></div>
+
+            <div class="mt-3 d-flex">
+                <div class="w-100 p-0">
+                    <div class="card shadow-lg mb-0">
+                        <div class="card-body">
+                            <h5 class="card-title">Monthly Access Usage Statistics</h5>
+                            <div class="row row-xs d-flex">
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="card card-status bg-info text-white border-0 shadow-lg">
+                                        <div class="media tx-white">
+                                            <i class="icon ion-android-hand tx-white"></i>
+
+
+                                            <div class="media-body">
+                                                <h1 class="text-white" id="_mavailableSlotsLearners"></h1>
+                                                <p><b>Granted Access</b></p>
+                                                <p>Learners Licence</p>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="card card-status bg-info text-white border-0 shadow-lg">
+                                        <div class="media">
+                                            <i class="icon ion-ios-analytics"></i>
+
+                                            <div class="media-body">
+                                                <h1 class="text-white" id="_musedSlotsLearners"></h1>
+                                                <p><b>Utilized Access</b></p>
+                                                <p>Learner Licence</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="card card-status bg-white border-0 shadow-lg">
+                                        <div class="media tx-primary">
+                                            <i class="icon ion-android-hand tx-primary"></i>
+                                            <div class="media-body">
+                                                <h1 class="tx-primary" id="_mavailableSlotsOthers"></h1>
+                                                <p><b>Granted Access</b></p>
+                                                <p>Other Licences</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <br />
+                            <div class="row row-xs d-flex">
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="card card-status bg-white border-0 shadow-lg">
+                                        <div class="media tx-primary">
+                                            <i class="icon ion-ios-analytics"></i>
+
+                                            <div class="media-body">
+                                                <h1 class="text-primary" id="_musedSlotsOthers"></h1>
+                                                <p><b>Utilized Access</b></p>
+                                                <p>Other Licences</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="card card-status bg-teal text-white border-0 shadow-lg">
+                                        <div class="media">
+                                            <i class="icon ion-thumbsup"></i>
+                                            <div class="media-body">
+                                                <h1 class="text-white" id="_mapprovedApplications"></h1>
+                                                <p>Approved Requests</p>
+                                                <br />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="card card-status bg-teal text-white border-0 shadow-lg">
+                                        <div class="media">
+                                            <i class="icon ion-thumbsdown"></i>
+                                            <div class="media-body">
+                                                <h1 class="text-white" id="_mfailedApplications"></h1>
+                                                <p>Declined Requests</p>
+                                                <br />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dropdown-divider mt-3 mb-3"></div>
+
+            <div class="mt-3 d-flex">
+                <div class="w-50 mr-2 p-0">
+                    <div class="card shadow-lg mb-0 height-400px">
+                        <div class="card-body">
+                            <h5 class="card-title">Monthly Income</h5>
+                            <canvas id="_monthlyIncome-Chart"></canvas>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="w-50 ml-2 p-0">
+                    <div class="card shadow-lg mb-0 height-400px">
+                        <div class="card-body">
+                            <h5 class="card-title">Optometrist Firms</h5>
+                            <canvas id="_optometristFirm-Chart"></canvas>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3 d-flex">
+                <div class="w-50 mr-2 p-0">
+                    <div class="card shadow-lg mb-0 height-400px">
+                        <div class="card-body">
+                            <h5 class="card-title">Synchronization</h5>
+                            <canvas id="_availableSlot-Chart"></canvas>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="w-50 ml-2 p-0">
+                    <div class="card shadow-lg mb-0 height-400px">
+                        <div class="card-body">
+                            <h5 class="card-title">Used Access</h5>
+                            <canvas id="_usedSlot-Chart"></canvas>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3 d-flex">
+                <div class="w-50 mr-2 p-0">
+                    <div class="card shadow-lg mb-0 height-400px">
+                        <div class="card-body">
+                            <h5 class="card-title">Approved Requests</h5>
+                            <canvas id="_passedApplication-Chart"></canvas>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="w-50 ml-2 p-0">
+                    <div class="card shadow-lg mb-0 height-400px">
+                        <div class="card-body">
+                            <h5 class="card-title">Declined Requests</h5>
+                            <canvas id="_failedApplication-Chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<partial name="_SlotUsageStatistics"  model="Model"/>
+
+
+
+
+
+

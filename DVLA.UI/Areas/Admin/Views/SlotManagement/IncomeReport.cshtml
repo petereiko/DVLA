@@ -1,0 +1,153 @@
+﻿@model IncomeReportViewModel
+@using System.Globalization
+@using DVLA.Data.Models.DataObjects.ViewModels
+@{
+    ViewBag.Title = "Income Report";
+    var i = 0;
+}
+
+<div class="datatables">
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">@ViewBag.Title</h4>
+            </div>
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+                        <form asp-action="IncomeReport" asp-controller="SlotManagement" method="post">
+                            
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control mydatepicker" asp-for="StartDate" placeholder="Enter Start Date" required data-date-format="dd/mm/yyyy" />
+                                        <label for="StartDate">Start Date</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control mydatepicker" asp-for="EndDate" placeholder="Enter End Date" required data-date-format="dd/mm/yyyy" />
+                                        <label for="EndDate">End Date</label>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="d-md-flex align-items-center">
+
+                                        <div class="ms-auto mt-3 mt-md-0">
+                                            <button type="submit" class="btn btn-primary hstack gap-6">
+                                                Search
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div>
+                            <div>
+                                @if (Model.SlotRequests != null && Model.SlotRequests.Count() > 0)
+                                {
+                                    string amountString = String.Format("{0:N}", Model.SlotRequests.Sum(x => x.AmountPaid.Value));
+                                    <div>
+                                        Total Amount: GH₵ @amountString
+
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div>Total Amount: GH₵ 0</div>
+                                }
+                                <br />
+                                <div class="table-responsive">
+                                    <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    #
+                                                </th>
+                                                <th>
+                                                    Ref. No
+                                                </th>
+                                                <th>
+                                                    Business
+                                                </th>
+                                                <th>
+                                                    Amount Paid
+                                                </th>
+                                                <th>
+                                                    Quantity
+                                                </th>
+                                                <th>
+                                                    Date Created
+                                                </th>
+                                            </tr>
+
+                                        </thead>
+                                        <tbody>
+                                            @{
+                                                if (Model.SlotRequests != null && Model.SlotRequests.Count() > 0)
+                                                {
+                                                    foreach (var item in Model.SlotRequests)
+                                                    {
+                                                        i = i + 1;
+                                                        <tr>
+
+                                                            <td>@i</td>
+                                                            <td>@item.ReferenceNumber</td>
+                                                            <td>
+                                                                @item.BusinessName
+                                                            </td>
+                                                            <td>
+                                                                @item.AmountPaid
+                                                            </td>
+                                                            <td>
+                                                                @item.Quantity
+
+                                                            </td>
+                                                            <td>
+                                                                @item.DateCreated
+                                                            </td>
+
+                                                        </tr>
+                                                    }
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- MODAL -->
+<div id="divModal">
+    @*@Html.Partial("_ManageOptometrist", new DVLA.DATA.Models.OptometristFirmModel())*@
+</div>
+@section Scripts {
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            $("#EndDate").kendoDatePicker();
+
+            $("#StartDate").kendoDatePicker();
+
+        });
+
+    </script>
+}
+

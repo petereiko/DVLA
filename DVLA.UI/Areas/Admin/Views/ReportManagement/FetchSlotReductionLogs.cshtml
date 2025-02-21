@@ -1,0 +1,116 @@
+﻿@using DVLA.Data.Models.DataObjects.ViewModels
+@model SlotReductionLogViewModel
+@{
+    ViewBag.Title = "Slot Reduction Logs";
+}
+
+
+
+<div class="datatables">
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">@ViewData["Title"]</h4>
+            </div>
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+                        <style>
+                            .pace {
+                                padding-left: 10px;
+                                width: 300px;
+                            }
+                        </style>
+
+
+                        <form asp-action="FetchSlotReductionLogs" asp-controller="ReportManagement" method="post">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-floating mb-3">
+                                        <select asp-for="SearchParameter.OptometristFirmId" class="form-control">
+                                        <option value="">Select an Optometrist Firm</option>
+                                        @foreach (var item in Model.OptometristFirms)
+                                        {
+                                                <option value="@item.Id">@item.BusinessName</option>
+                                        }
+                                        </select>
+                                        <label for="FormData_OptometristFirmId">Optometrist Firm</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control mydatepicker" asp-for="SearchParameter.StartDate" placeholder="Enter Start Date" required data-date-format="dd/mm/yyyy" />
+                                        <label for="SearchParameter_StartDate">Start Date</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control mydatepicker" asp-for="SearchParameter.EndDate" placeholder="Enter End Date" required data-date-format="dd/mm/yyyy" />
+                                        <label for="SearchParameter_EndDate">End Date</label>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="d-md-flex align-items-center">
+
+                                        <div class="ms-auto mt-3 mt-md-0">
+                                            <button type="submit" class="btn btn-primary hstack gap-6">
+                                                Search
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <br />
+                        <div class="table-responsive">
+                            <partial name="_SlotReductionReportList" model="Model.SlotReductions" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<div class="modal fade" id="modal-reject-reason" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Reason</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label>Reason:</label>
+
+                        @Html.TextArea("Reason", new { @class = "form-control" })
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
+                <button type="button" onclick="DeleteRequestNow()" class="btn btn-primary"><i class="fa fa-save"></i> Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+    </script>
+}
+

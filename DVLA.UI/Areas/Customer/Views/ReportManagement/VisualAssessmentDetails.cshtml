@@ -1,0 +1,44 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@model VisualAssessmentResultModel
+@{
+    ViewBag.Title = "Visual Assessment Details";
+}
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">Biodata Update</h4>
+            </div>
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+
+
+                        <div>
+                            <partial name="_VisualAssessmentDetailsPartial" model="Model" />
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    <script>
+        $('#class-of-company-datagridview').dataTable()
+
+    </script>
+}
+
+
+
+

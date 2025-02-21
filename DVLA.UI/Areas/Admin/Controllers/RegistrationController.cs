@@ -1,0 +1,348 @@
+﻿using DVLA.Business.NotificationModule;
+using DVLA.Business.ReportModule;
+using DVLA.Business.Repository;
+using DVLA.Business.UserModule;
+using DVLA.Business.VisualAssessmentResultModule;
+using DVLA.Data;
+using DVLA.Data.Models.DataObjects.DTOs;
+using DVLA.Data.Models.Enumerables;
+using DVLA.DATA.Domains;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Transactions;
+using System.Web;
+
+namespace DVLA.UI.Areas.Admin.Controllers
+{
+    [Authorize(Roles = "System Administrator")]
+    public class RegistrationController : Controller
+    {
+        private readonly IAuditRepo _AuditRepo;
+        private readonly IRepositoryQuery<VisualAssessmentResult> _applicantQuery;
+        private readonly INotificationRepository _notificationRepository;
+        private readonly IRepositoryQuery<OptometristFirm> _optometristFirmQuery;
+        private readonly IRepositoryQuery<OptometristFirmUser> _optometristFirmUserQuery;
+        private readonly IReportRepository _reportRepository;
+        private readonly ISmsRepository _smsRepository;
+        private IVisualAssessmentResultRepository _visualAssessmentResultRepository;
+        //private readonly int OptometristFirmId;
+        private readonly string currentUserId;
+        private readonly ILogger<RegistrationController> _logger;
+
+        // GET: VisualAssessmentResult/Applicant
+        public RegistrationController(IAuditRepo AuditRepo, IRepositoryQuery<VisualAssessmentResult> applicantQuery, IRepositoryQuery<Region> regionQuery,
+            INotificationRepository notificationRepository, IReportRepository reportRepository, ISmsRepository smsRepository, IVisualAssessmentResultRepository visualAssessmentResultRepository,
+            IRepositoryQuery<OptometristFirm> optometristFirmQuery, IUserService userService, ILogger<RegistrationController> logger, IRepositoryQuery<OptometristFirmUser> optometristFirmUserQuery)
+        {
+            _AuditRepo = AuditRepo;
+            _applicantQuery = applicantQuery;
+            _notificationRepository = notificationRepository;
+            _reportRepository = reportRepository;
+            _smsRepository = smsRepository;
+            _visualAssessmentResultRepository = visualAssessmentResultRepository;
+            _optometristFirmQuery = optometristFirmQuery;
+            currentUserId = userService.GetUserData().Id;
+            _logger = logger;
+            _optometristFirmUserQuery = optometristFirmUserQuery;
+        }
+
+        // GET: Admin/Optometrist
+        public ActionResult Index()
+        {
+
+            //if (TempData["MESSAGE"] != null)
+            //{
+            //    ViewBag.Message = TempData["MESSAGE"] as AlertMessage;
+            //}
+
+            try
+            {
+                var obj = _applicantQuery.GetAll().Join(_optometristFirmQuery.GetAll(),
+                    a => a.OptometristFirmId,
+                    o => o.Id, (a, o) => new { a, o }).Where(x => x.a.IsRegistration == true)// && x.a.OptometristFirmId == optometristFirmId)
+                    .Select(p => new ApplicantModel
+                    {
+                        ContactNumber = p.a.ContactNumber,
+                        FirstName = p.o.BusinessAddress,
+                        DOB = p.a.DOB,
+                        DriversLicence = p.a.DriversLicence,
+                        DVLAReferenceNo = p.a.DVLAReferenceNo,
+                        Email = p.a.Email,
+                        LearnerDriversLicence = p.a.LearnerDriversLicence,
+                        NameTitle = p.a.NameTitle,
+                        OtherName = p.a.OtherName,
+                        Fullname = p.a.Surname + " " + p.a.FirstName + " " + p.a.OtherName,
+                        CreatedBy = p.o.CreatedBy,
+                        Optometrist = p.o.BusinessName,
+                        OptometristFirmId = p.o.Id,
+                        //PassportImageUrl = p.a.PassportImageUrl,
+                        PostalAddress = p.a.PostalAddress,
+                        FormNumber = p.a.FormNumber,
+                        Surname = p.a.Surname,
+                        TaxIdentificationNumber = p.a.TaxIdentificationNumber,
+                        InvoiceNumber = p.a.OldDVLAReferenceNo,
+                        Id = p.a.Id,
+                        IsActive = p.o.IsActive,
+                        IsDeleted = p.o.IsDeleted,
+                        UpdatedBy = p.o.ModifiedBy
+                    }).ToList();
+                    _AuditRepo.AddAudit(Activities.APPLICANT_REGISTRATION, "View Applicant List");
+                return View(obj);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return View(new List<ApplicantModel>());
+        }
+
+        public ActionResult Update(string Id)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(User.Identity.Name))
+                {
+                    return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+                }
+                ViewBag.OptometristFirms = _optometristFirmQuery.GetAll().ToList();
+
+
+                Int64 applicanId = Convert.ToInt64(Utility.Decrypt(Id));
+                var applicant = _applicantQuery.Filter(x => x.Id == applicanId).FirstOrDefault();              
+
+                var model = new ApplicantModel();
+                model.Id = applicant.Id;
+                model.NameTitle = applicant.NameTitle;             
+                model.Surname = applicant.Surname;
+                model.DriversLicence = applicant.DriversLicence;
+                model.DVLAReferenceNo = applicant.DVLAReferenceNo;
+                model.FirstName = applicant.FirstName;
+                model.OtherName = applicant.OtherName;
+                model.DOB = (DateTime)applicant.DOB;
+                model.PostalAddress = applicant.PostalAddress;
+                model.ContactNumber = applicant.ContactNumber;
+                model.TaxIdentificationNumber = applicant.TaxIdentificationNumber;
+                model.Email = applicant.Email;
+                model.ResultServiceType = applicant.ResultServiceType;
+                model.LearnerDriversLicence = applicant.LearnerDriversLicence;
+                model.PassportImageUrl = applicant.PassportImageUrl;
+                model.Status = applicant.Status;
+                model.OptometristFirmId = applicant.OptometristFirmId;
+                model.FormNumber = applicant.FormNumber;
+                model.TestType = (TestType)applicant.TestType;
+                model.InvoiceNumber = applicant.OldDVLAReferenceNo;
+                model.IsActive = applicant.IsActive;
+                model.CreatedBy = applicant.CreatedBy;
+                model.IsDeleted = applicant.IsDeleted;
+                model.UpdatedBy = applicant.ModifiedBy;
+                model.IsRegistration = applicant.IsRegistration;
+                model.ReferenceNumber = applicant.ReferenceNumber;
+               
+
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+
+            return View(new ApplicantModel());
+        }
+             
+        [HttpPost]
+        public ActionResult Update(ApplicantModel model, string Id)
+        {
+            if (string.IsNullOrEmpty(User.Identity.Name))
+            {
+                return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+            }
+            ViewBag.OptometristFirms = _optometristFirmQuery.GetAll().ToList();
+            try
+            {
+                if (model.ResultServiceType == null)
+                {
+                    ModelState.AddModelError("ResultServiceType", "Please select service type");
+                }
+
+                if (model.ResultServiceType != null)
+                {
+                    if (model.ResultServiceType == ResultServiceType.LearnerDriversLicence)
+                    {
+                        if (model.LearnerDriversLicence == null)
+                        {
+                            ModelState.AddModelError("LearnerDriversLicence", "Please select learner licence type");
+                        }
+                    }
+                }
+
+
+                if (model.NameTitle == null)
+                {
+                    ModelState.AddModelError("NameTitle", "Please select name title");
+                }
+
+                if (string.IsNullOrEmpty(model.Surname))
+                {
+                    ModelState.AddModelError("Surname", "Please enter surname");
+                }
+
+                if (string.IsNullOrEmpty(model.FirstName))
+                {
+                    ModelState.AddModelError("FirstName", "Please enter first name");
+                }
+
+                if (model.DOB == null)
+                {
+                    ModelState.AddModelError("DOB", "Please select DOB");
+                }
+
+                if (string.IsNullOrEmpty(model.PostalAddress))
+                {
+                    ModelState.AddModelError("PostalAddress", "Please enter postal address");
+                }
+
+                if (model.OptometristFirmId == 0)
+                {
+                    ModelState.AddModelError("OptometristFirmId", "Please select Optometrist Firm");
+                }
+
+                if (string.IsNullOrEmpty(model.ContactNumber))
+                {
+                    ModelState.AddModelError("ContactNumber", "Please enter contact number");
+                }
+
+                if (string.IsNullOrEmpty(model.TaxIdentificationNumber))
+                {
+                    ModelState.AddModelError("TaxIdentificationNumber", "Please enter tax identification number");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                Int64 applicanId = Convert.ToInt64(Utility.Decrypt(Id));
+                var applicant = _applicantQuery.Filter(x => x.Id == applicanId).FirstOrDefault();
+
+                string[] dob = model.DateOfBirth != null ? model.DateOfBirth.Split('-') : null;
+                model.DOB = dob != null ? new DateTime(Convert.ToInt32(dob[0]), Convert.ToInt32(dob[1]), Convert.ToInt32(dob[2])) : model.DOB;
+                model.PassportImageUrl = model.PassportImageUrl.Substring(model.PassportImageUrl.IndexOf(',') + 1);
+
+
+
+
+                applicant.NameTitle = model.NameTitle;
+                applicant.Surname = model.Surname;
+                applicant.DriversLicence = model.DriversLicence;
+                applicant.DVLAReferenceNo = model.DVLAReferenceNo;
+                applicant.FirstName = model.FirstName;
+                applicant.OtherName = model.OtherName;
+                applicant.DOB = (DateTime)model.DOB;
+                applicant.PostalAddress = model.PostalAddress;
+                applicant.ContactNumber = model.ContactNumber;
+                applicant.TaxIdentificationNumber = model.TaxIdentificationNumber;
+                applicant.Email = model.Email;
+                applicant.ResultServiceType = model.ResultServiceType;
+                applicant.LearnerDriversLicence = model.LearnerDriversLicence;
+                applicant.PassportImageUrl = model.PassportImageUrl;
+                applicant.Status = model.Status;
+                applicant.TestType = (TestType)model.TestType;
+                applicant.OldDVLAReferenceNo = model.InvoiceNumber;
+                applicant.IsActive = model.IsActive;
+                applicant.CreatedBy = model.CreatedBy;
+                applicant.IsDeleted = model.IsDeleted;
+                applicant.ModifiedBy = model.UpdatedBy;
+                if ((model.IsRegistration ?? false) && string.IsNullOrEmpty(model.ReferenceNumber))
+                {
+                    applicant.ReferenceNumber = _visualAssessmentResultRepository.GenerateReferenceNo(model.OptometristFirmId);
+                    applicant.IsSynchronized = false;
+                }
+                _applicantQuery.Update(applicant);
+
+
+                TempData["SuccessMessage"] = "Record saved successfully";
+                _AuditRepo.AddAudit(Activities.UPPDATE_APPLICANT_REGISTRATION, "Update applicant");
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                model.Errors.Add("Kindly try again later");
+                _logger.LogError(ex.Message, ex);
+            }
+            return View(model);
+        }
+
+        public int GetResultServiceType(string serviceType)
+        {
+            int resultService = 0;
+            switch (serviceType.Trim().ToUpper())
+            {
+                case "LEARNER DRIVER’S LICENCE":
+                    resultService = 1;
+                    break;
+                case "RENEWAL OF DRIVER’S LICENCE":
+                    resultService = 2;
+                    break;
+                case "REPLACEMENT OF DRIVER’S LICENCE":
+                    resultService = 3;
+                    break;
+                case "UPGRADE OF DRIVER’S LICENCE":
+                    resultService = 4;
+                    break;
+                case "ACCIDENT REPORT":
+                    resultService = 5;
+                    break;
+                default:
+                    break;
+            }
+            return resultService;
+        }
+
+        //[HttpPost]
+        //public JsonResult GetApplicantDetail(string refno)
+        //{
+        //    ApplicantModel applicant = null;
+        //    try
+        //    {
+        //        DVLAServiceReference.FLTDVLARecord driverInfo = new DVLAServiceReference.FLTDVLARecord();
+        //        DVLAServiceReference.StudentAttendanceData studentDetail = new DVLAServiceReference.StudentAttendanceData();
+        //        using (DVLAServiceReference.DVLAServiceSoapClient client = new DVLAServiceReference.DVLAServiceSoapClient())
+        //        {
+        //            studentDetail = client.FetchStudentAttendanceDetails(refno);
+        //        }
+
+        //        if(studentDetail.ReferenceNo != null)
+        //        {
+        //            var dd = studentDetail.DriverInfo;
+        //            applicant = new ApplicantModel
+        //            {
+        //                DriversLicence = "",
+        //                DVLAReferenceNo = studentDetail.DVLAReferenceNo,
+        //                Surname = studentDetail.DriverInfo.surname,
+        //                FirstName = studentDetail.DriverInfo.firstname,
+        //                OtherName = studentDetail.DriverInfo.middlename,
+        //                ContactNumber = studentDetail.DriverInfo.telephone,
+        //                Email = studentDetail.EmailAddress,   
+        //                PostalAddress = studentDetail.DriverInfo.contactaddress
+
+        //            };
+
+                  
+        //            return Json(applicant, JsonRequestBehavior.AllowGet);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ErrorLogManager.Error(ex);
+        //    }
+        //    return Json(applicant, JsonRequestBehavior.AllowGet);
+        //}
+    }
+}

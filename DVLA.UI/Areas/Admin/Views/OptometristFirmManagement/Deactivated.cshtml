@@ -1,0 +1,99 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.DataObjects.UtilityObjects
+@using DVLA.Data.Models.DataObjects.ViewModels
+@model List<OptometristFirmModel>
+@{
+    ViewData["Title"] = "Deactivated Optometrist Firms";
+}
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            @* <div class="mb-2">
+            <h4 class="card-title mb-0">File export</h4>
+            </div> *@
+            <p class="card-subtitle mb-3">
+                <a asp-action="Create" class="btn btn-primary">Create New @ViewData["Title"].ToString()</a>
+            </p>
+            <div class="table-responsive">
+                <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                    <thead>
+                        <!-- start row -->
+                        <tr>
+                            <th>Practice Name</th>
+                            <th>Centre Code</th>
+                            <th>Business Tel.</th>
+                            <th>Accrd #</th>
+                            <th>Region</th>
+                            <th>Town</th>
+                            <th>Digital Addr.</th>
+                            <th></th>
+                        </tr>
+                        <!-- end row -->
+                    </thead>
+                    <tbody>
+                        @foreach (OptometristFirmModel item in Model)
+                        {
+                            <!-- start row -->
+                            <tr>
+                                <td>@item.BusinessName</td>
+                                <td>@item.CentreCode</td>
+                                <td>@item.ContactPhoneNumber</td>
+                                <td>@item.AccreditationNumber</td>
+                                <td>@item.RegionName</td>
+                                <td>@item.Town</td>
+                                <td>@item.DigitalAddress</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-primary dropdown-toggle show" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="true">
+                                            Action
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(0px, 40.8px, 0px);">
+                                            @* <li>
+                                                <a asp-action="Update" asp-route-token="@Utility.Encrypt(item.Id.ToString())" class="dropdown-item">Update</a>
+                                            </li> *@
+                                            <li>
+                                                <a onclick="ChangeStatus(@item.Id)" class="dropdown-item">Activate</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </td>
+                            </tr>
+                            <!-- end row -->
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+@section Scripts {
+    <script>
+        function ChangeStatus(Id) {
+            $.ajax({
+                url: '@Url.Action("ChangeStatus")?Id=' + Id,
+                type: 'get',
+                dataType: 'json',
+                success: function (response) {
+                    location.reload();
+                },
+                error: function (err) {
+                    console.log(err.responseText);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Please try again later',
+                        icon: 'error'
+                    });
+                }
+            })
+        }
+    </script>
+}
+

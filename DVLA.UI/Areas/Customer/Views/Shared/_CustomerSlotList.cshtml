@@ -1,0 +1,83 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.Enumerables
+@using DVLA.Data;
+@model IEnumerable<SlotRequestModel>
+@{
+    int counter = 0;
+}
+
+<div class="table-responsive">
+    <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+        <thead>
+            <tr>
+                <th>
+                    #
+                </th>
+                <th>Ref #.</th>
+                <th>
+                    Bus.
+                </th>
+                <th>Amt</th>
+                <th>Qty</th>
+                <th>
+                    Telephone
+                </th>
+                <th>
+                    Access Type
+                </th>
+                <th>
+                    Status
+                </th>
+                <th>Created On</th>
+            </tr>
+
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                counter = counter + 1;
+                <tr>
+                    <td>
+                        @counter
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ReferenceNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.BusinessName)
+                    </td>
+                    <td>@Html.DisplayFor(modelItem => item.AmountPaid)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TelephoneNumber)
+                    </td>
+                    <td>
+                        @(item.AccessType == 0 ? "" : item.AccessType.GetDisplayName())
+                    </td>
+                    <td>
+                        @if (item.Status == SlotRequestStatus.Pending)
+                        {
+                            <span class="mb-1 badge rounded-pill text-bg-info">@item.Status</span>
+                        }
+                        else if (item.Status == SlotRequestStatus.Opened)
+                        {
+                            <span class="mb-1 badge rounded-pill text-bg-dark">@item.Status</span>
+                        }
+                        else if (item.Status == SlotRequestStatus.Approved)
+                        {
+                            <span class="mb-1 badge rounded-pill text-bg-success">@item.Status</span>
+                        }
+                        else if (item.Status == SlotRequestStatus.Reject)
+                        {
+                            <span class="mb-1 badge rounded-pill text-bg-danger">Rejected</span>
+                        }
+                    </td>
+                    <td>
+                        @item.DateCreated.ToString("dd/MM/yyyy")
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

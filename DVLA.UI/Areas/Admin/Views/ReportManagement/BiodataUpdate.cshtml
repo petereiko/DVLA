@@ -1,0 +1,125 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.DataObjects.UtilityObjects
+@using DVLA.Data.Models.DataObjects.ViewModels
+@model PaginationResponseModel<List<VisualAssessmentResultItemViewModel>>
+@{
+    ViewBag.Title = "Biodata Update";
+    ViewData["Area"] = "customer";
+    int counter = 0;
+}
+
+
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">Biodata Update</h4>
+            </div>
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+
+
+
+                        <div class="table-responsive">
+                            <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th class="width-10px text-center">#</th>
+                                        <th>Names</th>
+                                        <th>Address</th>
+                                        <th>Company</th>
+                                        <th>DS Reference</th>
+                                        <th>Test Date</th>
+                                        <th>Grade</th>
+                                        <th></th>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.ListResult)
+                                    {
+                                        counter = counter + 1;
+                                        <tr>
+                                            <td>
+                                                @counter
+                                            </td>
+                                            <td><span>@item.ApplicantName </span></td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ApplicantAddress)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.OptometristFirmName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.DSReference)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.TestDate)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Grade)
+                                            </td>
+
+                                            <td>
+                                                <a asp-action="Detail" asp-controller="VisualAssessmentResult" asp-area="Customer" asp-route-page="Details" asp-route-token="@Utility.Encrypt(item.Id.ToString())">Details</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                            @{
+                                PaginationModel paginationModel = new()
+                                {
+                                    Action = "BiodataUpdate",
+                                    Area = "Admin",
+                                    Controller = "ReportManagement",
+                                    EndIndex = Model.EndIndex,
+                                    FilteredCount = Model.ListResult.Count,
+                                    PageIndex = Model.PageIndex,
+                                    TotalCount = Model.TotalCount,
+                                    TotalPages = Model.TotalPages
+                                };
+                            }
+
+                            <partial name="_PaginationFooter" model="paginationModel" />
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+
+    <script>
+        $(function () {
+            $('#file_export_info').hide();
+            $('#file_export_paginate').hide();
+            $('#dataTables_info').hide();
+        });
+    </script>
+}
+
+
+
+
+
+<script>
+    $(function () {
+        $('#file_export_info').hide();
+        $('#file_export_paginate').hide();
+        $('#dataTables_info').hide();
+    });
+</script>
+
+

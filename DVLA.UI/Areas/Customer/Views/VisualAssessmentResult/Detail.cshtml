@@ -1,0 +1,158 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.Enumerables
+
+@{
+    ViewData["Title"] = "Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string token = Context.Request.Query["token"];
+
+    string result = Model.PassOrFail.ToString();
+    string resultServiceType = "";
+    string learnerType = "";
+    if (Model.ResultServiceType.HasValue)
+    {
+        resultServiceType = EnumHelper<ResultServiceType>.GetDisplayValue(Model.ResultServiceType.Value);
+    }
+    if (Model.LearnerDriversLicence.HasValue)
+    {
+        learnerType = EnumHelper<LearnerDriversLicenceType>.GetDisplayValue(Model.LearnerDriversLicence.Value);
+    }
+
+    string action = TempData["Action"] == null ? "#" : TempData["Action"].ToString();
+
+}
+@model VisualAssessmentResultModel
+
+
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-md-12" style="text-align:right">
+                    <button class="btn btn-primary btn-sm right" id="btn-print">Print</button>
+                    @* <div><button type="button" id="printreceipt" onclick="PrintSection()" class="btn btn-sm btn-primary pull-right">Print</button></div> *@
+                </div>
+            </div>
+
+            <div id="DivIdToPrint">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <table>
+                                    <tr>
+                                        <td style="padding-right:20px">
+                                            <img src="@Model.PassportImageUrl" style="width:150px; height:150px" />
+                                        </td>
+                                        <td valign="top" style="font-size:12pt; padding:5px; color:#2cabe3;">
+                                            <div class="col-12" style="text-transform:uppercase">@Model.Surname @Model.FirstName @Model.OtherName</div>
+                                            <div class="col-12">@Model.DOB.GetValueOrDefault().ToString("dd/MM/yyyy")</div>
+                                            <div class="col-12">@Model.MobileNumber</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-4" style="font-family:'Yu Gothic UI'; font-weight:bold; font-size:12pt">
+                        <div style="float:right">VAS NO: @Model.ReferenceNumber</div>
+                    </div>
+                </div>
+                <hr />
+                <div class="row">
+                    <div class="col-md-8">
+                        <table style="font-size:14pt">
+                            <tr>
+                                <td style="padding-right:20px;">Results:</td>
+                                <td>
+                                    @result
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    @Model.ResultConclusion
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <table>
+                            <tr>
+                                <td style="padding-right:30px">Test Facility Details:</td>
+                                <td><b>@Model.BusinessName</b></td>
+                            </tr>
+                            <tr>
+                                <td style="padding-right:30px">Authenticated By:</td>
+                                <td><b>@Model.Optometrist</b></td>
+                            </tr>
+                            <tr>
+                                <td style="padding-right:30px">Service Type:</td>
+                                <td><b>@resultServiceType</b></td>
+                            </tr>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <hr />
+                <div class="row">
+                    <div class="col-md-8"></div>
+                    <div class="col-md-4">
+                        SIGN AND STAMP
+                    </div>
+                </div>
+                <hr />
+                <div class="row">
+                    <div class="col-12">
+                        Disclaimer: Passing this eye exam does not guarantee the applicant a driver's license. The issuance of the license is the sole prerogative of the DVLA.
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12" style="text-align:right">
+                    @* <a href="@action" class="btn btn-sm btn-info pull-right">Close</a> *@
+                    <button onclick="history.back()" class="btn btn-sm btn-danger pull-right">Back</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts {
+    <script>
+
+        $(function () {
+            $('#btn-print').click(function () {
+                let section = $('#DivIdToPrint').html();
+                const width = 700; // Set the desired width
+                const height = 500; // Set the desired height
+                const left = (screen.width / 2) - (width / 2); // Center the window horizontally
+                const top = (screen.height / 2) - (height / 2); // Center the window vertically
+                const newWindow = window.open("", "_blank", `width=${width},height=${height},top=${top},left=${left}`);
+
+                newWindow.document.write(section);
+                newWindow.print();
+                newWindow.document.close(); // Close the document to render the content
+                
+            })
+        });
+
+
+    </script>
+}
+
+
+
+
+
+
+

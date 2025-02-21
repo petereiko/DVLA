@@ -1,0 +1,207 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.DTOs
+@model SlotUsageBarModel
+
+@{
+    ViewBag.Title = "Dashboard";
+
+}
+
+
+
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card" style="cursor:pointer">
+            <div class="card-body p-9">
+                <div class="hstack gap-9">
+                    <div class="round-56 rounded-circle text-white d-flex align-items-center justify-content-center text-bg-primary">
+                        <iconify-icon icon="solar:calendar-minimalistic-linear" class="aside-icon"></iconify-icon>
+                    </div>
+                    <div class="align-self-center">
+                        <h5 class="mb-1 fs-6">Learner's Granted Slots</h5>
+                        <span id="learnersgrandedslots">
+                            @{
+                                var learnersgrandedslots = Model.LearnUnusedSlot + Model.LearnerUsedSlot;
+                            }
+                            @learnersgrandedslots
+                            </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-3">
+        <div class="card" style="cursor:pointer">
+            <div class="card-body p-9">
+                <div class="hstack gap-9">
+                    <div class="round-56 rounded-circle text-white d-flex align-items-center justify-content-center text-bg-primary">
+                        <iconify-icon icon="solar:cardholder-linear" class="aside-icon"></iconify-icon>
+                    </div>
+                    <div class="align-self-center">
+                        <h5 class="mb-1 fs-6">Learner's Utilized Slots</h5>
+                        <span class="text-muted" id="learnersutilizedslots">@Model.LearnerUsedSlot</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card" style="cursor:pointer">
+            <div class="card-body p-9">
+                <div class="hstack gap-9">
+                    <div class="round-56 rounded-circle text-white d-flex align-items-center justify-content-center text-bg-primary">
+                        <iconify-icon icon="solar:box-minimalistic-linear" class="aside-icon"></iconify-icon>
+                    </div>
+                    <div class="align-self-center">
+                        <h5 class="mb-1 fs-6">Other's Granted Slot</h5>
+                        <span class="text-muted" id="othersgrantedaccess">
+                            @{
+                                var othersgrantedaccess = Model.OtherUnusedSlot + Model.OtherUsedSlot;
+                            }
+                            @othersgrantedaccess
+                            </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card" style="cursor:pointer">
+            <div class="card-body p-9">
+                <div class="hstack gap-9">
+                    <div class="round-56 rounded-circle text-white d-flex align-items-center justify-content-center text-bg-primary">
+                        <iconify-icon icon="solar:atom-linear" class="aside-icon"></iconify-icon>
+                    </div>
+                    <div class="align-self-center">
+                        <h5 class="mb-1 fs-6">Other's Utilized Slot</h5>
+                        <span class="text-muted" id="othersutilizedaccess">@Model.OtherUsedSlot</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br />
+
+<div class="row">
+
+    @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.FACILITYOWNER))
+    {
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body p-9">
+                    <div class="hstack gap-9">
+                        <div class="round-56 rounded-circle text-white d-flex align-items-center justify-content-center text-bg-primary">
+                            <iconify-icon icon="solar:notes-linear" class="aside-icon"></iconify-icon>
+                        </div>
+                        <div class="align-self-center">
+
+                            @if (User.IsInRole(AppRoles.SYSTEMADMIN))
+                            {
+                                <h5 class="mb-1 fs-6">Slot Management</h5>
+                                <a asp-action="SlotRequest" asp-controller="SlotManagement" asp-area="Admin" asp-route-status="1" class="btn btn-primary btn-sm">Click Here</a>
+                            }
+                            else if (User.IsInRole(AppRoles.FACILITYOWNER))
+                            {
+                                <h5 class="mb-1 fs-6">Buy Slot</h5>
+                                <a asp-action="InitiateSlotRequest" asp-controller="Slot" asp-area="Customer" class="btn btn-primary btn-sm">Click Here</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        if (User.IsInRole(AppRoles.SYSTEMADMIN))
+        {
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body p-9">
+                        <div class="hstack gap-9">
+                            <div class="round-56 rounded-circle text-white d-flex align-items-center justify-content-center text-bg-primary">
+                                <iconify-icon icon="solar:buildings-2-linear" class="aside-icon"></iconify-icon>
+                            </div>
+                            <div class="align-self-center">
+                                <h5 class="mb-1 fs-6">Facility<br /> Setup</h5>
+                                <a asp-action="Index" asp-controller="OptometristFirmManagement" asp-area="Admin" class="btn btn-primary btn-sm">Click Here</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body p-9">
+                    <div class="hstack gap-9">
+                        <div class="round-56 rounded-circle text-white d-flex align-items-center justify-content-center text-bg-primary">
+                            <iconify-icon icon="solar:user-circle-linear" class="aside-icon"></iconify-icon>
+                        </div>
+                        <div class="align-self-center">
+                            <h5 class="mb-1 fs-6">User Management</h5>
+                            @if (User.IsInRole(AppRoles.SYSTEMADMIN))
+                            {
+                                <a asp-action="Index" asp-controller="UserManagement" asp-area="Admin" class="btn btn-primary btn-sm">Click Here</a>
+                            }
+                            else
+                            {
+                                <a asp-action="Index" asp-controller="UserManagement" asp-area="Customer" class="btn btn-primary btn-sm">Click Here</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+@section Scripts {
+    <script>
+        // $(function () {
+        //     //LoadDashboardData();
+        // });
+
+        // function LoadDashboardData() {
+        //     $.ajax({
+        //         url: '@Url.Action("GetDashboardData")',
+        //         type: 'get',
+        //         dataType: 'json',
+        //         success: function (response) {
+        //             $('#learnersgrandedslots').text(response.learnerGrantedSlotCount);
+        //             $('#learnersutilizedslots').text(response.learnerUtilizedSlotCount);
+        //             $('#othersgrantedaccess').text(response.otherGrantedSlotCount);
+        //             $('#othersutilizedaccess').text(response.otherUtilizedSlotCount);
+        //         },
+        //         error: function (err) {
+        //             Swal.fire({
+        //                 title: 'Error',
+        //                 text: 'Could not load Dashboard details at this time. Please try again.',
+        //                 icon: 'error'
+        //             });
+        //         }
+        //     })
+        // }
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

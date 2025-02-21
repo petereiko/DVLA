@@ -1,0 +1,195 @@
+﻿@using DVLA.Data.Models.DataObjects.ViewModels
+@using DVLA.Data.Models.Enumerables
+@model List<CustomerReportViewModel>
+@{
+
+    ViewBag.Title = "Synchronization Report";
+    var i = 0;
+}
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">Access Statistics</h4>
+            </div>
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+
+                        <form method="post" id="createoredit-product-registration-form" style="margin-bottom:30px;">
+
+                            <div class="form-horizontal">
+
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label>Start Date</label>
+                                        <input type="text" id="StartDate" name="StartDate" class="form-control" data-date-format="dd/mm/yyyy" />
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label>End Date</label>
+                                        <input type="text" id="EndDate" name="EndDate" class="form-control" data-date-format="dd/mm/yyyy" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>Result</label>
+                                        <select id="Result" name="Result" class="form-control" asp-items="Html.GetEnumSelectList<PassOrFail>()">
+                                            <option>All</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="btn btn-primary pull-left" style="margin-top:20px;">Search</button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </form>
+
+                        <div class="d-flex mb-2 float-right">
+
+                            <div class="d-flex">
+
+                                <form asp-action="ExportAudit" asp-area="ReportManagement" method="post">
+
+                                    @for (var n = 0; n < Model.Count; n++)
+                                    {
+                                        @Html.HiddenFor(x => x[n].FullName)
+                                        @Html.HiddenFor(x => x[n].Email)
+                                        @Html.HiddenFor(x => x[n].ReferenceNumber)
+                                        @Html.HiddenFor(x => x[n].DVLAReferenceNo)
+                                        @Html.HiddenFor(x => x[n].DriversLicence)
+                                        @Html.HiddenFor(x => x[n].TaxIdentificationNumber)
+                                        @Html.HiddenFor(x => x[n].Unaided_OD)
+                                        @Html.HiddenFor(x => x[n].Unaided_OS)
+                                        @Html.HiddenFor(x => x[n].Unaided_OU)
+                                        @Html.HiddenFor(x => x[n].BCV_OD)
+                                        @Html.HiddenFor(x => x[n].BCV_OS)
+                                        @Html.HiddenFor(x => x[n].BCV_OU)
+                                        @Html.HiddenFor(x => x[n].HX_BCV_OD)
+                                        @Html.HiddenFor(x => x[n].HX_BCV_OS)
+                                        @Html.HiddenFor(x => x[n].HX_BCV_OU)
+                                        @Html.HiddenFor(x => x[n].GlareTest_BCV_OD)
+                                        @Html.HiddenFor(x => x[n].GlareTest_BCV_OS)
+                                        @Html.HiddenFor(x => x[n].GlareTest_BCV_OU)
+                                        @Html.HiddenFor(x => x[n].ColourVision_BCV_OU)
+                                        @Html.HiddenFor(x => x[n].ContrastSensitivity_BCV)
+                                        @Html.HiddenFor(x => x[n].Grade)
+                                        @Html.HiddenFor(x => x[n].SingleImage_BCV_OU)
+                                        @Html.HiddenFor(x => x[n].PathologicalRemarks)
+                                        @Html.HiddenFor(x => x[n].ResultConclusion)
+                                        @Html.HiddenFor(x => x[n].CreatedOn)
+                                    }
+
+
+
+                                    <button type="submit" id="add_row" class="btn btn-primary">
+                                        <i class="fa fa-file"></i>
+                                        <span>Export To Excel</span>
+                                    </button>
+                                </form>
+
+
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+
+                            <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            #
+                                        </th>
+                                        <th>
+                                            Reference Number
+                                        </th>
+                                        <th>
+                                            DVLA Reference Number
+                                        </th>
+                                        <th>
+                                            Full Name
+                                        </th>
+
+
+                                        <th>
+                                            DriversLicence
+                                        </th>
+                                        <th>
+                                            Grade
+                                        </th>
+                                        <th>
+                                            Test Date
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        i = i + 1;
+                                        <tr>
+
+                                            <td>@i</td>
+                                            <td>
+                                                @item.ReferenceNumber
+                                            </td>
+                                            <td>
+                                                @item.DVLAReferenceNo
+
+                                            </td>
+                                            <td>
+                                                @item.FullName
+                                            </td>
+
+                                            <td>
+                                                @item.DriversLicence
+                                            </td>
+                                            <td>
+                                                @item.Grade
+                                            </td>
+                                            <td>
+                                                @item.CreatedOn
+                                            </td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- MODAL -->
+<div id="divModal">
+    @*@Html.Partial("_ManageOptometrist", new DVLA.DATA.Models.OptometristFirmModel())*@
+</div>
+@section Scripts {
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#StartDate").datepicker({
+                dateFormat: "dd-mm-yyyy"
+            });
+            $("#EndDate").datepicker({
+                dateFormat: "dd-mm-yyyy"
+            });
+
+        });
+
+    </script>
+}

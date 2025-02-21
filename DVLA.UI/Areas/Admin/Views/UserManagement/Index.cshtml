@@ -1,0 +1,66 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.DataObjects.UtilityObjects
+@using DVLA.Data.Models.DataObjects.ViewModels
+@model List<UserViewModel>
+@{
+    ViewData["Title"] = "User";
+}
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            @* <div class="mb-2">
+            <h4 class="card-title mb-0">File export</h4>
+            </div> *@
+            <p class="card-subtitle mb-3">
+                <a asp-action="Create" class="btn btn-primary">Create New @ViewData["Title"].ToString()</a>
+            </p>
+            <div class="table-responsive">
+                <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                    <thead>
+                        <!-- start row -->
+                        <tr>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                        <!-- end row -->
+                    </thead>
+                    <tbody>
+                        @foreach (UserViewModel item in Model)
+                        {
+                            <!-- start row -->
+                            <tr>
+                                <td>@item.FirstName @item.LastName</td>
+                                <td>@item.DefaultRole</td>
+                                <td>@item.Email</td>
+                                <td>@item.MobileNumber</td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="mb-1 badge rounded-pill text-bg-success">Confirmed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="mb-1 badge rounded-pill text-bg-danger">Not Confirmed</span>
+                                    }
+                                </td>
+                                
+                                <td>
+                                    <a asp-action="Update" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+                                </td>
+                            </tr>
+                            <!-- end row -->
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+

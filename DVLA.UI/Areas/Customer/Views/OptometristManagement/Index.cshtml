@@ -1,0 +1,217 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.ViewModels
+@model IEnumerable<UserViewModel>
+@{
+
+    ViewBag.Title = "Optometrist Management";
+    var i = 0;
+}
+
+
+<div class="datatables">
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">@ViewBag.Title</h4>
+                <div class="section-wrapper">
+                    <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                        <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+
+                            <div class="d-flex mb-2 float-right">
+
+                                <div class="d-flex">
+
+                                    <a id="add_row" href="@Url.Action("Create","OptometristManagement")" class="btn btn-primary">
+                                        <i class="fa fa-plus"></i>
+                                        <span>Add New</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                #
+                                            </th>
+                                            <th>
+                                                First Name
+                                            </th>
+                                            <th>
+                                                Last Name
+                                            </th>
+                                            <th>
+                                                Mobile Number
+                                            </th>
+                                            <th>
+                                                Email Address
+                                            </th>
+                                            <th>
+                                                Status
+                                            </th>
+                                            <th></th>
+                                        </tr>
+
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            i = i + 1;
+                                            <tr>
+                                                <td>
+                                                    @i
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.FirstName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.LastName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.MobileNumber)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Email)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.IsActive, new { @readonly = "true" })
+
+                                                </td>
+
+                                                @{
+                                                    var toggleActive = item.IsActive ? "Disable" : "Enable";
+                                                }
+                                                <td style="text-align:right;">
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-rounded btn-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            Action
+                                                        </button>
+                                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                                                            <a class="dropdown-item has-icon" style="cursor:pointer;" href="@Url.Action("Update", new { id = @Utility.Encrypt(item.Id)})"> Update</a>
+
+                                                            @if (item.IsActive)
+                                                            {
+                                                                <a class="dropdown-item has-icon" style="cursor:pointer;" onclick="changeUserStatus(this.id);" id="@item.Id">
+                                                                    Deactivate
+                                                                </a>
+                                                            }
+                                                            else
+                                                            {
+                                                                <a class="dropdown-item has-icon" style="cursor:pointer;" onclick="changeUserStatus(this.id);" id="@item.Id">
+                                                                    Activate
+                                                                </a>
+                                                            }
+
+                                                            <a class="dropdown-item has-icon" style="cursor:pointer;" onclick="resetPassword(this.id);" id="@item.Id">
+                                                                Reset Password
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- MODAL -->
+<div id="divModal">
+    @*@Html.Partial("_ManageOptometrist", new DVLA.DATA.Models.OptometristFirmModel())*@
+</div>
+@section Scripts {
+    <script>
+        $("#btnSearch").click(function () {
+            var roleId = $('#RoleId').val()
+            var name = $('#Name').val();
+            Search(roleId, name);
+        })
+
+
+        function changeUserStatus(Id) {
+
+            $.ajax({
+                type: "POST",
+                url: '/OptometristManagement/ChangeStatus',
+                dataType: "json",
+                processData: false,
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ Id: Id }),
+                success: function (response) {
+                    console.log(response);
+
+                    if (response.success) {
+                        swal(
+                            'Success',
+                            response.message,
+                            'success'
+                        );
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1200);
+                    }
+                    else {
+                        swal(
+                            'Error!',
+                            response.message,
+                            'error'
+                        )
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        function resetPassword(Id) {
+
+            $.ajax({
+                type: "POST",
+                url: '/OptometristManagement/ResetPassword',
+                dataType: "json",
+                processData: false,
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ Id: Id }),
+                success: function (response) {
+                    console.log(response);
+
+                    if (response.success) {
+                        swal(
+                            'Success',
+                            response.message,
+                            'success'
+                        );
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1200);
+                    }
+                    else {
+                        swal(
+                            'Error!',
+                            response.message,
+                            'error'
+                        )
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+        }
+
+    </script>
+}

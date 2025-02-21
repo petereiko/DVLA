@@ -1,0 +1,65 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@model IEnumerable<ClientModel>
+@{
+    int counter = 0;
+    Layout = null;
+}
+
+
+<div class="table-responsive">
+
+    <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+        <thead>
+            <tr>
+                <th>
+                    #
+                </th>
+                <th>Fullname</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Drivers Licence</th>
+                <th>DVLA Reference Number</th>
+                <th>
+                    Reference Number
+                </th>
+                <th>
+                    Test Date
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                counter = counter + 1;
+                <tr>
+                    <td>
+                        @counter
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FullName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ContactNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Email)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DriversLicence)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DVLAReferenceNo)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ReferenceNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TestDate)
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>

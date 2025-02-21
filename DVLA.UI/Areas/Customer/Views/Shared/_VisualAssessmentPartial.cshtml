@@ -1,0 +1,58 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.DataObjects.ViewModels
+@model IEnumerable<VisualAssessmentResultAdminViewModel>
+@{
+    var sn = 0;
+}
+
+
+
+<table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Names</th>
+            <th>Address</th>
+            <th>Company</th>
+            <th>D. Licence</th>
+            <th>DVLA No.</th>
+            <th>Test Date</th>
+            <th>Grade</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (VisualAssessmentResultAdminViewModel item in Model)
+        {
+            sn++;
+            <tr>
+                <td>@sn</td>
+                <td>@item.FirstName @item.ContactLastName</td>
+                <td>@item.BusinessAddress</td>
+                <td>@item.BusinessName</td>
+                <td>@item.DriversLicence</td>
+                <td>@item.DVLAReferenceNo</td>
+                <td>@item.TestDate</td>
+                <td>@item.Grade</td>
+                <td>
+                    <div class="dropdown">
+                        <div class="btn-group">
+                            <button class="btn btn-primary dropdown-toggle show" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="true">
+                                Action
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(0px, 40.8px, 0px);">
+                                <li>
+                                    <a asp-action="Detail" asp-controller="VisualAssessmentResult" asp-route-token="@Utility.Encrypt(item.Id.ToString())" asp-route-page="Details" class="dropdown-item">Details</a>
+                                </li>
+                                <li>
+                                    <a asp-action="Update" asp-controller="ReportManagement" asp-route-token="@Utility.Encrypt(item.Id.ToString())" class="dropdown-item">Update</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

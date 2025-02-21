@@ -1,0 +1,260 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.UtilityObjects
+@using DVLA.Data.Models.DataObjects.ViewModels
+@model SlotDeductionViewModel
+@{
+    ViewData["Title"] = "Slot Deduction";
+}
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">@ViewData["Title"]</h4>
+            </div>
+
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+                        <center>
+                            <section id="loginForm" style="width:60%; text-align:left">
+                                @if (Model.Errors.Count > 0)
+                                {
+                                    <div class="alert alert-danger">
+                                        @foreach (var item in Model.Errors)
+                                        {
+                                            <div>@item</div>
+                                        }
+                                    </div>
+                                }
+
+                                @*
+                                <div class="form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                <div mat-input-field id="email-mat-input-field" class="mat-input-field form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                Optometrist Firm
+                                <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                @Html.DropDownListFor(m => m.FormData.OptometristFirmId, new SelectList(Model.OptometristFirms, "ID", "BusinessName"), "-Select Optometrist Firm-", new { @class = "form-control", type = "number" })
+                                @Html.ValidationMessageFor(m => m.FormData.OptometristFirmId, "", new { @class = "text-danger" })
+                                </div>
+                                </div>
+                                </div>
+                                <br />
+                                <div class="form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                <div mat-input-field id="email-mat-input-field" class="mat-input-field form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                Quantity
+                                <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                @Html.TextBoxFor(m => m.FormData.Quantity, new { @class = "form-control", type = "number" })
+                                @Html.ValidationMessageFor(m => m.FormData.Quantity, "", new { @class = "text-danger" })
+                                </div>
+                                </div>
+                                </div>
+                                <br />
+                                <div class="form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                <div mat-input-field id="email-mat-input-field" class="mat-input-field form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                Comment
+                                <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                @Html.TextAreaFor(m => m.FormData.Comment, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.FormData.Comment, "", new { @class = "text-danger" })
+                                </div>
+                                </div>
+                                </div> *@
+
+                                <form>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-floating mb-3">
+                                                <select asp-for="FormData.OptometristFirmId" class="form-control" asp-items="Model.OptometristFirms">
+                                                    <option value="">Select an Optometrist Firm</option>
+                                                </select>
+                                                <label for="FormData_OptometristFirmId">Optometrist Firm</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating mb-3">
+                                                <input type="number" class="form-control" asp-for="FormData.Quantity" placeholder="Enter Contact Last Name here" required />
+                                                <label for="FormData_Quantity">Quantity</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-floating mb-3">
+                                                <textarea asp-for="FormData.Comment" placeholder="Enter Comment..." required class="form-control"></textarea>
+                                                <label for="FormData_Comment">Comment</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="d-md-flex align-items-center">
+
+                                                <div class="ms-auto mt-3 mt-md-0">
+                                                    <button onclick="ReduceSlot()" type="button" class="btn btn-primary hstack gap-6">
+                                                        Reduce Access
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </section>
+                        </center>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+</div>
+
+
+@section Scripts {
+    <script>
+        function ReduceSlot() {
+            debugger
+            let optometristFirmId = $('#FormData_OptometristFirmId').val();
+            let quantity = $('#FormData_Quantity').val();
+            let comment = $('#FormData_Comment').val();
+            let obj = {
+                OptometristFirmId: optometristFirmId,
+                Quantity: quantity,
+                Comment: comment
+            };
+            if (obj.OptometristFirmId == '') {
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Select an Optometrist Firm',
+                    icon: 'warning'
+                });
+                return;
+            }
+            if (obj.Quantity == '') {
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Enter the quantity of access to be removed',
+                    icon: 'warning'
+                });
+                return;
+            }
+            if (obj.Comment.trim() == '') {
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Enter a comment',
+                    icon: 'warning'
+                });
+                return;
+            }
+            let confirmationText = parseInt(obj.Quantity) > 1 ? "Yes, remove the access(s)!" : "Yes, remove the access"
+            //alert(confirmationText)
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to submit this form? Please note that once submitted, you cannot make changes!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, submit it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // User clicked "Ok" - set the IsSubmitted value to true
+                    $.ajax({
+                        url: '@Url.Action("SlotDeduction", "SlotManagement", new { area = "admin" })',
+                        type: 'post',
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify(obj),
+                        success: function (response) {
+                            if (response.status) {
+                                ClearForm();
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: response.message,
+                                    icon: 'success'
+                                });
+                            }
+                            else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: response.message,
+                                    icon: 'error'
+                                });
+                            }
+
+                            //setTimeout(function () {
+                            //    location.reload();
+                            //}, 2000);
+                        },
+                        error: function (err) {
+                            console.log(err);
+                        }
+                    });
+                } else {
+                    // User clicked "Cancel" - Do nothing
+                    Swal.fire('Cancelled', 'The form was not submitted', 'info');
+                }
+            });
+
+            // swal({
+            //     title: "Access Reduction",
+            //     text: "Are you sure you want to remove " + obj.Quantity + " access(s) from this Optometrist Firm? Once removed, the action cannot be reversed",
+            //     icon: 'warning',
+            //     showCancelButton: true,
+            //     confirmButtonColor: '#3085d6',
+            //     cancelButtonColor: '#d33',
+            //     confirmButtonText: 'Yes, submit it!',
+            //     cancelButtonText: 'Cancel'
+            // }).then((result) => {
+            //     if (result.isConfirmed) {
+            //         $.ajax({
+            //             url: '@Url.Action("SlotDeduction", "SlotManagement", new { area = "admin" })',
+            //             type: 'post',
+            //             dataType: 'json',
+            //             contentType: 'application/json; charset=utf-8',
+            //             data: JSON.stringify(obj),
+            //             success: function (response) {
+            //                 if (response.status) {
+            //                     ClearForm();
+            //                     Swal.fire({
+            //                         title: 'Success!',
+            //                         text: response.message,
+            //                         icon: 'success'
+            //                     });
+            //                 }
+            //                 else {
+            //                     Swal.fire({
+            //                         title: 'Error!',
+            //                         text: response.message,
+            //                         icon: 'error'
+            //                     });
+            //                 }
+
+            //                 //setTimeout(function () {
+            //                 //    location.reload();
+            //                 //}, 2000);
+            //             },
+            //             error: function (err) {
+            //                 console.log(err);
+            //             }
+            //         });
+            //     }
+            //     else {
+
+            //     }
+            // });
+        }
+
+        function ClearForm() {
+            $('#FormData_OptometristFirmId').val('');
+            $('#FormData_Quantity').val('');
+            $('#FormData_Comment').val('');
+
+        }
+
+        $(function () {
+            ClearForm();
+        })
+    </script>
+}
+

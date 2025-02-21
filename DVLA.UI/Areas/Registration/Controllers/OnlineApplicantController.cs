@@ -1,0 +1,385 @@
+﻿using DVLA.Business.NotificationModule;
+using DVLA.Business.ReportModule;
+using DVLA.Business.Repository;
+using DVLA.Business.UserModule;
+using DVLA.Business.VisualAssessmentResultModule;
+using DVLA.Data;
+using DVLA.Data.Models.DataObjects.DTOs;
+using DVLA.Data.Models.DataObjects.ViewModels;
+using DVLA.Data.Models.Enumerables;
+using DVLA.DATA.Domains;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NPOI.HPSF;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Transactions;
+
+namespace DVLA.UI.Areas.Registration.Controllers
+{
+    [Area("Registration")]
+    [AllowAnonymous]
+    public class OnlineApplicantController : Controller
+    {
+        //private readonly IAuditRepo _AuditRepo;       
+        private readonly IRepositoryQuery<VisualAssessmentResult> _visualAssessmentResultQuery;
+        private readonly INotificationRepository _notificationRepository;
+        private readonly IRepositoryQuery<OptometristFirm> _optometristFirmQuery;
+        private readonly IReportRepository _reportRepository;
+        private readonly ISmsRepository _smsRepository;
+        private IVisualAssessmentResultRepository _visualAssessmentResultRepository;
+        private readonly IRepositoryQuery<Region> _regionQuery;
+        private readonly IRepositoryQuery<District> _districtQuery;
+        private readonly ILogger<OnlineApplicantController> _logger;
+        private readonly IWebHostEnvironment _environment;
+        private readonly HttpClient client;
+
+        // GET: OnlineApplicant/Applicant
+        public OnlineApplicantController(/*IAuditRepo AuditRepo,*/ IRepositoryQuery<VisualAssessmentResult> applicantQuery, IRepositoryQuery<Region> regionQuery,
+            INotificationRepository notificationRepository, IReportRepository reportRepository, ISmsRepository smsRepository, IVisualAssessmentResultRepository visualAssessmentResultRepository,
+            IRepositoryQuery<OptometristFirm> optometristFirmQuery, IRepositoryQuery<District> districtQuery, ILogger<OnlineApplicantController> logger, IWebHostEnvironment environment)
+        {
+            //_AuditRepo = AuditRepo;
+            _visualAssessmentResultQuery = applicantQuery;
+            _notificationRepository = notificationRepository;
+            _reportRepository = reportRepository;
+            _smsRepository = smsRepository;
+            _visualAssessmentResultRepository = visualAssessmentResultRepository;
+            _optometristFirmQuery = optometristFirmQuery;
+            _districtQuery = districtQuery;
+            _regionQuery = regionQuery;
+            client = new HttpClient();
+            _logger = logger;
+            _environment = environment;
+        }
+
+        // GET: Admin/Optometrist
+
+        [HttpGet]
+        public ActionResult Create()
+        {
+           
+            ViewBag.OptometristFirms = _optometristFirmQuery.GetAll().Where(x => x.IsActive).OrderBy(p => p.BusinessName).ToList();
+            return View(new ApplicantModel());
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Create(ApplicantModel model)
+        {
+            try
+            {
+               
+               ViewBag.OptometristFirms = _optometristFirmQuery.GetAll().Where(x => x.IsActive).OrderBy(p => p.BusinessName).ToList();
+
+                string[] dob = model.DateOfBirth != null ? model.DateOfBirth.Split('-') : null;
+                model.DOB = dob != null ? new DateTime(Convert.ToInt32(dob[0]), Convert.ToInt32(dob[1]), Convert.ToInt32(dob[2])) : model.DOB;
+                
+                
+
+                if (model.ResultServiceType == null)
+                {
+                    ModelState.AddModelError("ResultServiceType", "Please select service type");
+                }
+
+                if (model.ResultServiceType != null)
+                {
+                    if (model.ResultServiceType == ResultServiceType.LearnerDriversLicence)
+                    {
+                        if (model.LearnerDriversLicence == null)
+                        {
+                            ModelState.AddModelError("LearnerDriversLicence", "Please select learner licence type");
+                        }
+                    }
+                }
+
+                if (string.IsNullOrEmpty(model.PassportImageUrl) && (model.Image==null || model.Image.Length==0))
+                {
+                    ModelState.AddModelError("PassportImageUrl", "Please capture/upload passport");
+                }
+
+                //if (model.NameTitle == null)
+                //{
+                //    ModelState.AddModelError("NameTitle", "Please select name title");
+                //}
+
+                if (string.IsNullOrEmpty(model.Surname))
+                {
+                    ModelState.AddModelError("Surname", "Please enter surname");
+                }
+
+                if (string.IsNullOrEmpty(model.FirstName))
+                {
+                    ModelState.AddModelError("FirstName", "Please enter first name");
+                }
+
+                if (model.DOB == null)
+                {
+                    ModelState.AddModelError("DOB", "Please select DOB");
+                }
+
+                if (string.IsNullOrEmpty(model.PostalAddress))
+                {
+                    ModelState.AddModelError("PostalAddress", "Please enter postal address");
+                }
+
+                if (model.OptometristFirmId == 0)
+                {
+                    ModelState.AddModelError("OptometristFirmId", "Please select Optometrist Firm");
+                }
+
+                if (string.IsNullOrEmpty(model.ContactNumber))
+                {
+                    ModelState.AddModelError("ContactNumber", "Please enter contact number");
+                }
+
+                //if (string.IsNullOrEmpty(model.TaxIdentificationNumber))
+                //{
+                //    ModelState.AddModelError("TaxIdentificationNumber", "Please enter tax identification number");
+                //}
+
+                if (!ModelState.IsValid)
+                {
+                    TempData["ErrorMessage"] = ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage).FirstOrDefault();
+                    return View(model);
+                }
+
+
+
+
+                //var user = UserManager.FindByEmail(model.Email);
+                //if (user != null)
+                //{
+                //    TempData["MESSAGE"] = new AlertMessage { Message = "User already exist", MessageType = MessageType.ErrorMessage };
+                //}
+                string filename = Guid.NewGuid().ToString();
+                if (!string.IsNullOrEmpty(model.PassportImageUrl))
+                {
+                    model.PassportImageUrl = model.PassportImageUrl.Substring(model.PassportImageUrl.IndexOf(',') + 1);
+                    byte[] imageBytes = Convert.FromBase64String(model.PassportImageUrl);
+
+
+                    var contents = new MemoryStream(imageBytes);
+
+
+                    // store the file inside ~/project folder(Img)  
+                    var path = Path.Combine(_environment.ContentRootPath, "wwwroot", "Passports", filename + ".png");
+                    string directory = Path.GetDirectoryName(path);
+                    if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+
+                    Utility.ResizePicture(contents, path);
+                    System.IO.File.WriteAllBytes(path, imageBytes);
+                    model.PassportImageUrl = filename + ".png";
+                }
+                else
+                {
+                    string extension = Path.GetExtension(model.Image.FileName);
+                    var path = Path.Combine(_environment.ContentRootPath, "wwwroot", "Passports", filename + extension);
+                    string directory = Path.GetDirectoryName(path);
+                    if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+
+                    FileStream fs = new FileStream(path, FileMode.Create);
+                    await model.Image.CopyToAsync(fs);
+
+                    model.PassportImageUrl = Path.GetFileName(path);
+                }
+
+                string formNumber = _visualAssessmentResultRepository.GenerateFormNo();
+
+                var applicant = new VisualAssessmentResult()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Id = model.Id,
+                        NameTitle = model.NameTitle,
+                        Surname = model.Surname,
+                        DriversLicence = model.DriversLicence,
+                        DVLAReferenceNo = model.DVLAReferenceNo,
+                        OldDVLAReferenceNo = model.InvoiceNumber,
+                        LearnerDriversLicence = model.LearnerDriversLicence,
+                        OptometristFirmId = model.OptometristFirmId,
+                        ResultServiceType = model.ResultServiceType,
+                    AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
+                        PassportImageUrl = model.PassportImageUrl,
+                        TestType = model.TestType,
+                        Status = Status.InProgress,
+                        FirstName = model.FirstName,
+                        OtherName = model.OtherName,
+                        DOB = (DateTime)model.DOB,                       
+                        PostalAddress = model.PostalAddress,
+                        ContactNumber = model.ContactNumber,
+                        FormNumber = formNumber,
+                        TaxIdentificationNumber = model.TaxIdentificationNumber,
+                        Email = model.Email,
+                        IsRegistration = true,
+                        CreatedBy = "System"
+                    };
+
+                    if (model.LearnerDriversLicence != null) model.LearnerDriversLicence = model.LearnerDriversLicence;
+                    _visualAssessmentResultQuery.Add(applicant);
+
+
+
+                await _smsRepository.SendRegistrationDetail(model.FirstName, model.ContactNumber, formNumber);
+                //send email
+                await _notificationRepository.SendRegistrationDetail(model.FirstName, model.ContactNumber, formNumber, model.Email);
+
+
+
+                TempData["SuccessMessage"] = "Record saved successfully";
+                //_AuditRepo.AddAudit(Activities.CREATE_VISUAL_ASSESSMENT_RESULT, "Create Visual Assessment Registration");
+
+
+                return RedirectToActionPermanent(nameof(Confirmation), new { token = Utility.Encrypt(applicant.Id.ToString()) });
+
+
+                
+            }
+            catch (Exception ex)
+            {
+                model.Errors.Add("Kindly try again later");
+                _logger.LogError(ex.Message, ex);
+            }
+            return View(model);
+        }
+
+        public ActionResult Confirmation(string token)
+        {
+            try
+            {
+
+                //await _smsRepository.SendPendingSms();
+
+                ViewBag.OptometristFirms = _optometristFirmQuery.GetAll().ToList();
+
+
+                Int64 applicanId = Convert.ToInt64(Utility.Decrypt(token));
+                var applicant = _visualAssessmentResultQuery.Filter(x => x.Id == applicanId).FirstOrDefault();              
+
+                var model = new VisualAssessmentPrintResultViewModel();
+                model.Id = applicant.Id;
+                //model.NameTitle = Enum.GetName(typeof(NameTitle), applicant.NameTitle); ;             
+                model.Surname = applicant.Surname;
+                model.DriversLicence = applicant.DriversLicence;
+                model.DVLAReferenceNo = applicant.DVLAReferenceNo;
+                model.FirstName = applicant.FirstName;
+                model.OtherName = applicant.OtherName;
+                model.DOB = (DateTime)applicant.DOB;
+                model.PostalAddress = applicant.PostalAddress;
+                model.ContactNumber = applicant.ContactNumber;
+                model.TaxIdentificationNumber = applicant.TaxIdentificationNumber;
+                model.Email = applicant.Email;
+                model.ResultServiceType = Enum.GetName(typeof(ResultServiceType), applicant.ResultServiceType);
+                model.LearnerDriversLicence = applicant.LearnerDriversLicence != null ? Enum.GetName(typeof(LearnerDriversLicenceType), applicant.LearnerDriversLicence) : "";
+                model.PassportImageUrl = applicant.PassportImageUrl;
+                model.Status = applicant.Status;
+                model.OptometristFirmId = applicant.OptometristFirmId;
+                model.FormNumber = applicant.FormNumber;
+                model.TestType = Enum.GetName(typeof(TestType), applicant.TestType); ;
+                model.OldDVLAReferenceNo = applicant.OldDVLAReferenceNo;
+             
+
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                
+            }
+
+            return View(new VisualAssessmentPrintResultViewModel());
+        }
+             
+    
+
+        public int GetResultServiceType(string serviceType)
+        {
+            int resultService = 0;
+            switch (serviceType.Trim().ToUpper())
+            {
+                case "LEARNER DRIVER’S LICENCE":
+                    resultService = 1;
+                    break;
+                case "RENEWAL OF DRIVER’S LICENCE":
+                    resultService = 2;
+                    break;
+                case "REPLACEMENT OF DRIVER’S LICENCE":
+                    resultService = 3;
+                    break;
+                case "UPGRADE OF DRIVER’S LICENCE":
+                    resultService = 4;
+                    break;
+                case "ACCIDENT REPORT":
+                    resultService = 5;
+                    break;
+                default:
+                    break;
+            }
+            return resultService;
+        }
+
+        //[HttpPost]
+        //public async Task<JsonResult> GetApplicantDetailAsync(string refno)
+        //{
+        //    ApplicantModel applicant = new ApplicantModel();
+        //    try
+        //    {
+                
+
+        //        GenesysClient g = new GenesysClient();
+        //        var msg = await g.GetApplicantDetail(refno);
+
+
+
+        //        if (msg != null && msg.code == "00")
+        //        {
+        //            string filename = Guid.NewGuid().ToString() + ".png";
+        //            string path = Server.MapPath("~/Passports/") + filename;
+        //            //flpPassport.PostedFile.SaveAs(Server.MapPath("~/passports/temp/") + filename);
+        //            //Uri myUri = new Uri(msg.data.photo, UriKind.Absolute);
+        //            using (WebClient webClient = new WebClient())
+        //            {
+        //                byte[] dataArr = webClient.DownloadData(msg.data.photo);
+        //                //save file to local
+        //                var contents = new MemoryStream(dataArr);
+        //                BUSINESS.BusinessUtility.Utility.ResizePicture(contents, path);
+        //            }
+
+        //            string[] fullname = msg.data.fullName.Split(' ');
+
+        //            byte[] imageArray = System.IO.File.ReadAllBytes(path);
+                    
+
+        //            applicant = new ApplicantModel
+        //            {
+        //                DriversLicence = refno,                        
+        //                Surname = fullname[1],
+        //                FirstName = fullname[0], 
+        //                PassportImageUrl = Convert.ToBase64String(imageArray),
+        //                Filename = filename
+        //            };
+
+                   
+
+        //            return Json(applicant, JsonRequestBehavior.AllowGet);
+        //        }               
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ErrorLogManager.Error(ex);
+        //    }
+        //    return Json(applicant, JsonRequestBehavior.AllowGet);
+        //}
+
+     
+    }
+}

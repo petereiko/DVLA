@@ -1,0 +1,326 @@
+﻿@using DVLA.Data.Models.DataObjects.ViewModels
+@using Microsoft.AspNetCore.Http
+@model AdminSlotRequestViewModel
+@{
+    ViewData["Title"] = "Slot Requests";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string queryString = Context.Request.Query["status"];
+    int status = 0;
+    string statusName = string.Empty;
+    if (!string.IsNullOrEmpty(queryString))
+    {
+        int output;
+
+        bool isnumeric = int.TryParse(queryString, out output);
+        if (isnumeric)
+        {
+            status = output;
+        }
+    }
+    if (status == 1) { statusName = "Pending Access"; }
+    else if (status == 2) { statusName = "Openend Access"; }
+    else if (status == 3) { statusName = "Approved Access"; }
+    else if (status == 4) { statusName = "Rejected Access"; }
+}
+
+
+<div class="datatables">
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">Slot Requests</h4>
+            </div>
+
+            <div class="section-wrapper">
+                @if (status != 0)
+                {
+                    if (Model.Slots.Count() > 0)
+                    {
+                        using (Html.BeginForm("SlotRequest", "SlotManagement", new { status = queryString }, FormMethod.Post))
+                        {
+                            <table>
+                                <tr>
+                                    <td>Show</td>
+                                    <td><input type="number" class="form-control" asp-for="parameter.length" placeholder="No of Records" style="width:120px;" /></td>
+                                    <td><input type="submit" value="entries" class="btn btn-primary btn-sm" /></td>
+                                </tr>
+                            </table>
+                        }
+                        <br />
+                        <partial name="_Slots" model="Model.Slots" />
+                    }
+                    else
+                    {
+                        <div class="text-danger">Sorry! No record was found for @statusName</div>
+                    }
+                }
+                @* else
+                {
+                <div class="text-danger">You've tempered with the query string</div>
+                } *@
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modal-evidence" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Evidence of Payment</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="mycontainer">
+                    <iframe id="evidence-container" frameborder="0" allowfullscreen class="mycontent"></iframe>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-reject-reason" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Reason</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label>Reason:</label>
+
+                        @Html.TextArea("Reason", new { @class = "form-control" })
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
+                <button type="button" onclick="DeleteRequestNow()" class="btn btn-primary"><i class="fa fa-save"></i> Decline</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- end Basic Form -->
+@section Scripts {
+    @if (Model.Errors.Any())
+    {
+        <script>
+            Swal.fire({
+                title: 'Error',
+                text: '@Model.Errors.FirstOrDefault()',
+                type: 'error'
+            });
+        </script>
+    }
+
+    <script>
+        $(function () {
+            $('#RegionId').change(function () {
+                let regionId = $(this).val();
+                if (regionId == '') {
+                    $('#DistrictId').empty();
+                    let html = '<option value="">Select District</option>';
+                    $('#DistrictId').html(html);
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("GetDistrictsByRegion", "Location")?regionId=' + regionId,
+                    type: 'get',
+                    dataType: 'json',
+                    success: function (response) {
+                        $('#DistrictId').empty();
+                        let html = '<option value="">Select District</option>';
+                        $.each(response, function (index, val) {
+                            html += `<option value='${val.value}'>${val.text}</option>`;
+                        });
+                        $('#DistrictId').html(html);
+                    },
+                    error: function (err) {
+                        console.log(err.responseText);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Could not load Districts at this time. Please try again later',
+                            icon: 'error'
+                        });
+                    }
+                })
+            })
+        })
+
+        function PreviewRequest(id, proof) {
+            var obj = {
+                id: id
+            };
+            $.ajax({
+                url: '@Url.Action("Preview", "SlotManagement", new { area = "admin" })?id='+id,
+                type: 'get',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(obj),
+                success: function (response) {
+                    console.log(response);
+                    if (response.success) {
+                        //swal({
+                        //    title: 'Success!',
+                        //    text: response.message,
+                        //    type: 'success'
+                        //});
+                        $('#modal-evidence').modal('show');
+                        var src = '@Url.Content("~/AppFile/SlotPaymentEvidence")/' + proof;
+                        console.log(src);
+                        $('#evidence-container').prop('src', '@Url.Content("~/AppFile/SlotPaymentEvidence")/' + proof);
+                        //window.location.href = '@Url.Content("~/AppFile/SlotPaymentEvidence")/' + proof;
+                    }
+                    else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: response.message,
+                            type: 'error'
+                        });
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        function ApproveRequest(id) {
+            var obj = {
+                id: id
+            };
+
+            Swal.fire({
+                title: "Approve Access Request",
+                text: "Are you sure you want to Approve this request? Once approved, the action cannot be reversed",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, Approve it!",
+                closeOnConfirm: true
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        url: '@Url.Action("Approve", "SlotManagement", new { area = "admin" })?id='+id,
+                        type: 'get',
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (response) {
+                            if (response.status) {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: response.message,
+                                    type: 'success'
+                                });
+                            }
+                            else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: response.message,
+                                    type: 'error'
+                                });
+                            }
+
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1000);
+                        },
+                        error: function (err) {
+                            console.log(err);
+                        }
+                    });
+                }
+            });
+        }
+
+        function RejectRequest(id) {
+            Swal.fire({
+                title: "Decline Access Request",
+                text: "Are you sure you want to decline this request. Once declined, the action cannot be reversed",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes, decline it!",
+                closeOnConfirm: true
+            }).then((result) => {
+                if (result.value) {
+                    sessionStorage.setItem('RequestID', id);
+
+                    $('#modal-reject-reason').modal('show');
+                }
+            });
+        }
+
+        function DeleteRequestNow() {
+            var id = sessionStorage.getItem('RequestID');
+            var reason = $('#Reason').val();
+
+            if (reason == '') {
+                $('#Reason').focus();
+                return;
+            }
+            var obj = {
+                id: id,
+                reason: reason
+            };
+
+
+            $.ajax({
+                url: '@Url.Action("Reject", "SlotManagement", new { area = "admin" })',
+                type: 'post',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(obj),
+                success: function (response) {
+                    if (response.success) {
+                        $('#modal-reject-reason').modal('hide');
+                        Swal.fire({
+                            title: 'Success!',
+                            text: response.message,
+                            type: 'success'
+                        });
+                    }
+                    else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: response.message,
+                            type: 'error'
+                        });
+                    }
+
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+        }
+    </script>
+
+
+}
+
+
+
+
+
+

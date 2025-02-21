@@ -1,0 +1,112 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.DataObjects.ViewModels
+@model TestAnalysisViewModel
+@{
+    ViewBag.Title = "Test Analysis";
+    int counter = 0;
+}
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="section-wrapper">
+
+                <form asp-action="TestAnalysis" asp-controller="SlotManagement" method="post">
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <select asp-for="OptometristFirmId" class="form-control">
+                                    <option>Select Optometrist Firm</option>
+                                    @foreach (var item in Model.OptometristFirms)
+                                    {
+                                        <option>@item.BusinessName</option>
+                                    }
+                                </select>
+                                <label for="OptometristFirmId">Optometric Firm</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" asp-for="StartDate" autocomplete="off" class="form-control mydate" data-date-format="dd-mm-yyyy" />
+                                <label for="StartDate">Start Date</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" asp-for="EndDate" autocomplete="off" class="form-control mydate" data-date-format="dd-mm-yyyy" />
+                                <label for="EndDate">End Date</label>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="d-md-flex align-items-center">
+
+                                <div class="ms-auto mt-3 mt-md-0">
+                                    <button type="submit" class="btn btn-primary hstack gap-6">
+                                        Search
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <br />
+                <div>Total Access Used: <b>@Model.SlotUsages.Count()</b></div>
+                <div class="table-responsive">
+                    <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                        <thead>
+                            <tr>
+                                <th>
+                                    #
+                                </th>
+                                <th>
+                                    Optometrist
+                                </th>
+                                <th>Frequency</th>
+                                <th>
+                                    Region
+                                </th>
+                                <th>
+                                    Test Date
+                                </th>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            @foreach (TestAnalysisModel item in Model.SlotUsages)
+                            {
+                                counter = counter + 1;
+                                <tr>
+                                    <td>
+                                        @counter
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.BusinessName)
+                                    </td>
+                                    <td>@Html.DisplayFor(modelItem => item.Metric)</td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Region)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.TestDate)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts {
+    <script>
+        $(".mydate").datepicker({
+            format: 'dd-mm-yyyy'
+        });
+    </script>
+}

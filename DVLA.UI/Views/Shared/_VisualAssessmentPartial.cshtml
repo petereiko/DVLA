@@ -1,0 +1,55 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.ViewModels
+@model IEnumerable<VisualAssessmentResultItemViewModel>
+
+@{
+    int counter = 0;
+}
+
+
+<table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+    <thead>
+        <tr>
+            <th class="width-10px text-center">#</th>
+            <th>Names</th>
+            <th>Address</th>
+            <th>Company</th>
+            <th>DS Reference</th>
+            <th>Test Date</th>
+            <th>Grade</th>
+            <th></th>
+        </tr>
+
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            counter = counter + 1;
+            <tr>
+                <td>
+                    @counter
+                </td>
+                <td><span>@item.ApplicantName </span></td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ApplicantAddress)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OptometristFirmName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DSReference)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TestDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Grade)
+                </td>
+
+                <td>
+                    <a href="@Url.Action("VisualAssessmentResult","Detail", new { token=Utility.Encrypt(item.Id.ToString())})">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

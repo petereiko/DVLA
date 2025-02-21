@@ -1,0 +1,678 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.ViewModels
+@using DVLA.Data.Models.Enumerables
+@{
+    ViewBag.Title = "Visual Assessment Results";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model VisualAssessmentResultViewModel
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">Visual Assessment Results</h4>
+            </div>
+            <div id="DivIdToPrint">
+                <div class="card form-card">
+                    <div class="card-body">
+
+                        <div class="container">
+                            <br />
+                            <div id="loading" style="display: none;">
+                                <table style="height: 100%; border: 0; width: 100%; position: fixed; top: 0; left: 0; background-color: #FAFAFA; opacity: 0.8; filter: alpha(opacity=80); z-index: 9000;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 100%; text-align:center; vertical-align : middle;">
+                                                <div id="Loadingtext" style="font-family: Arial; font-size: 24px; opacity: 1; filter: alpha(opacity=100); font-weight: bold; color: #000000; text-align: center; padding-top: 5px;"><img src="//i.stack.imgur.com/FhHRx.gif" />&nbsp;Please wait...</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4" style="padding:0px">
+                                    <video id="video" autoplay style="height: 200px;clip-path: inset(0px 20px 0px 20px); border:1px solid black"></video>
+                                    <button onclick="Capture()" style="margin-left:20px" id="capture" class="btn btn-primary">Capture</button>
+                                </div>
+                                <div class="col-sm-4" style="padding:0px">
+                                    <canvas id="canvas" width="200" height="200" />
+                                    <img src="" hidden id="photo" style="height: 200px; width:200px; border:1px solid black" />
+
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <form asp-action="Create" method="post" enctype="multipart/form-data" id="target">
+                            <div class="container">
+                                @if (Model.Errors.Any())
+                                {
+                                    <div class="alert alert-danger">@Model.Errors.FirstOrDefault()</div>
+                                }
+                                
+
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        Upload Image
+                                        <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                            @Html.TextBoxFor(m => m.Image, new { @class = "form-control", type = "file", accept = "image/jpeg", onchange = "handleImage(e)" })
+                                            @Html.ValidationMessageFor(m => m.Image, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+                            </div>
+
+
+
+                            <input type="hidden" asp-for="PassportImageUrl" />
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="ActionType" />
+                            <input type="hidden" asp-for="Action" />
+                            <input type="hidden" asp-for="Status" />
+                            <input type="hidden" asp-for="ReferenceNumber" />
+
+                            <div class="container">
+
+                                <div class="row row-xs mg-b-10">
+                                    @* <div class="col-sm">
+                                    DVLA Invoice Number
+                                    @Html.TextBoxFor(model => model.OldDVLAReferenceNo, new { @class = "form-control", @autocomplete = "off" })
+                                    </div> *@
+                                    <div class="col-sm">
+                                        Service Type
+                                        <select asp-for="ResultServiceType" class="form-control" asp-items="Html.GetEnumSelectList<ResultServiceType>()">
+                                            <option>Select Service Type</option>
+                                        </select>
+                                        @Html.ValidationMessageFor(model => model.ResultServiceType, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-sm">
+                                        <div id="LearnerType" style="display:@(Model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? "block" : "none")">
+                                            Learner Driver's Licence Type
+                                            <select asp-for="LearnerDriversLicence" class="form-control" asp-items="Html.GetEnumSelectList<LearnerDriversLicenceType>()">
+                                                <option>Select Type</option>
+                                            </select>
+                                            @* @Html.DropDownList("LearnerDriversLicence", EnumHelper.GetSelectList(typeof(LearnerDriversLicenceType)), "Select Type", new { @style = "width:100%;", @class = "form-control", @id = "ddlLearnerType" }) *@
+                                            @Html.ValidationMessageFor(model => model.LearnerDriversLicence, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                @* <div class="row row-xs mg-b-10">
+                                <div class="col-sm">
+                                Test Type
+                                <select asp-for="TestType" class="form-control" asp-items="Html.GetEnumSelectList<TestType>()">
+                                </select>
+                                @Html.ValidationMessageFor(model => model.TestType, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-sm">
+                                Licence Number
+                                @Html.TextBoxFor(model => model.DriversLicence, new { @class = "form-control", @autocomplete = "off" })
+                                @Html.ValidationMessageFor(model => model.DriversLicence, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-sm mg-t-10 mg-sm-t-0">
+                                DVLA Reference Number
+                                @Html.TextBoxFor(model => model.DVLAReferenceNo, new { @class = "form-control", @autocomplete = "off" })
+                                @Html.ValidationMessageFor(model => model.DVLAReferenceNo, "", new { @class = "text-danger" })
+                                </div>
+
+                                </div> *@
+                                <div class="row row-xs mg-b-10">
+                                    @if (Model != null)
+                                    {
+                                        if (Model.Id != null && Model.Id != 0)
+                                        {
+                                            <div class="col-sm mg-t-10 mg-sm-t-0">
+                                                Reference Number
+                                                <div class="form-control">
+                                                    <span id="HX_BCV_OU">
+                                                        @Html.DisplayFor(model => model.ReferenceNumber)
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                        }
+                                    }
+                                    <div class="col-sm-8">
+                                    </div>
+                                </div>
+                                <div id="DetailsOfApplicant">
+                                    <ul class="nav nav-tabs" id="DetailsOfApplicantTab">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-toggle="tab">Details of Applicant</a>
+                                        </li>
+
+                                    </ul>
+
+                                    <div class="tab-content mb-4">
+                                        <div class="tab-pane active" id="DetailsTab">
+
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    Surname
+                                                    @Html.TextBoxFor(model => model.Surname, new { @class = "form-control", @autocomplete = "off" })
+
+                                                    @Html.ValidationMessageFor(model => model.Surname, "", new { @class = "text-danger" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    First Name
+                                                    @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @autocomplete = "off" })
+
+                                                    @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                                                </div>
+                                                <div class="col-sm mg-t-10 mg-sm-t-0">
+                                                    Other Name
+                                                    @Html.TextBoxFor(model => model.OtherName, new { @class = "form-control", @autocomplete = "off" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    Date of Birth (DD/MM/YYYY)
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control" asp-for="DOB" autocomplete="off" data-date-format="dd/mm/yyyy" />
+                                                        <div class="input-group-addon">
+                                                            <span class="glyphicon glyphicon-th"></span>
+                                                        </div>
+                                                    </div>
+                                                    @Html.ValidationMessageFor(model => model.DOB, "", new { @class = "text-danger" })
+                                                    @Html.HiddenFor(model => model.DateOfBirth)
+                                                </div>
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    Digital/Residential Address
+
+                                                    @Html.TextAreaFor(model => model.PostalAddress, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.PostalAddress, "", new { @class = "text-danger" })
+
+                                                </div>
+
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    Contact Number
+                                                    @Html.TextBoxFor(model => model.ContactNumber, new { @class = "form-control", @autocomplete = "off" })
+                                                    @Html.ValidationMessageFor(model => model.ContactNumber, "", new { @class = "text-danger" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    Tax Identification Number (TIN)
+                                                    @Html.TextBoxFor(model => model.TaxIdentificationNumber, new { @class = "form-control", @autocomplete = "off" })
+                                                    @*@Html.ValidationMessageFor(model => model.TaxIdentificationNumber, "", new { @class = "text-danger" })*@
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    Email (if applicable)
+                                                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @autocomplete = "off" })
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div id="ImportPermit">
+                                    <ul class="nav nav-tabs" id="ImportPermitApplicationTab">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" href="#DetailsTab" data-toggle="tab">Visual Tests</a>
+                                        </li>
+
+                                    </ul>
+
+                                    <div class="tab-content mb-4">
+                                        <div class="tab-pane active" id="DetailsTab">
+                                            <div class="row">
+                                                <div class="col-sm mt-2">
+                                                    <h5>1.	VISUAL ACUITY (Required)</h5>
+                                                    <hr />
+
+                                                </div>
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    UNAIDED OD
+                                                    @Html.DropDownList("Unaided_OD", (SelectList)ViewBag.VisualAcuity, "", new { @style = "width:100%;", @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.Unaided_OD, "", new { @class = "text-danger" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    UNAIDED OS
+                                                    @Html.DropDownList("Unaided_OS", (SelectList)ViewBag.VisualAcuity, "", new { @style = "width:100%;", @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.Unaided_OS, "", new { @class = "text-danger" })
+
+                                                </div>
+                                                @* <div class="col-sm mg-t-10 mg-sm-t-0">
+                                                UNAIDED OU
+                                                @Html.DropDownList("Unaided_OU", (SelectList)ViewBag.VisualAcuity, "", new { @style = "width:100%;", @class = "form-control" })
+                                                @Html.ValidationMessageFor(model => model.Unaided_OU, "", new { @class = "text-danger" })
+
+                                                </div> *@
+
+                                            </div>
+
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    BCV OD
+                                                    @Html.DropDownList("BCV_OD", (SelectList)ViewBag.VisualAcuity, "", new { @style = "width:100%;", @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.BCV_OD, "", new { @class = "text-danger" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    BCV OS
+                                                    @Html.DropDownList("BCV_OS", (SelectList)ViewBag.VisualAcuity, "", new { @style = "width:100%;", @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.BCV_OS, "", new { @class = "text-danger" })
+
+                                                </div>
+                                                <div class="col-sm mg-t-10 mg-sm-t-0">
+                                                    BCV OU
+                                                    @Html.DropDownList("BCV_OU", (SelectList)ViewBag.VisualAcuity, "", new { @style = "width:100%;", @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.BCV_OU, "", new { @class = "text-danger" })
+
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm mt-2">
+                                                    <h5>2.	VISUAL FIELD (Required)</h5>
+                                                    <hr />
+                                                </div>
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    HX BCV OD°
+                                                    @Html.DropDownList("HX_BCV_OD", (SelectList)ViewBag.VisualFieldScores, "", new { @style = "width:100%;", @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.HX_BCV_OD, "", new { @class = "text-danger" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    HX BCV OS°
+                                                    @Html.DropDownList("HX_BCV_OS", (SelectList)ViewBag.VisualFieldScores, "", new { @style = "width:100%;", @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.HX_BCV_OS, "", new { @class = "text-danger" })
+
+                                                </div>
+                                                @*<div class="col-sm mg-t-10 mg-sm-t-0">
+                                                HX BCV OU°
+                                                <div class="form-control">
+                                                <span id="HX_BCV_OU">
+                                                OD + OS
+                                                </span>
+                                                </div>
+                                                </div>*@
+
+                                                <script>
+                                                    function Compute() {
+                                                        debugger;
+                                                        var left = document.getElementById('HX_BCV_OD').value;
+                                                        var right = document.getElementById('HX_BCV_OS').value;
+                                                        console.log('!isNaN(left) = ' + !isNaN(left));
+                                                        console.log('!isNaN(right) = ' + !isNaN(right));
+                                                        if (left != "" && right != "") {
+                                                            var result = parseInt(left) + parseInt(right);
+                                                            document.getElementById('HX_BCV_OU').innerHTML = result.toString();
+                                                        }
+                                                        else {
+                                                            document.getElementById('HX_BCV_OU').innerHTML = " ";
+                                                        }
+                                                    }
+                                                </script>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm mt-2">
+                                                    <h5>3.	CONTRAST SENSITIVITY (Optional)</h5>
+                                                    <hr />
+                                                </div>
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    SINGLE IMAGE (BCV) OU
+                                                    @Html.DropDownList("SingleImage_BCV_OU", (SelectList)ViewBag.SingleImage, "", new { @style = "width:100%;", @class = "form-control" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                </div>
+                                                <div class="col-sm mg-t-10 mg-sm-t-0">
+                                                </div>
+
+                                            </div>
+
+                                            @*<div class="row row-xs mg-b-10 mt-2">
+
+                                            <div class="col-sm">
+                                            <h5>4.	CONTRAST SENSITIVITY BCV (Optional) </h5>
+                                            <hr />
+                                            @Html.TextAreaFor(model => model.ContrastSensitivity_BCV, new { @class = "form-control", @placeholder = "Please type in your observation(s)" })
+
+                                            </div>
+
+                                            </div>*@
+                                            <div class="row">
+                                                <div class="col-sm mt-2">
+                                                    <h5>4.	GLARE TEST (Optional)</h5>
+                                                    <hr />
+                                                </div>
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+
+                                                @*<div class="col-sm">
+                                                BCV OD
+                                                @Html.DropDownList("GlareTest_BCV_OD", (SelectList)ViewBag.VisualAcuity, "", new { @style = "width:100%;", @class = "form-control" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                BCV OS
+                                                @Html.DropDownList("GlareTest_BCV_OS", (SelectList)ViewBag.VisualAcuity, "", new { @style = "width:100%;", @class = "form-control" })
+                                                </div>*@
+                                                <div class="col-sm mg-t-10 mg-sm-t-0">
+                                                    BCV OU
+                                                    @Html.DropDownList("GlareTest_BCV_OU", (SelectList)ViewBag.SingleImage, "", new { @style = "width:100%;", @class = "form-control" })
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm mt-2">
+                                                    <h5>5.	COLOUR VISION (Optional)</h5>
+                                                    <hr />
+                                                </div>
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    BCV OU
+
+                                                    @Html.DropDownList("ColourVision_BCV_OU", (SelectList)ViewBag.ColourVisionScores, "", new { @style = "width:100%;", @class = "form-control" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                </div>
+                                                <div class="col-sm mg-t-10 mg-sm-t-0">
+                                                </div>
+
+                                            </div>
+
+                                            <div class="row row-xs mg-b-10 mt-2">
+
+                                                <div class="col-sm">
+                                                    <h5>6.	PATHOLOGICAL REMARKS (Required)</h5>
+                                                    <hr />
+                                                    @Html.TextAreaFor(model => model.PathologicalRemarks, new { @class = "form-control", @placeholder = "Please type in your observation(s):" })
+                                                    @Html.ValidationMessageFor(model => model.PathologicalRemarks, "", new { @class = "text-danger" })
+
+                                                </div>
+
+                                            </div>
+                                            <div class="row row-xs mg-b-10 mt-2">
+
+                                                <div class="col-sm">
+                                                    <h5>7.	RESULTS CONCLUSION (Required)</h5>
+                                                    <hr />
+                                                    <select onchange="ChangeResultConclusion(this)" asp-for="ResultConclusion" asp-items="(SelectList)ViewBag.ResultConclusions" style="width:100%;" class="form-control">
+                                                        <option>--Select Conclusion--</option>
+                                                    </select>
+                                                    @* @Html.DropDownListFor(model => model.ResultConclusion, (SelectList)ViewBag.ResultConclusions, "", new { @style = "width:100%;", @class = "form-control" }) *@
+                                                </div>
+
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+                                                <div class="col-sm">
+                                                    <h5>8. RESULTS BASED ON CONCLUSION(S) ABOVE  (Required)</h5>
+                                                    <hr />
+                                                </div>
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    <select asp-for="PassOrFail" class="form-control" asp-items="Html.GetEnumSelectList<PassOrFail>()" disabled>
+                                                        @* <option value="">Select pass type</option> *@
+                                                    </select>
+                                                    @* @Html.DropDownList("PassOrFail", EnumHelper.GetSelectList(typeof(PassOrFail)), "", new { @style = "width:100%;", @class = "form-control" }) *@
+                                                    @Html.ValidationMessageFor(model => model.PassOrFail, "", new { @class = "text-danger" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    <select asp-for="PassResult" asp-items="EnumExtensions.GetEnumSelectListWithDescriptions<PassResult>()" style="display:none" class="form-control">
+                                                        @* <option>Select Pass Type</option> *@
+                                                    </select>
+                                                    @Html.ValidationMessageFor(model => model.PassResult, "", new { @class = "text-danger" })
+
+                                                </div><div class="col-sm"></div><div class="col-sm"></div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12 mb-2">
+                                        <div class="row">
+                                            <div class="col-lg-6 text-left">
+                                                <a href="@Url.Action("Index","VisualAssessmentResult")" class="btn btn-secondary">Back to Application List</a>
+
+
+                                            </div>
+                                            <div class="col-lg-6 text-right">
+
+                                                @if (Model == null)
+                                                {
+
+                                                    <input type="submit" id="btnSave" class="btn btn-primary" value="Save & Continue" />
+                                                    <input type="submit" id="btnSubmit" class="btn btn-primary" value="Finalize & Submit" />
+
+                                                }
+                                                else
+                                                {
+                                                    if (Model.Status == Status.InProgress || Model.Status == null)
+                                                    {
+
+                                                        <input type="submit" id="btnSave" class="btn btn-primary" value="Save & Continue Later" />
+                                                        <input type="submit" id="btnSubmit" class="btn btn-primary" value="Finalize & Submit" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <button onclick="printDiv()" type="button" class="btn btn-primary">Print Result</button>
+                                                    }
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+
+    <script>
+        $(function () {
+
+            $("#DOB").datepicker({
+                dateFormat: "dd-mm-yyyy"
+            });
+
+
+            let currentYear = (new Date).getFullYear();
+            let currentMonth = (new Date).getMonth();
+            let currentDay = (new Date).getDate();
+
+            $('#DOB').on('changeDate', function (e) {
+                var date = e.date;
+                var day = ('0' + date.getDate()).slice(-2);
+                var month = ('0' + (date.getMonth() + 1)).slice(-2);
+                var year = date.getFullYear();
+                $('#DateOfBirth').val(year + '-' + month + '-' + day);
+
+            });
+
+
+            StartCam();
+
+
+            $('#HX_BCV_OD').change(function () {
+
+                if ($('#HX_BCV_OD').val() && $('#HX_BCV_OS').val()) {
+
+                    $('#HX_BCV_OU').val(parseInt($('#HX_BCV_OD').val()) + parseInt($('#HX_BCV_OS').val()));
+                }
+            });
+
+            $('#HX_BCV_OS').change(function () {
+
+                if ($('#HX_BCV_OS').val() && $('#HX_BCV_OD').val()) {
+
+                    $('#HX_BCV_OU').val(parseInt($('#HX_BCV_OD').val()) + parseInt($('#HX_BCV_OS').val()));
+                }
+            });
+
+
+            $('#PassOrFail').change(function () {
+
+                $('#PassResult').empty();
+
+                var id = $('#PassOrFail').val();
+
+                if (id == 2 || id == null || id == '') {
+                    $('#PassResult').empty()
+                    $('#PassResult').hide()
+                    return false;
+                }
+                $('#PassResult').show();
+
+            });
+
+            $('#ResultServiceType').change(function () {
+                var serviceType = $(this).val();
+                if (serviceType == 1) {
+                    $("#LearnerType").css("display", "block");
+                    $('#LearnerDriversLicenceType').rules('add', { required: true, messages: "Learner Drivers Licence Type is required" });
+                } else {
+                    $("#LearnerType").css("display", "none");
+                    $('#LearnerDriversLicenceType').rules('remove', 'required')
+                }
+
+            });
+
+            let isSubmitted = false;
+
+            $('#btnSave').click(function () {
+                $('#ActionType').val('Modify');
+                $('#Action').val('2');
+                $("#target").submit();
+                $(this).val('Submitting.. Please Wait..');
+            });
+
+            $('#btnSubmit').click(function () {
+                $('#ActionType').val('Finalize');
+                $('#Action').val('1');
+                $("#target").submit();
+                $(this).val('Submitting.. Please Wait..');
+            });
+
+
+
+        });
+
+
+        function StartCam() {
+            // Access the webcam
+            const video = document.getElementById("video");
+            video.style.display = "block";
+
+            const photo = document.getElementById("photo");
+            photo.style.display = "none";
+
+            //const canvas = document.getElementById("canvas");
+            //canvas.style.display = "block";
+
+            navigator.mediaDevices
+                .getUserMedia({ video: true })
+                .then((stream) => {
+                    video.srcObject = stream; // Set the stream to the video element
+                })
+                .catch((error) => {
+                    console.error("Error accessing webcam:", error);
+                });
+        }
+
+        function Capture() {
+            let photo = document.getElementById('photo');
+            let video = document.getElementById('video');
+            let canvas = document.getElementById('canvas');
+            // Draw the current frame from the video to the canvas
+            const context = canvas.getContext("2d");
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Get the image data from the canvas as a data URL (base64 encoded image)
+            const imageData = canvas.toDataURL("image/png");
+
+            // Set the captured image as the source of the img element
+            photo.src = imageData;
+
+            //document.getElementById("PassportUrl").value = imageData;
+
+            $('#PassportImageUrl').val(imageData);
+
+            console.log('Image', imageData);
+
+            // Display the captured image
+            photo.style.display = "block";
+
+            //video.style.display = "none";
+        }
+
+        function ChangeResultConclusion(e) {
+            if (e.value == "Fit to drive" || e.value == "Fit to drive with glasses") {
+                $('#PassOrFail').val("1");
+                $('#PassResult').show();
+                load();
+            }
+            else if (e.value = "Not fit to drive") {
+                $('#PassOrFail').val("2");
+                $('#PassResult').hide();
+            }
+            else {
+                $('#PassOrFail').val("");
+                $('#PassResult').hide();
+            }
+        }
+
+        document.getElementById('image').onchange = function (e) {
+
+            const size =
+                (this.files[0].size / 1024 / 1024).toFixed(2);
+
+            if (size > 4) {
+                alert("File must be less than 4 MB");
+                this.value = ''
+                return false
+            }
+
+            var img = new Image();
+            img.onload = draw;
+            img.onerror = failed;
+            img.src = URL.createObjectURL(this.files[0]);
+        };
+
+    </script>
+
+}
+

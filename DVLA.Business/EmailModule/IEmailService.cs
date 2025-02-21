@@ -1,0 +1,18 @@
+﻿using DVLA.Data.Models.DataObjects.DTOs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Mail;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DVLA.Business.EmailModule
+{
+    public interface IEmailService
+    {
+        bool SendEmail(string email, string subject, string message);
+        bool SendEmailWithAttachment(string email, string subject, string message, Attachment attachment);
+        void SendEmailToAllSubscribers(string subject, string message, List<string> emails);
+        Task<bool> LogEmail(EmailLogDto model);
+    }
+}

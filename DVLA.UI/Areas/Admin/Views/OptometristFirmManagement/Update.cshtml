@@ -1,0 +1,187 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.DataObjects.ViewModels
+@model OptometristFirmModel
+@{
+    ViewData["Title"] = "Update";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <!-- ----------------------------------------- -->
+        <!-- 1. Basic Form -->
+        <!-- ----------------------------------------- -->
+        <!-- start Basic Form -->
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Fill Form</h4>
+                <form asp-action="Update" method="post">
+                    
+                    <input type="hidden" asp-for="Id" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="ContactFirstName" placeholder="Enter Contact First Name here" required />
+                                <label for="ContactFirstName">Contact First Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="ContactLastName" placeholder="Enter Contact Last Name here" required />
+                                <label for="ContactLastName">Contact Last Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control" asp-for="ContactEmailAddress" placeholder="name@example.com" required />
+                                <label for="ContactEmail">Email address</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="ContactPhoneNumber" placeholder="Enter Phone here" required />
+                                <label for="ContactPhoneNumber">Phone</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="TelephoneNumber" placeholder="Enter Other Phone here" required />
+                                <label for="TelephoneNumber">Other Phone</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="BusinessName" placeholder="Enter Business Name" required />
+                                <label for="BusinessName">Business Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="BusinessAddress" placeholder="Enter Business Address" required />
+                                <label for="BusinessAddress">Business Address</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <select asp-for="RegionId" class="form-control" asp-items="Model.Regions" required>
+                                    <option value="">Select Region</option>
+                                </select>
+                                <label for="RegionId">Region</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <select asp-for="DistrictId" class="form-control" asp-items="@Model.Districts" required>
+                                    <option value="">Select District</option>
+                                </select>
+                                <label for="DistrictId">District</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="Town" placeholder="Enter Town" required />
+                                <label for="Town">Town</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="DigitalAddress" placeholder="Enter Digital Address" required />
+                                <label for="DigitalAddress">Digital Address</label>
+                            </div>
+                        </div>
+
+                        @* <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="AccreditationNumber" placeholder="Enter Accreditation Number" required />
+                                <label for="AccreditationNumber">Accreditation Number</label>
+                            </div>
+                        </div> *@
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="RegistrationNumber" placeholder="Enter Registration Number" readonly />
+                                <label for="ReorderLevel">Registration Number</label>
+                            </div>
+                        </div>
+
+                        @* <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" asp-for="IsActive" />
+                                    <label class="form-check-label" for="IsActive">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div> *@
+                        <div class="col-12">
+                            <div class="d-md-flex align-items-center">
+
+                                <div class="ms-auto mt-3 mt-md-0">
+                                    <button type="submit" class="btn btn-primary hstack gap-6">
+
+                                        Submit
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- end Basic Form -->
+    @section Scripts {
+        @if (Model.Errors.Any())
+        {
+            <script>
+                Swal.fire({
+                    title: 'Error',
+                    text: '@Model.Errors.FirstOrDefault()',
+                    type: 'error'
+                });
+            </script>
+        }
+
+        <script>
+            $(function () {
+                $('#RegionId').change(function () {
+                    let regionId = $(this).val();
+                    if (regionId == '') {
+                        $('#DistrictId').empty();
+                        let html = '<option value="">Select District</option>';
+                        $('#DistrictId').html(html);
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '@Url.Action("GetDistrictsByRegion", "Location")?regionId=' + regionId,
+                        type: 'get',
+                        dataType: 'json',
+                        success: function (response) {
+                            $('#DistrictId').empty();
+                            let html = '<option value="">Select District</option>';
+                            $.each(response, function (index, val) {
+                                html += `<option value='${val.value}'>${val.text}</option>`;
+                            });
+                            $('#DistrictId').html(html);
+                        },
+                        error: function (err) {
+                            console.log(err.responseText);
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Could not load Districts at this time. Please try again later',
+                                icon: 'error'
+                            });
+                        }
+                    })
+                })
+            })
+        </script>
+
+
+    }
+
+
+
+

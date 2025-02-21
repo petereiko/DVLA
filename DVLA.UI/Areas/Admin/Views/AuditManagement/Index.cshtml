@@ -1,0 +1,181 @@
+﻿@using DVLA.DATA.Domains
+@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.DataObjects.ViewModels
+
+@model List<ActivityModel>
+@{
+
+    ViewBag.Title = "Audit Management";
+    var i = 0;
+}
+
+<div class="datatables">
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">@ViewBag.Title</h4>
+            </div>
+            <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+                    <form asp-action="Index" asp-controller="AuditManagement" method="post">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <select id="ModuleId" name="ModuleId" class="form-control">
+                                        <option>Select Module</option>
+                                        @foreach (Module item in (IEnumerable<Module>)ViewBag.Modules)
+                                        {
+                                            <option value="@item.Id">@item.Name</option>
+                                        }
+                                    </select>
+                                    <label for="ModuleId">Module</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <select id="OptometristFirmId" name="OptometristFirmId" class="form-control">
+                                        <option value="">Select Optometrist Firm</option>
+                                        @foreach (OptometristFirm item in (IEnumerable<OptometristFirm>)ViewBag.OptometristFirms)
+                                        {
+                                            <option value="@item.Id">@item.BusinessName</option>
+                                        }
+                                    </select>
+                                    <label for="OptometristFirmId">Optometric Firm</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <select id="UserId" name="UserId" class="form-control">
+                                        <option value="">Select User</option>
+                                        @foreach (UserViewModel item in (IEnumerable<UserViewModel>)ViewBag.Users)
+                                        {
+                                            <option value="@item.Id">@item.Email</option>
+                                        }
+                                    </select>
+                                    <label for="UserId">User</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <input type="date" id="StartDate" name="StartDate" class="form-control" />
+                                    <label for="StartDate">Start Date</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <input type="date" id="EndDate" name="EndDate" class="form-control" />
+                                    <label for="StartDate">End Date</label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="d-md-flex align-items-center">
+
+                                    <div class="ms-auto mt-3 mt-md-0">
+                                        <button type="submit" class="btn btn-primary hstack gap-6">
+                                            Search
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+
+                    <div class="d-flex mb-2 float-right">
+
+                        <div class="d-flex">
+                            @using (Html.BeginForm("ExportAudit", "AuditManagement", FormMethod.Post))
+                            {
+                                var sn = 0;
+                                for (var n = 0; n < Model.Count; n++)
+                                {
+                                    @Html.HiddenFor(x => x[n].Id)
+                                    @Html.HiddenFor(x => x[n].ModuleName)
+                                    @Html.HiddenFor(x => x[n].Description)
+                                    @Html.HiddenFor(x => x[n].FullName)
+                                    @Html.HiddenFor(x => x[n].DateCreated)
+                                }
+
+                                <button type="submit" id="add_row" class="btn btn-primary">
+                                    <i class="fa fa-file"></i>
+                                    <span>Export To Excel</span>
+                                </button>
+                            }
+
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="table-responsive">
+                            <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            SN
+                                        </th>
+                                        <th>
+                                            Module
+                                        </th>
+                                        <th>
+                                            Description
+                                        </th>
+
+                                        <th>
+                                            User
+                                        </th>
+
+                                        <th>
+                                            Action Time
+                                        </th>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        i = i + 1;
+                                        <tr>
+
+                                            <td>@i</td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ModuleName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Description)
+                                            </td>
+
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.FullName)
+                                            </td>
+
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.DateCreated)
+                                            </td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- MODAL -->
+<div id="divModal">
+    @*@Html.Partial("_ManageOptometrist", new DVLA.DATA.Models.OptometristFirmModel())*@
+</div>
+@section Scripts {
+
+    <script type="text/javascript">
+
+        
+
+    </script>
+}

@@ -1,0 +1,145 @@
+﻿@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create</h1>
+
+@using DVLA.DATA.Domains
+@using DVLA.Data
+@using DVLA.Data.Models.Auth
+@using DVLA.Data.Models.DataObjects.ViewModels
+@model UserViewModel
+@{
+    ViewData["Title"] = "Update";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <!-- ----------------------------------------- -->
+        <!-- 1. Basic Form -->
+        <!-- ----------------------------------------- -->
+        <!-- start Basic Form -->
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Fill Form</h4>
+                <form asp-action="Update" method="post">
+                    <input asp-for="OptometristFirmId" type="hidden" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="FirstName" placeholder="Enter First Name here" required />
+                                <label for="FirstName">First Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="LastName" placeholder="Enter Last Name here" required />
+                                <label for="LastName">Last Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control" asp-for="Email" placeholder="name@example.com" required />
+                                <label for="tb-email">Email address</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="Phone" placeholder="Enter Phone here" required />
+                                <label for="Phone">Phone</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="MobileNumber" placeholder="Enter Additional Phone here" required />
+                                <label for="Phone">Additional Phone</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <select asp-for="DefaultRole" class="form-control" required>
+                                    <option value="">Select User Role</option>
+                                    @foreach (ApplicationRole item in (List<ApplicationRole>)ViewBag.Roles)
+                                    {
+                                        <option value="@item.Name">@item.Name</option>
+                                    }
+                                </select>
+                                <label for="DefaultRole">DefaultRole</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="OptometristArea">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="OptometristFirmName" asp-for="@Model.OptometristFirmName" readonly disabled />
+                                <label for="OptometristFirmName">Optometrist Firm</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="PIN" placeholder="Enter PIN" />
+                                <label for="PIN">Personal Identification Number</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-md-flex align-items-center">
+
+                                <div class="ms-auto mt- mt-md-0">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <button type="submit" class="btn btn-danger hstack gap-6" onclick="history.back()">
+
+                                                    Back
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <button type="submit" class="btn btn-primary hstack gap-6">
+
+                                                    Submit
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- end Basic Form -->
+    @section Scripts {
+        @if (Model.Errors.Any())
+        {
+            <script>
+                Swal.fire({
+                    title: 'Error',
+                    text: '@Model.Errors.FirstOrDefault()',
+                    type: 'error'
+                });
+            </script>
+        }
+
+        <script>
+            $(function () {
+                $('#DefaultRole').change(function () {
+                    let role = $(this).val();
+                    let sysAdminRole = '@AppRoles.SYSTEMADMIN';
+                    if (role == sysAdminRole) {
+                        $('#OptometristArea').hide();
+                    }
+                    else {
+                        $('#OptometristArea').show();
+                    }
+                });
+            })
+        </script>
+    }
+
+
+
+

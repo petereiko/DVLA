@@ -1,0 +1,67 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@model IEnumerable<SlotRequestModel>
+@{
+    ViewBag.Title = "Slot Requests";
+}
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">Slot Request Logs</h4>
+            </div>
+            <div class="section-wrapper">
+                <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+
+                    <div class="d-flex mb-2 float-right">
+
+                        <div class="d-flex">
+
+                            <a asp-action="InitiateSlotRequest" asp-controller="Slot" class="btn btn-primary">
+                                <i class="fa fa-plus"></i>
+                                <span>Add New</span>
+                            </a>
+
+
+                        </div>
+
+
+                    </div>
+
+                    <div>
+
+                        <partial name="_CustomerSlotList" model="Model" />
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+@section Scripts {
+    <script>
+        $('#class-of-company-datagridview').dataTable();
+
+
+
+
+
+    </script>
+}
+
+
+
+
+

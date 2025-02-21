@@ -1,0 +1,125 @@
+﻿@using DVLA.Data.Models.DataObjects.ViewModels
+@using DVLA.Data.Models.Enumerables
+@model SlotUsageViewModel
+@{
+    ViewBag.Title = "Access Statistics";
+    int counter = 0;
+}
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+                        <form asp-action="SlotUsageStatistics" asp-controller="SlotManagement" method="post">
+                            
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" asp-for="StartDate" autocomplete="off" class="form-control mydatepicker" data-date-format="dd/mm/yyyy" />
+                                        <label for="StartDate">Start Date</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" asp-for="EndDate" autocomplete="off" class="form-control mydatepicker" data-date-format="dd/mm/yyyy"  />
+                                        <label for="EndDate">End Date</label>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="d-md-flex align-items-center">
+
+                                        <div class="ms-auto mt-3 mt-md-0">
+                                            <button type="submit" class="btn btn-primary hstack gap-6">
+                                                Search
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <br />
+                        <div>Total Balance: <b>@Model.SlotUsages.Sum(x => x.Balance)</b></div>
+                        <div>Total Access Purchased: <b>@Model.SlotUsages.Sum(x => x.TotalSlotPurchased)</b></div>
+                        <div>Total Access Used: <b>@Model.SlotUsages.Sum(x => x.TotalSlotUsed)</b></div>
+
+                        <div class="table-responsive">
+                            <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            #
+                                        </th>
+                                        <th>
+                                            Optometrist
+                                        </th>
+                                        <th>Balance</th>
+                                        <th>
+                                            Total Used
+                                        </th>
+                                        <th>
+                                            Total Purchased
+                                        </th>
+                                        <th>
+                                            Access Type
+                                        </th>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.SlotUsages)
+                                    {
+                                        counter = counter + 1;
+                                        <tr>
+                                            <td>
+                                                @counter
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.BusinessName)
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.Balance)</td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.TotalSlotUsed)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.TotalSlotPurchased)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.AccessType)
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts {
+    <script>
+
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+
+

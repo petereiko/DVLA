@@ -1,0 +1,82 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.Enumerables
+@model SlotModel
+@{
+    ViewBag.Title = "Update Slot Reorder";
+}
+
+
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">Visual Assessment Results</h4>
+            </div>
+
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+                        <form asp-action="UpdateSlotReorder" asp-controller="Slot">
+                            @Html.HiddenFor(m => m.Id)
+                            @Html.HiddenFor(m => m.OptometristFirmId)
+                            @Html.HiddenFor(m => m.AccessType)
+                            <div>
+                                <table>
+                                    <tr>
+                                        <td>Access Type:</td>
+                                        <td>
+                                            <select asp-for="AccessType" class="form-control" asp-items="@Html.GetEnumSelectList<AccessType>()">
+                                                <option>Select Access Type</option>
+                                            </select>
+                                            @Html.ValidationMessageFor(m => m.AccessType, "", new { @class = "text-danger" })
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td>Reorder Level:</td>
+                                        <td>
+                                            <input asp-for="ReorderLevel" placeholder="Enter Reorder Level" class="form-control" />
+                                            @Html.ValidationMessageFor(m => m.ReorderLevel, "", new { @class = "text-danger" })
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td><a asp-action="*SlotReorder" asp-controller="Slot" asp-area="Customer" class="btn btn-danger pull-left">Cancel</a></td>
+                                        <td><input type="submit" value="Update Level" class="btn btn-primary pull-right" /></td>
+                                    </tr>
+                                </table>
+
+                            </div>
+                        </form>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
