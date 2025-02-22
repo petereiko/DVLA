@@ -134,10 +134,10 @@ namespace DVLA.Business.NotificationModule
             }
         }
 
-        public void HandleVisualAssessmentNotification()
-        {
-            VisualAssessmentController
-        }
+        //public void HandleVisualAssessmentNotification()
+        //{
+        //    VisualAssessmentController
+        //}
 
         public void SendAssessmentResult(string firstName, string mobileNumber, string referenceNumber, string assessmentResult, DVLADbContext context = null)
         {

@@ -1,0 +1,38 @@
+﻿@using DVLA.VerificationPortal.Shared.Requests
+@model OnboardUserRequest
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+}
+
+<form asp-action="Register" method="post">
+    
+    
+    
+    <div class="mb-3">
+        <label for="Email" class="form-label">Email address</label>
+        <input type="email" asp-for="Email" class="form-control" aria-describedby="emailHelp">
+    </div>
+    <div class="mb-3">
+        <label for="Phone" class="form-label">Phone</label>
+        <input type="text" asp-for="PhoneNumber" class="form-control" aria-describedby="textHelp">
+    </div>
+    <button type="submit" class="btn btn-primary w-100 py-8 mb-4 ">Sign Up</button>
+    <div class="d-flex align-items-center">
+        <p class="fs-4 mb-0 text-dark">Already have an Account?</p>
+        <a class="text-primary fw-medium ms-2" asp-action="Login" asp-controller="Account">Sign In</a>
+    </div>
+</form>
+
+@section Scripts {
+    @if (Model.Errors.Any())
+    {
+        <script>
+            Swal.fire({
+                title: 'Error',
+                text: '@Model.Errors.FirstOrDefault()',
+                type: 'error'
+            });
+        </script>
+    }
+}

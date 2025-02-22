@@ -1,0 +1,88 @@
+﻿@using DVLA.VerificationPortal.Shared.DTOs
+@using DVLA.VerificationPortal.Shared.Enums
+@model ApplicationUserDto
+<aside class="left-sidebar with-vertical">
+    <div>
+        <!-- ---------------------------------- -->
+        <!-- Start Vertical Layout Sidebar -->
+        <!-- ---------------------------------- -->
+        <!-- Sidebar scroll-->
+        <nav class="sidebar-nav scroll-sidebar simplebar-scrollable-y" data-simplebar="init">
+            <div class="simplebar-wrapper" style="margin: 0px;">
+                <div class="simplebar-height-auto-observer-wrapper"><div class="simplebar-height-auto-observer"></div></div><div class="simplebar-mask">
+                    <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
+                        <div class="simplebar-content-wrapper" tabindex="0" role="region" aria-label="scrollable content" style="height: 100%; overflow: hidden scroll;">
+                            <div class="simplebar-content" style="padding: 0px;">
+
+                                <ul id="sidebarnav">
+                                    <li class="nav-small-cap">
+                                        <iconify-icon icon="solar:menu-dots-bold" class="nav-small-cap-icon fs-4"></iconify-icon>
+                                        <span class="hide-menu">Applications</span>
+                                    </li>
+
+
+                                    <!--Dasboard-->
+                                    <li class="sidebar-item">
+                                        @if (User.IsInRole(EnumHelper.GetEnumDescription(Role.Administrator)) || User.IsInRole(EnumHelper.GetEnumDescription(Role.SuperAdmin)) || User.IsInRole(EnumHelper.GetEnumDescription(Role.Verifier)))
+                                        {
+                                            <a asp-action="Index" asp-controller="Home" asp-area="" class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                                <span class="hide-menu">Search</span>
+                                            </a>
+                                        }
+                                    </li>
+
+
+
+                                    <!--User Management-->
+                                    @if (User.IsInRole(EnumHelper.GetEnumDescription(Role.Administrator)) || User.IsInRole(EnumHelper.GetEnumDescription(Role.SuperAdmin)))
+                                    {
+
+                                        <li class="sidebar-item">
+                                            <a asp-action="Index" asp-controller="UserManagement" asp-area="Admin" class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                                <span class="hide-menu">User Management</span>
+                                            </a>
+                                        </li>
+                                        <li class="sidebar-item">
+                                            <a asp-action="Index" asp-controller="CentreManagement" asp-area="Admin" class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                                <span class="hide-menu">Centre Management</span>
+                                            </a>
+                                        </li>
+
+                                    }
+
+                                    <!--Result Search-->
+                                    @if (User.IsInRole(EnumHelper.GetEnumDescription(Role.Verifier)))
+                                    {
+                                        <li class="sidebar-item">
+                                            <a asp-action="Index" asp-controller="ResultVerification" asp-area="User" class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                                <span class="hide-menu">Verify Result</span>
+                                            </a>
+                                        </li>
+                                    }
+
+                                    
+                                    <!--Report-->
+                                    @if (User.IsInRole(EnumHelper.GetEnumDescription(Role.Administrator)))
+                                    {
+                                        <li class="sidebar-item">
+                                            <a class="sidebar-link" asp-action="Index" asp-controller="Report" asp-area="Admin">
+                                                <iconify-icon icon="solar:cart-large-2-linear" class="aside-icon"></iconify-icon>
+                                                <span class="hide-menu">Report Generation</span>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div><div class="simplebar-placeholder" style="width: 260px; height: 3841px;"></div>
+            </div><div class="simplebar-track simplebar-horizontal" style="visibility: hidden;"><div class="simplebar-scrollbar" style="width: 0px; display: none;"></div></div><div class="simplebar-track simplebar-vertical" style="visibility: visible;"><div class="simplebar-scrollbar" style="height: 113px; transform: translate3d(0px, 0px, 0px); display: block;"></div></div>
+        </nav>
+
+        <!-- End Sidebar scroll-->
+    </div>
+</aside>

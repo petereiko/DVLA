@@ -13,6 +13,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DVLA.WindowsApplication", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinApp", "WinApp\WinApp.csproj", "{99288B59-1651-445A-AFF5-8092EB0E2293}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DVLA.VerificationPortal", "DVLA.VerificationPortal\DVLA.VerificationPortal.csproj", "{79A23EBA-133A-4AB1-8FB8-FEC5DFD5950D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DVLA.VerificationPortal.Domain", "DVLA.VerificationPortal.Business\DVLA.VerificationPortal.Domain.csproj", "{8B037EF9-F791-429E-BEB1-2E51C30D36EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DVLA.VerificationPortal.Application", "DVLA.VerificationPortal.Data\DVLA.VerificationPortal.Application.csproj", "{822B7ACE-3CC4-4B19-B82E-551B21A23DE1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DVLA.VerificationPortal.Infrastructure", "DVLA.VerificationPortal.Infrastructure\DVLA.VerificationPortal.Infrastructure.csproj", "{9EF28473-D434-498F-AE25-82658FCA0927}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DVLA.VerificationPortal.Shared", "DVLA.VerificationPortal.Shared\DVLA.VerificationPortal.Shared.csproj", "{C05C4768-4D58-4F62-9B58-8724FD558F8A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +49,26 @@ Global
 		{99288B59-1651-445A-AFF5-8092EB0E2293}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99288B59-1651-445A-AFF5-8092EB0E2293}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99288B59-1651-445A-AFF5-8092EB0E2293}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79A23EBA-133A-4AB1-8FB8-FEC5DFD5950D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79A23EBA-133A-4AB1-8FB8-FEC5DFD5950D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79A23EBA-133A-4AB1-8FB8-FEC5DFD5950D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79A23EBA-133A-4AB1-8FB8-FEC5DFD5950D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B037EF9-F791-429E-BEB1-2E51C30D36EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B037EF9-F791-429E-BEB1-2E51C30D36EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B037EF9-F791-429E-BEB1-2E51C30D36EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B037EF9-F791-429E-BEB1-2E51C30D36EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{822B7ACE-3CC4-4B19-B82E-551B21A23DE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{822B7ACE-3CC4-4B19-B82E-551B21A23DE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{822B7ACE-3CC4-4B19-B82E-551B21A23DE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{822B7ACE-3CC4-4B19-B82E-551B21A23DE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EF28473-D434-498F-AE25-82658FCA0927}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EF28473-D434-498F-AE25-82658FCA0927}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EF28473-D434-498F-AE25-82658FCA0927}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EF28473-D434-498F-AE25-82658FCA0927}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C05C4768-4D58-4F62-9B58-8724FD558F8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C05C4768-4D58-4F62-9B58-8724FD558F8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C05C4768-4D58-4F62-9B58-8724FD558F8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C05C4768-4D58-4F62-9B58-8724FD558F8A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
