@@ -19,7 +19,7 @@
                         <iconify-icon icon="solar:calendar-minimalistic-linear" class="aside-icon"></iconify-icon>
                     </div>
                     <div class="align-self-center">
-                        <h5 class="mb-1 fs-6">Learner's Granted Slots</h5>
+                        <h5 class="mb-1 fs-6">Granted Learner’s Slots</h5>
                         <span id="learnersgrandedslots">
                             @{
                                 var learnersgrandedslots = Model.LearnUnusedSlot + Model.LearnerUsedSlot;
@@ -40,7 +40,7 @@
                         <iconify-icon icon="solar:cardholder-linear" class="aside-icon"></iconify-icon>
                     </div>
                     <div class="align-self-center">
-                        <h5 class="mb-1 fs-6">Learner's Utilized Slots</h5>
+                        <h5 class="mb-1 fs-6">Used Learner’s Slots</h5>
                         <span class="text-muted" id="learnersutilizedslots">@Model.LearnerUsedSlot</span>
                     </div>
                 </div>
@@ -55,7 +55,7 @@
                         <iconify-icon icon="solar:box-minimalistic-linear" class="aside-icon"></iconify-icon>
                     </div>
                     <div class="align-self-center">
-                        <h5 class="mb-1 fs-6">Other's Granted Slot</h5>
+                        <h5 class="mb-1 fs-6">Granted Other’s Slots</h5>
                         <span class="text-muted" id="othersgrantedaccess">
                             @{
                                 var othersgrantedaccess = Model.OtherUnusedSlot + Model.OtherUsedSlot;
@@ -75,7 +75,7 @@
                         <iconify-icon icon="solar:atom-linear" class="aside-icon"></iconify-icon>
                     </div>
                     <div class="align-self-center">
-                        <h5 class="mb-1 fs-6">Other's Utilized Slot</h5>
+                        <h5 class="mb-1 fs-6">Used Other's Slots</h5>
                         <span class="text-muted" id="othersutilizedaccess">@Model.OtherUsedSlot</span>
                     </div>
                 </div>

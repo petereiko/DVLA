@@ -25,7 +25,7 @@ using System.Web;
 namespace DVLA.UI.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [Authorize(Roles = AppRoles.FACILITYOWNER)]
+    [Authorize(Roles = $"{AppRoles.FACILITYOWNER}, {AppRoles.OPTOMETRIST}")]
 
     public class SlotController : Controller
     {
@@ -57,7 +57,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             _auditRepo.AddAudit(Activities.VIEW_SLOT_REQUEST, "View Slot Requests");
             return View(slotRequests);
         }
-
+        [Authorize(Roles =$"{AppRoles.FACILITYOWNER}, {AppRoles.OPTOMETRIST}" )]
         [HttpGet]
         public IActionResult InitiateSlotRequest()
         {
@@ -65,7 +65,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             model.FormData = new SlotRequestModel { SlotPriceList = _slotRepository.AmountPerSlot() };
             return View(model);
         }
-
+        [Authorize(Roles = $"{AppRoles.FACILITYOWNER}, {AppRoles.OPTOMETRIST}")]
         [HttpPost]
         public ActionResult InitiateSlotRequest(SlotRequestViewModel model)
         {
@@ -79,6 +79,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             int OptometristFirmId = optometristUser == null ? 0 : optometristUser.OptometristFirmId;
             model.FormData.OptometristFirmId = OptometristFirmId;
             model.FormData.Status = SlotRequestStatus.Pending;
+            model.FormData.PaymentMethod = PaymentMethod.Online;
             MessageResponse response = _slotRepository.CreateSlotRequest(model.FormData);
             if (response.Success)
             {

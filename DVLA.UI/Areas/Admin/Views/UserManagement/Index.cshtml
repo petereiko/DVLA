@@ -36,7 +36,7 @@
                             <!-- start row -->
                             <tr>
                                 <td>@item.FirstName @item.LastName</td>
-                                <td>@item.DefaultRole</td>
+                                <td>@string.Join(",",item.Roles.Select(x=>x.Name).ToList())</td>
                                 <td>@item.Email</td>
                                 <td>@item.MobileNumber</td>
                                 <td>

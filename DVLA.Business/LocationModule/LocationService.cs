@@ -45,5 +45,15 @@ namespace DVLA.Business.LocationModule
                 Value = x.Id.ToString()
             }).ToListAsync();
         }
+
+        public async Task<List<SelectListItem>> GetDistrictsByRegionWithFacilities(int regionId)
+        {
+            return await _context.Districts.Include(x=>x.OptometristFirms).AsNoTracking().Where(x => x.RegionId == regionId && x.OptometristFirms.Count>0).Select(x => new SelectListItem
+            {
+                Text = x.Name,
+                Value = x.Id.ToString(),
+                
+            }).ToListAsync();
+        }
     }
 }

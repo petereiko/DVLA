@@ -12,7 +12,6 @@ namespace DVLA.Data.Models.Auth
 {
     public class ApplicationUser:IdentityUser<string>
     {
-        //public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Pin { get; set; }
         public string FirstName { get; set; }
         public string MiddleName { get; set; }

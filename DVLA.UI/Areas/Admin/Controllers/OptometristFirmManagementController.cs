@@ -65,14 +65,47 @@ namespace DVLA.UI.Areas.Admin.Controllers
             _context = context;
         }
 
+        [HttpGet]
         // GET: Admin/Optometrist
         public async Task<ActionResult> Index()
         {
             try
             {
+                ViewBag.Region = 0;
+                if (HttpContext.Session.GetString("Regions") == null)
+                {
+                    HttpContext.Session.SetString("Regions", JsonConvert.SerializeObject(_regionQuery.GetAllAsync().GetAwaiter().GetResult()));
+                }
+                ViewBag.Regions = JsonConvert.DeserializeObject<List<Region>>(HttpContext.Session.GetString("Regions"));
+                var model = await _reportRepository.FetchAllOptometristFirms(0, null);
 
-                var model = await _reportRepository.FetchAllOptometristFirms();
-                
+                _AuditRepo.AddAudit(Activities.VIEW_OPTOMETRIST_FIRM, "View Optometrist Firm");
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return View(new List<OptometristFirmModel>());
+
+        }
+
+
+        [HttpPost]
+        // GET: Admin/Optometrist
+        public async Task<ActionResult> Index(int? Region, int? District)
+        {
+            try
+            {
+                ViewBag.Region = Region;
+                ViewBag.District = District;
+                if (HttpContext.Session.GetString("Regions") == null)
+                {
+                    HttpContext.Session.SetString("Regions", JsonConvert.SerializeObject(_regionQuery.GetAllAsync().GetAwaiter().GetResult().OrderBy(x => x.Name)));
+                }
+                ViewBag.Regions = JsonConvert.DeserializeObject<List<Region>>(HttpContext.Session.GetString("Regions"));
+                var model = await _reportRepository.FetchAllOptometristFirms(Region.GetValueOrDefault(), District);
+
                 _AuditRepo.AddAudit(Activities.VIEW_OPTOMETRIST_FIRM, "View Optometrist Firm");
                 return View(model);
             }
@@ -168,7 +201,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        
+
         public ActionResult Create(OptometristFirmModel model)
         {
             try
@@ -354,7 +387,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                     }
                 }
 
-                
+
 
                 TempData["SuccessMessage"] = "Record saved successfully";
                 _AuditRepo.AddAudit(Activities.CREATE_OPTOMETRIST_FIRM, "Create Optometrist Firm");
@@ -600,7 +633,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                     message = "Optometrist successfully activated";
                     optometrist.IsActive = true;
                 }
-                
+
 
                 string respMessage = "";
                 var users = _userRepository.GetUsersByOptometristFirm(optometrist.Id);

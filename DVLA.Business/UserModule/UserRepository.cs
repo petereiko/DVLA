@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Identity;
 
 namespace DVLA.Business.UserModule
 {
@@ -24,12 +25,16 @@ namespace DVLA.Business.UserModule
         private readonly ILogger<UserRepository> _logger;
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
-        public UserRepository(DVLADbContext context, ILogger<UserRepository> logger, IConfiguration configuration)
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        public UserRepository(DVLADbContext context, ILogger<UserRepository> logger, IConfiguration configuration, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
             _context = context;
             _logger = logger;
             _configuration = configuration;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         public void Dispose()
@@ -39,7 +44,7 @@ namespace DVLA.Business.UserModule
 
         public UserViewModel GetUserDetails(string Id)
         {
-            UserViewModel users = new();
+            UserViewModel user = new();
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
                 using (SqlCommand cmd = new SqlCommand("FetchUserById", conn))
@@ -51,7 +56,7 @@ namespace DVLA.Business.UserModule
                     {
                         while (reader.Read())
                         {
-                            users = new()
+                            user = new()
                             {
                                 Email = reader.IsDBNull(reader.GetOrdinal("Email")) ? null : reader.GetString(reader.GetOrdinal("Email")),
                                 FirstName = reader.IsDBNull(reader.GetOrdinal("FirstName")) ? null : reader.GetString(reader.GetOrdinal("FirstName")),
@@ -63,17 +68,17 @@ namespace DVLA.Business.UserModule
                                 MobileNumber = reader.IsDBNull(reader.GetOrdinal("MobileNumber")) ? null : reader.GetString(reader.GetOrdinal("MobileNumber")),
                                 OptometristFirmName = reader.IsDBNull(reader.GetOrdinal("OptometristFirmName")) ? null : reader.GetString(reader.GetOrdinal("OptometristFirmName")),
                                 RoleId = reader.IsDBNull(reader.GetOrdinal("RoleId")) ? null : reader.GetString(reader.GetOrdinal("RoleId")),
-                                DefaultRole = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName")),
+                                //DefaultRole = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName")),
                                 CreatedDate = reader.GetDateTime(reader.GetOrdinal("CreatedDate")),
                                 EmailConfirmed = reader.IsDBNull(reader.GetOrdinal("EmailConfirmed")) ? false : reader.GetBoolean(reader.GetOrdinal("EmailConfirmed")),
                                 IsFirstLogin = reader.IsDBNull(reader.GetOrdinal("IsFirstLogin")) ? false : reader.GetBoolean(reader.GetOrdinal("IsFirstLogin")),
                                 Phone = reader.IsDBNull(reader.GetOrdinal("PhoneNumber")) ? null : reader.GetString(reader.GetOrdinal("PhoneNumber")),
                                 PIN = reader.IsDBNull(reader.GetOrdinal("Pin")) ? null : reader.GetString(reader.GetOrdinal("Pin")),
-                                Role = new()
-                                {
-                                    Id = reader.IsDBNull(reader.GetOrdinal("RoleId")) ? null : reader.GetString(reader.GetOrdinal("RoleId")),
-                                    Name = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName"))
-                                },
+                                //Role = new()
+                                //{
+                                //    Id = reader.IsDBNull(reader.GetOrdinal("RoleId")) ? null : reader.GetString(reader.GetOrdinal("RoleId")),
+                                //    Name = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName"))
+                                //},
                                 
                                 
                             };
@@ -82,7 +87,22 @@ namespace DVLA.Business.UserModule
 
                 }
             }
-            return users;
+
+            user.Roles = new();
+
+            ApplicationUser applicationUser = _userManager.FindByIdAsync(user.Id).GetAwaiter().GetResult();
+            IList<string> roles = _userManager.GetRolesAsync(applicationUser).GetAwaiter().GetResult();
+
+            var allRoles =_roleManager.Roles.AsNoTracking().ToList();
+
+            foreach (ApplicationRole role in allRoles)
+            {
+                bool isInRole = _userManager.IsInRoleAsync(applicationUser, role.Name).GetAwaiter().GetResult();
+                user.Roles.Add(new CheckBoxListItemDto { Id = role.Id, IsChecked = isInRole, Name = role.Name });
+            }
+
+
+            return user;
         }
 
         public List<UserViewModel> GetUsers(string roleName, string CreatedBy)
@@ -112,24 +132,32 @@ namespace DVLA.Business.UserModule
                                 MobileNumber = reader.IsDBNull(reader.GetOrdinal("MobileNumber")) ? null : reader.GetString(reader.GetOrdinal("MobileNumber")),
                                 OptometristFirmName = reader.IsDBNull(reader.GetOrdinal("OptometristFirmName")) ? null : reader.GetString(reader.GetOrdinal("OptometristFirmName")),
                                 RoleId = reader.IsDBNull(reader.GetOrdinal("RoleId")) ? null : reader.GetString(reader.GetOrdinal("RoleId")),
-                                DefaultRole = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName")),
+                                //DefaultRole = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName")),
                                 CreatedDate = reader.GetDateTime(reader.GetOrdinal("CreatedDate")),
                                 EmailConfirmed = reader.IsDBNull(reader.GetOrdinal("EmailConfirmed")) ? false : reader.GetBoolean(reader.GetOrdinal("EmailConfirmed")),
                                 IsFirstLogin = reader.IsDBNull(reader.GetOrdinal("IsFirstLogin")) ? false : reader.GetBoolean(reader.GetOrdinal("IsFirstLogin")),
                                 Phone = reader.IsDBNull(reader.GetOrdinal("PhoneNumber")) ? null : reader.GetString(reader.GetOrdinal("PhoneNumber")),
                                 PIN = reader.IsDBNull(reader.GetOrdinal("Pin")) ? null : reader.GetString(reader.GetOrdinal("Pin")),
                                 CreatedBy = reader.IsDBNull(reader.GetOrdinal("CreatedBy")) ? null : reader.GetString(reader.GetOrdinal("CreatedBy")),
-                                Role = new()
-                                {
-                                    Id = reader.IsDBNull(reader.GetOrdinal("RoleId")) ? null : reader.GetString(reader.GetOrdinal("RoleId")),
-                                    Name = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName"))
-                                }
+                                //Role = new()
+                                //{
+                                //    Id = reader.IsDBNull(reader.GetOrdinal("RoleId")) ? null : reader.GetString(reader.GetOrdinal("RoleId")),
+                                //    Name = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName"))
+                                //}
                             });
                         }
                     }
 
                 }
             }
+
+            foreach (var user in users)
+            {
+                ApplicationUser appUser = _userManager.FindByIdAsync(user.Id).GetAwaiter().GetResult();
+                IList<string> roles = _userManager.GetRolesAsync(appUser).GetAwaiter().GetResult();
+                user.Roles = roles.Select(role => new CheckBoxListItemDto { Name = role }).ToList();
+            }
+
             return users;
         }
 
@@ -159,17 +187,17 @@ namespace DVLA.Business.UserModule
                                 MobileNumber = reader.IsDBNull(reader.GetOrdinal("MobileNumber")) ? null : reader.GetString(reader.GetOrdinal("MobileNumber")),
                                 OptometristFirmName = reader.IsDBNull(reader.GetOrdinal("OptometristFirmName")) ? null : reader.GetString(reader.GetOrdinal("OptometristFirmName")),
                                 RoleId = reader.IsDBNull(reader.GetOrdinal("RoleId")) ? null : reader.GetString(reader.GetOrdinal("RoleId")),
-                                DefaultRole = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName")),
+                                //DefaultRole = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName")),
                                 CreatedDate = reader.GetDateTime(reader.GetOrdinal("CreatedDate")),
                                 EmailConfirmed = reader.IsDBNull(reader.GetOrdinal("EmailConfirmed")) ? false : reader.GetBoolean(reader.GetOrdinal("EmailConfirmed")),
                                 IsFirstLogin = reader.IsDBNull(reader.GetOrdinal("IsFirstLogin")) ? false : reader.GetBoolean(reader.GetOrdinal("IsFirstLogin")),
                                 Phone = reader.IsDBNull(reader.GetOrdinal("PhoneNumber")) ? null : reader.GetString(reader.GetOrdinal("PhoneNumber")),
                                 PIN = reader.IsDBNull(reader.GetOrdinal("Pin")) ? null : reader.GetString(reader.GetOrdinal("Pin")),
-                                Role = new()
-                                {
-                                    Id = reader.IsDBNull(reader.GetOrdinal("RoleId")) ? null : reader.GetString(reader.GetOrdinal("RoleId")),
-                                    Name = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName"))
-                                }
+                                //Role = new()
+                                //{
+                                //    Id = reader.IsDBNull(reader.GetOrdinal("RoleId")) ? null : reader.GetString(reader.GetOrdinal("RoleId")),
+                                //    Name = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName"))
+                                //}
                             });
                         }
                     }
@@ -213,26 +241,28 @@ namespace DVLA.Business.UserModule
                     userDetails.ModifiedBy = updatedBy;
                     userDetails.IsActive = model.IsActive;
                     userDetails.EmailConfirmed = model.IsActive;
-                    userDetails.DefaultRole = model.DefaultRole;
+                    //userDetails.DefaultRole = model.DefaultRole;
                     userDetails.PhoneNumber = model.Phone;
                     userDetails.Pin = model.PIN;
                     userDetails.OptometristFirmId = model.OptometristFirmId;
                     _context.SaveChanges();
 
-                    var role = _context.ApplicationRoles.FirstOrDefault(r => r.Name == model.DefaultRole);
-                    var userRole = _context.ApplicationUserRoles.FirstOrDefault(u => u.UserId == model.Id);
-                    if (userRole != null && userRole.RoleId != role.Id)
+                    //var role = _context.ApplicationRoles.FirstOrDefault(r => r.Name == model.DefaultRole);
+                    var userRoleQuery = _context.ApplicationUserRoles.Where(u => u.UserId == model.Id);
+                    //Detect if there are role changes
+                    if (model.Roles.Count(x => x.IsChecked) != userRoleQuery.Count() && !model.Roles.Select(x=>x.Id).SequenceEqual(userRoleQuery.Select(x=>x.RoleId)))
                     {
-                        _context.Entry(userRole).State = EntityState.Deleted;
-                        _context.SaveChanges();
+                       List<ApplicationUserRole> userRoles = userRoleQuery.ToList();
+                        _context.ApplicationUserRoles.RemoveRange(userRoles);
 
-                        var newRole = new ApplicationUserRole
+                        userRoles = model.Roles.Where(x=>x.IsChecked).Select(x => new ApplicationUserRole
                         {
-                            RoleId = role.Id,
-                            UserId = model.Id
-                        };
-                        _context.ApplicationUserRoles.Add(newRole);
+                            RoleId = x.Id,
+                            UserId = model.Id,
+                        }).ToList();
+                        _context.ApplicationUserRoles.AddRange(userRoles);
                         _context.SaveChanges();
+                           
                     }
 
                     var optometristUserDetails = _context.OptometristFirmUsers.FirstOrDefault(x => x.ApplicationUserId == model.Id);
@@ -247,23 +277,23 @@ namespace DVLA.Business.UserModule
                         _context.OptometristFirmUsers.Add(optometristUser);
                         _context.SaveChanges();
                     }
-                    else if (optometristUserDetails != null && optometristUserDetails.OptometristFirmId != model.OptometristFirmId && model.DefaultRole != AppRoles.SYSTEMADMIN)
-                    {
-                        var oldData = _context.OptometristFirmUsers.FirstOrDefault(x => x.ApplicationUserId == model.Id && x.OptometristFirmId == optometristUserDetails.OptometristFirmId);
-                        _context.OptometristFirmUsers.Remove(oldData);
-                        _context.SaveChanges(true);
+                    //else if (optometristUserDetails != null && optometristUserDetails.OptometristFirmId != model.OptometristFirmId && model.DefaultRole != AppRoles.SYSTEMADMIN)
+                    //{
+                    //    var oldData = _context.OptometristFirmUsers.FirstOrDefault(x => x.ApplicationUserId == model.Id && x.OptometristFirmId == optometristUserDetails.OptometristFirmId);
+                    //    _context.OptometristFirmUsers.Remove(oldData);
+                    //    _context.SaveChanges(true);
 
-                        optometristUserDetails.OptometristFirmId = model.OptometristFirmId.GetValueOrDefault();
-                        var optometristUser = new OptometristFirmUser
-                        {
-                            OptometristFirmId = model.OptometristFirmId.GetValueOrDefault(),
-                            ApplicationUserId = model.Id
-                        };
-                        _context.OptometristFirmUsers.Add(optometristUser);
-                        _context.SaveChanges();
+                    //    optometristUserDetails.OptometristFirmId = model.OptometristFirmId.GetValueOrDefault();
+                    //    var optometristUser = new OptometristFirmUser
+                    //    {
+                    //        OptometristFirmId = model.OptometristFirmId.GetValueOrDefault(),
+                    //        ApplicationUserId = model.Id
+                    //    };
+                    //    _context.OptometristFirmUsers.Add(optometristUser);
+                    //    _context.SaveChanges();
 
                        
-                    }
+                    //}
 
                     
 

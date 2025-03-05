@@ -191,9 +191,9 @@ app.MapControllerRoute(
 app.MapHub<NotificationHub>("/notification");
 
 RecurringJob.AddOrUpdate<BackgroundJobService>("SendBulkEmail", service => service.SendBulkEmail(), "*/1 * * * *");
-RecurringJob.AddOrUpdate<BackgroundJobService>("SendBulkSms", service => service.SendBulkEmail(), "*/1 * * * *");
+//RecurringJob.AddOrUpdate<BackgroundJobService>("SendBulkSms", service => service.SendBulkEmail(), "*/1 * * * *");
 RecurringJob.AddOrUpdate<BackgroundJobService>("VerifyTransfers", service => service.VerifyPayments(), "*/1 * * * *");
-//RecurringJob.AddOrUpdate<BackgroundJobService>("OpenTickets", service => service.OpenTickets(), "0 */2 * * *");//Every 2 hours
+RecurringJob.AddOrUpdate<BackgroundJobService>("PushVisualAssessmentResult", service => service.PushVisualAssessmentResult(), "*/5 * * * *");//Every 1 minute
 
 
 //Create a scope to resolve scoped services

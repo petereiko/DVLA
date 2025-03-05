@@ -54,7 +54,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
         private readonly string currentUserId;
         private readonly DVLADbContext _context;
         private readonly IUserService _userService;
-        
+
 
         public VisualAssessmentResultController(IRepositoryQuery<OptometristFirmUser> optometristFirmUserRepositoryQuery,
             IRepositoryQuery<OptometristFirm> optometristFirmRepositoryQuery,
@@ -88,7 +88,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
         // GET: Customer/VisualAssessmentResult
         [Authorize(Roles = $"{AppRoles.FACILITYOWNER}, {AppRoles.OPTOMETRIST}")]
         [HttpGet]
-        public ActionResult Index(int Entries=10)
+        public ActionResult Index(int Entries = 10)
         {
             TempData["Action"] = Url.Action("Index", "VisualAssessmentResult", new { area = "Customer" });
             PaginationResponseModel<List<VisualAssessmentResultListItem>> visualAssessmentResults = new();
@@ -117,16 +117,19 @@ namespace DVLA.UI.Areas.Customer.Controllers
         public ActionResult Index(DateTime? StartDate, DateTime? EndDate, string DSReference, Status status, int Entries = 10)
         {
             TempData["Action"] = Url.Action("Index", "VisualAssessmentResult", new { area = "Customer" });
-            ViewBag.StartDate = StartDate.HasValue ? StartDate.Value.ToString("dd/MM/yyyy") : DateTime.Now.AddMonths(-1).ToString("dd/MM/yyyy");  
-            ViewBag.EndDate = EndDate.HasValue ? EndDate.Value.ToString("dd/MM/yyyy") : DateTime.Now.AddMonths(-1).ToString("dd/MM/yyyy");
+            ViewBag.StartDate = StartDate.HasValue ? StartDate.Value.ToString("dd/MM/yyyy") : DateTime.UtcNow.ToString("dd/MM/yyyy");
+            ViewBag.EndDate = EndDate.HasValue ? EndDate.Value.AddHours(23).AddMinutes(59).AddSeconds(59).ToString("dd/MM/yyyy") : DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59).ToString("dd/MM/yyyy");
             ViewBag.DSReference = DSReference;
             ViewBag.Status = status.ToString();
-            PaginationResponseModel<List<VisualAssessmentResultListItem>> visualAssessmentResults = new ();
+
+            EndDate = EndDate.HasValue ? EndDate.Value.AddHours(23).AddMinutes(59).AddSeconds(59) : DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+            PaginationResponseModel<List<VisualAssessmentResultListItem>> visualAssessmentResults = new();
             try
             {
                 int? OptometristFirmId = _userService.GetUserData().OptometristFirmId;
                 PaginationRequestModel pagination = new() { PageSize = Entries };
-                visualAssessmentResults = _visualAssessmentResultRepository.GetVisualAssessmentResult(pagination, OptometristFirmId, status, StartDate, EndDate.Value.AddDays(2), DSReference);
+                visualAssessmentResults = _visualAssessmentResultRepository.GetVisualAssessmentResult(pagination, OptometristFirmId, status, StartDate, EndDate.Value, DSReference);
                 _AuditRepo.AddAudit(Activities.VIEW_VISUAL_ASSESSMENT_RESULT, "ViewVisual Assessment Result");
                 return View(visualAssessmentResults);
             }
@@ -615,6 +618,12 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 ViewBag.SingleImage = new SelectList(visualAcuitys.Where(x => x.Id > 4), "Score", "Score");
                 ViewBag.ResultConclusions = new SelectList(_visualAssessmentResultRepository.ResultConclusion(), "Value", "Text");
 
+                if (model.Action == Status.Complete && string.IsNullOrEmpty(model.ResultConclusion))
+                {
+                    ModelState.AddModelError("ResultConclusion", "Result Conclusion is required");
+                    model.Errors.Add("Result Conclusion is required");
+                    return View(model);
+                }
 
                 if (string.IsNullOrEmpty(model.Surname))
                 {
@@ -681,6 +690,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     if (string.IsNullOrEmpty(model.Unaided_OD))
                     {
                         ModelState.AddModelError("Unaided_OD", "Please select Unaided OD");
+                        return View(model);
                     }
 
                     if (string.IsNullOrEmpty(model.Unaided_OS))
@@ -698,7 +708,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     if (string.IsNullOrEmpty(model.BCV_OS))
                     {
                         ModelState.AddModelError("BCV_OS", "Please select BCV OS");
-                            return View(model);
+                        return View(model);
                     }
 
                     if (string.IsNullOrEmpty(model.BCV_OU))
@@ -792,23 +802,18 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     return View(model);
                 }
 
-                Slot slot = null;
-                //Validate Slot if User is Online
-                bool isOnline = Convert.ToBoolean(_configuration["AppConstants:Online"]);
-                if (isOnline)
+                Slot slot = _slotRepositoryQuery.FilterAsync(x => x.OptometristFirmId == optometristUser.OptometristFirmId && x.AccessType == (model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory)).Result.FirstOrDefault();
+                if (slot == null)
                 {
-                    slot = _slotRepositoryQuery.FilterAsync(x => x.OptometristFirmId == optometristUser.OptometristFirmId && x.AccessType == (model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory)).Result.FirstOrDefault();
-                    if (slot == null)
-                    {
-                        model.Errors.Add("There is no available slot to continue with this assessment result");
-                        return View(model);
-                    }
-                    if (slot.Quantity == 0)
-                    {
-                        model.Errors.Add("There is no available slot to continue with this assessment result");
-                        return View(model);
-                    }
+                    model.Errors.Add("There is no available slot to continue with this assessment result");
+                    return View(model);
                 }
+                if (slot.Quantity == 0)
+                {
+                    model.Errors.Add("There is no available slot to continue with this assessment result");
+                    return View(model);
+                }
+
                 var context = _context;
                 var scope = await context.Database.BeginTransactionAsync();
 
@@ -827,7 +832,13 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         var visualAssessmentResult = await context.VisualAssessmentResults.FirstOrDefaultAsync(x => x.Id == model.Id); //_visualAssessmentResultRepositoryQuery.FilterAsync(x => x.Id == model.Id).Result.FirstOrDefault();
                         if (visualAssessmentResult == null)
                         {
-                            string referenceNumber = isOnline ? _visualAssessmentResultRepository.GenerateReferenceNo(optometristUser.OptometristFirmId) : null;
+                            if (model.Status == Status.Complete && string.IsNullOrEmpty(model.PassportImageUrl))
+                            {
+                                await scope.RollbackAsync();
+                                model.Errors.Add("Kindly upload Passport");
+                                return View(model);
+                            }
+                            string referenceNumber = _visualAssessmentResultRepository.GenerateReferenceNo(optometristUser.OptometristFirmId);
 
                             visualAssessmentResult = new VisualAssessmentResult()
                             {
@@ -864,7 +875,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 ResultServiceType = model.ResultServiceType,
                                 LearnerDriversLicence = model.LearnerDriversLicence,
                                 OptometristFirmId = optometristUser.OptometristFirmId,
-                                ReferenceNumber = model.Status == Status.Complete ? referenceNumber : "",
+                                ReferenceNumber = referenceNumber,
                                 CreatedBy = currentUserId,
                                 IsActive = true,
                                 IsDeleted = false,
@@ -874,8 +885,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 IsSynchronized = false,
                                 TestType = (TestType)model.TestType,
                                 OldDVLAReferenceNo = model.OldDVLAReferenceNo,
-                                IsTransmitted = isSubmitted ? (isOnline ? true : false) : false,
-                                AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory
+                                IsTransmitted = false,
+                                AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
+                                
                             };
                             //if (model.LearnerDriversLicence != null) visualAssessmentResultCreate.LearnerDriversLicence = model.LearnerDriversLicence;
                             context.VisualAssessmentResults.Add(visualAssessmentResult);
@@ -886,21 +898,18 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
                             if (model.Status == Status.Complete)
                             {
-                                //Utilize Slot if Online
-                                if (isOnline)
-                                {
-                                    slot.Quantity = slot.Quantity - 1;
-                                    await context.SaveChangesAsync();
+                                slot.Quantity = slot.Quantity - 1;
+                                await context.SaveChangesAsync();
 
-                                    //Send Sms Notification
-                                    string result = model.PassOrFail.ToString(); //EnumHelper<PassOrFail>.GetDisplayValue(model.PassOrFail.GetValueOrDefault());
+                                //Send Sms Notification
+                                string result = model.PassOrFail.ToString(); //EnumHelper<PassOrFail>.GetDisplayValue(model.PassOrFail.GetValueOrDefault());
 
-                                    //OnCreateVisualAssessment.Invoke(model, referenceNumber, result, _context);
+                                //OnCreateVisualAssessment.Invoke(model, referenceNumber, result, _context);
 
-                                    _smsRepository.SendAssessmentResult(model.FirstName, model.ContactNumber, referenceNumber, result, context);
-                                    //send email
-                                    _notificationRepository.SendAssessmentResult(model.FirstName, model.ContactNumber, referenceNumber, result, model.Email, context);
-                                }
+                                _smsRepository.SendAssessmentResult(model.FirstName, model.ContactNumber, referenceNumber, result, context);
+                                //send email
+                                _notificationRepository.SendAssessmentResult(model.FirstName, model.ContactNumber, referenceNumber, result, model.Email, context);
+
                             }
 
                         }
@@ -908,6 +917,15 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         {
 
                             string passFile = visualAssessmentResult.PassportImageUrl;
+                            if (model.Status == Status.Complete)
+                            {
+                                if(string.IsNullOrEmpty(passFile) && string.IsNullOrEmpty(model.PassportImageUrl))
+                                {
+                                    await scope.RollbackAsync();
+                                    model.Errors.Add("Kindly upload Passport");
+                                    return View(model);
+                                }
+                            }
                             //visualAssessmentResult.NameTitle = model.NameTitle;
                             visualAssessmentResult.PassOrFail = model.PassOrFail;
                             visualAssessmentResult.PassResult = model.PassResult;
@@ -945,22 +963,12 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             visualAssessmentResult.TestType = (TestType)model.TestType;
                             visualAssessmentResult.OldDVLAReferenceNo = model.OldDVLAReferenceNo;
                             visualAssessmentResult.AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory;
-                            visualAssessmentResult.IsTransmitted = isSubmitted ? (isOnline ? true : false) : false;
+                            visualAssessmentResult.IsTransmitted = false;
 
                             if (model.Status == Status.Complete)
                             {
-                                if (isOnline && string.IsNullOrEmpty(visualAssessmentResult.ReferenceNumber))
-                                {
-                                    visualAssessmentResult.ReferenceNumber = _visualAssessmentResultRepository.GenerateReferenceNo(optometristUser.OptometristFirmId);
-                                    visualAssessmentResult.TestDate = DateTime.UtcNow;
-                                    visualAssessmentResult.ModifiedBy = currentUserId;
-                                }
-                                if (isOnline)
-                                {
-                                    //deduct slot
-                                    slot.Quantity = slot.Quantity - 1;
-                                    context.SaveChanges();
-                                }
+                                slot.Quantity = slot.Quantity - 1;
+                                context.SaveChanges();
                             }
                             //visualAssessmentResult.TestDate = DateTime.UtcNow;
                             await context.SaveChangesAsync();
@@ -975,21 +983,19 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             //Send Sms Notification
                             if (model.Status == Status.Complete)
                             {
-                                if (isOnline)
-                                {
-                                    string result = model.PassOrFail.ToString(); //EnumHelper<PassOrFail>.GetDisplayValue(model.PassOrFail.GetValueOrDefault());
+                                string result = model.PassOrFail.ToString(); //EnumHelper<PassOrFail>.GetDisplayValue(model.PassOrFail.GetValueOrDefault());
 
-                                    _smsRepository.SendAssessmentResult(model.FirstName, model.ContactNumber, visualAssessmentResult.ReferenceNumber, result, context);
-                                    //send email
-                                    _notificationRepository.SendAssessmentResult(model.FirstName, model.ContactNumber, visualAssessmentResult.ReferenceNumber, result, model.Email, context);
-                                }
+                                _smsRepository.SendAssessmentResult(model.FirstName, model.ContactNumber, visualAssessmentResult.ReferenceNumber, result, context);
+                                //send email
+                                _notificationRepository.SendAssessmentResult(model.FirstName, model.ContactNumber, visualAssessmentResult.ReferenceNumber, result, model.Email, context);
+
                             }
                         }
-                        
+
                         TempData["SuccessMessage"] = "Record saved successfully";
                         _AuditRepo.AddAudit(Activities.CREATE_VISUAL_ASSESSMENT_RESULT, "Create Visual Assessment Result");
                         await scope.CommitAsync();
-                        if (model.Status==Status.Complete)
+                        if (model.Status == Status.Complete)
                         {
                             HttpContext.Session.SetString(AppConstants.VISUALASSESSMENTSUBMISSION, JsonConvert.SerializeObject(visualAssessmentResult));
                             return View("AssessmentDetails", visualAssessmentResult);
@@ -1028,7 +1034,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             return View(model);
         }
 
-        public async Task<ActionResult> Detail(string page="", string token = "")
+        public async Task<ActionResult> Detail(string page = "", string token = "")
         {
             //VisualAssessmentPrintResultViewModel model = null;
             VisualAssessmentResultModel model = new();

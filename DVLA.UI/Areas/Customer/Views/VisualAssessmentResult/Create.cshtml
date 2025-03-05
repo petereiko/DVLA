@@ -419,7 +419,7 @@
                                                     <h5>7.	RESULTS CONCLUSION (Required)</h5>
                                                     <hr />
                                                     <select onchange="ChangeResultConclusion(this)" asp-for="ResultConclusion" asp-items="(SelectList)ViewBag.ResultConclusions" style="width:100%;" class="form-control">
-                                                        <option>--Select Conclusion--</option>
+                                                        <option value="">--Select Conclusion--</option>
                                                     </select>
                                                     @* @Html.DropDownListFor(model => model.ResultConclusion, (SelectList)ViewBag.ResultConclusions, "", new { @style = "width:100%;", @class = "form-control" }) *@
                                                 </div>

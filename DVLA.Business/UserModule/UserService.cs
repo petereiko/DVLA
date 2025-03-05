@@ -106,7 +106,7 @@ namespace DVLA.Business.UserModule
             {
                 CreatedDate = u.CreatedDate,
                 Email = u.Email,
-                DefaultRole = u.DefaultRole,
+                //DefaultRole = u.DefaultRole,
                 FirstName = u.FirstName,
                 IsFirstLogin = u.IsFirstLogin,
                 LastName = u.LastName,
@@ -158,14 +158,14 @@ namespace DVLA.Business.UserModule
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Phone = user.PhoneNumber,
-                    Role = new() { Id = role.Id, Name = role.Name },
-                    Roles = roles.Select(x => new RoleViewModel
-                    {
-                        Id = x.Id,
-                        Name = x.Name
-                    }).ToList(),
+                    //Role = new() { Id = role.Id, Name = role.Name },
+                    //Roles = roles.Select(x => new RoleViewModel
+                    //{
+                    //    Id = x.Id,
+                    //    Name = x.Name
+                    //}).ToList(),
                     IsFirstLogin = user.IsFirstLogin,
-                    DefaultRole = user.DefaultRole,
+                    //DefaultRole = user.DefaultRole,
                     EmailConfirmed = user.EmailConfirmed,
                     IsActive = user.IsActive,
                     OptometristFirmId = optometricUser?.OptometristFirmId
@@ -191,14 +191,14 @@ namespace DVLA.Business.UserModule
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Phone = user.PhoneNumber,
-                    Role = new() { Id = role.Id, Name = role.Name },
-                    Roles = roles.Select(x => new RoleViewModel
-                    {
-                        Id = x.Id,
-                        Name = x.Name
-                    }).ToList(),
+                    //Role = new() { Id = role.Id, Name = role.Name },
+                    //Roles = roles.Select(x => new RoleViewModel
+                    //{
+                    //    Id = x.Id,
+                    //    Name = x.Name
+                    //}).ToList(),
                     IsFirstLogin = user.IsFirstLogin,
-                    DefaultRole = role.Name,
+                    //DefaultRole = role.Name,
                     EmailConfirmed = user.EmailConfirmed,
                     IsActive = user.IsActive
                 };
@@ -222,11 +222,11 @@ namespace DVLA.Business.UserModule
                  LastName = x.LastName,
                  Id = x.Id,
                  Phone = x.PhoneNumber,
-                 DefaultRole = x.DefaultRole,
+                 //DefaultRole = x.DefaultRole,
                  CreatedDate = x.CreatedDate,
                  EmailConfirmed = x.EmailConfirmed,
                  IsActive = x.IsActive
-             }).Where(x => x.DefaultRole != "Facility Manager")
+             })/*.Where(x => x.DefaultRole != "Facility Manager")*/
              .ToListAsync();
                 result.TotalCount = await query.CountAsync();
                 result.PageIndex = model.PageIndex;
@@ -306,9 +306,9 @@ namespace DVLA.Business.UserModule
                     IsFirstLogin = user.IsFirstLogin,
                     LastName = user.LastName,
                     Phone = user.PhoneNumber,
-                    Role = new() { Name = role, Id = applicationRole.Id },
+                    //Role = new() { Name = role, Id = applicationRole.Id },
                     Id = user.Id,
-                    DefaultRole = role,
+                    //DefaultRole = role,
                     OptometristFirmId = optometristFirmUser?.OptometristFirmId,
                     EmailConfirmed = user.EmailConfirmed,
                     MobileNumber = user.MobileNumber,
@@ -352,9 +352,9 @@ namespace DVLA.Business.UserModule
                     IsFirstLogin = user.IsFirstLogin,
                     LastName = user.LastName,
                     Phone = user.PhoneNumber,
-                    Role = new() { Name = role, Id = applicationRole.Id },
+                    //Role = new() { Name = role, Id = applicationRole.Id },
                     Id = user.Id,
-                    DefaultRole = role,
+                    //DefaultRole = role,
                     OptometristFirmId = optometristFirmUser?.OptometristFirmId,
                     EmailConfirmed = user.EmailConfirmed,
                     MobileNumber = user.MobileNumber,
@@ -428,9 +428,9 @@ namespace DVLA.Business.UserModule
                     IsFirstLogin = user.IsFirstLogin,
                     LastName = user.LastName,
                     Phone = user.PhoneNumber,
-                    Role = new() { Name = role, Id = applicationRole.Id },
-                    Id = user.Id,
-                    DefaultRole = role,
+                    //Role = new() { Name = role, Id = applicationRole.Id },
+                    Id = user.Id, 
+                    //DefaultRole = role,
                     OptometristFirmId = optometristFirmUser?.OptometristFirmId,
                     EmailConfirmed = user.EmailConfirmed,
                     MobileNumber = user.MobileNumber,
@@ -481,9 +481,9 @@ namespace DVLA.Business.UserModule
                     IsFirstLogin = user.IsFirstLogin,
                     LastName = user.LastName,
                     Phone = user.PhoneNumber,
-                    Role = new() { Name = role, Id = applicationRole.Id },
+                    //Role = new() { Name = role, Id = applicationRole.Id },
                     Id = user.Id,
-                    DefaultRole = role,
+                    //DefaultRole = role,
                     OptometristFirmId = optometristFirmUser?.OptometristFirmId,
                     EmailConfirmed = user.EmailConfirmed,
                     MobileNumber = user.MobileNumber,
@@ -595,7 +595,7 @@ namespace DVLA.Business.UserModule
                             CreatedDate = DateTime.UtcNow,
                             CreatedBy = "System",
                             IsFirstLogin = true,
-                            DefaultRole = model.Role.Name
+                            DefaultRole = AppRoles.FACILITYOWNER
                         };
                         string password = Guid.NewGuid().ToString().Substring(0, 7).Replace("-", "");
 
@@ -608,22 +608,22 @@ namespace DVLA.Business.UserModule
                         }
                         if (identityResult.Succeeded)
                         {
-                            var role = await _roleManager.Roles.AsNoTracking().FirstOrDefaultAsync(x => x.Name == model.Role.Name);
+                            var role = await _roleManager.Roles.AsNoTracking().FirstOrDefaultAsync(x => x.Name == AppRoles.FACILITYOWNER);
                             if (role == null)
                             {
-                                identityResult = await _roleManager.CreateAsync(new ApplicationRole { Id = Guid.NewGuid().ToString(), Name = model.Role.Name });
+                                identityResult = await _roleManager.CreateAsync(new ApplicationRole { Id = Guid.NewGuid().ToString(), Name = AppRoles.FACILITYOWNER });
                                 if (!identityResult.Succeeded)
                                 {
                                     await transaction.RollbackAsync();
-                                    response.Message = $"Could not create {model.Role.Name} role";
+                                    response.Message = $"Could not create {AppRoles.FACILITYOWNER} role";
                                     return response;
                                 }
                             }
-                            identityResult = await _userManager.AddToRoleAsync(user, model.Role.Name);
+                            identityResult = await _userManager.AddToRoleAsync(user, AppRoles.FACILITYOWNER);
                             if (!identityResult.Succeeded)
                             {
                                 await transaction.RollbackAsync();
-                                response.Message = $"Could not assign the User a {model.Role.Name} Role";
+                                response.Message = $"Could not assign the User a {AppRoles.FACILITYOWNER} Role";
                                 return response;
                             }
                         }
@@ -729,7 +729,7 @@ namespace DVLA.Business.UserModule
                         string previousRole = user.DefaultRole;
 
                         user.PhoneNumber = model.Phone.Trim();
-                        user.DefaultRole = model.DefaultRole;
+                        //user.DefaultRole = model.DefaultRole;
                         //user.Email = model.Email.Trim();
                         user.FirstName = model.FirstName.Trim();
                         user.LastName = model.LastName.Trim();
@@ -743,23 +743,23 @@ namespace DVLA.Business.UserModule
                             return response;
                         }
 
-                        if (previousRole != model.DefaultRole)
-                        {
-                            identityResult = await _userManager.RemoveFromRoleAsync(user, previousRole);
-                            if (!identityResult.Succeeded)
-                            {
-                                await transaction.RollbackAsync();
-                                response.Message = identityResult.Errors.Select(x => x.Description).FirstOrDefault();
-                                return response;
-                            }
-                            identityResult = await _userManager.AddToRoleAsync(user, model.DefaultRole);
-                            if (!identityResult.Succeeded)
-                            {
-                                await transaction.RollbackAsync();
-                                response.Message = identityResult.Errors.Select(x => x.Description).FirstOrDefault();
-                                return response;
-                            }
-                        }
+                        //if (previousRole != model.DefaultRole)
+                        //{
+                        //    identityResult = await _userManager.RemoveFromRoleAsync(user, previousRole);
+                        //    if (!identityResult.Succeeded)
+                        //    {
+                        //        await transaction.RollbackAsync();
+                        //        response.Message = identityResult.Errors.Select(x => x.Description).FirstOrDefault();
+                        //        return response;
+                        //    }
+                        //    identityResult = await _userManager.AddToRoleAsync(user, model.DefaultRole);
+                        //    if (!identityResult.Succeeded)
+                        //    {
+                        //        await transaction.RollbackAsync();
+                        //        response.Message = identityResult.Errors.Select(x => x.Description).FirstOrDefault();
+                        //        return response;
+                        //    }
+                        //}
 
                         response.Message = $"Account updated successfully";
                         await transaction.CommitAsync();

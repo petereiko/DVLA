@@ -1,10 +1,14 @@
 ﻿using DVLA.Business.UserModule;
 using DVLA.Data;
+using DVLA.Data.Models.Auth;
+using DVLA.Data.Models.DataObjects.DTOs;
 using DVLA.Data.Models.DataObjects.UtilityObjects;
 using DVLA.Data.Models.DataObjects.ViewModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,11 +18,13 @@ namespace DVLA.UI.Controllers
     {
         private readonly IUserService _userService;
         private readonly ILogger<AccountController> _logger;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public AccountController(IUserService userService, ILogger<AccountController> logger)
+        public AccountController(IUserService userService, ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager)
         {
             _userService = userService;
             _logger = logger;
+            _roleManager = roleManager;
         }
 
         [HttpGet]
@@ -84,7 +90,6 @@ namespace DVLA.UI.Controllers
                 model.Errors.Add(ModelState.Values.SelectMany(x => x.Errors).FirstOrDefault()?.ErrorMessage);
                 return View(model);
             }
-            model.Role = new() { Name = AppConstants.Roles[0] };
             var onboardUserResult = await _userService.OnboardUser(model);
             return View(model);
         }

@@ -168,7 +168,11 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
                         var userId = applicationUser.Id;
 
-                        await _userManager.AddToRoleAsync(applicationUser, model.DefaultRole);
+                        foreach (var item in model.Roles)
+                        {
+                            await _userManager.AddToRoleAsync(applicationUser, item.Name);
+                        }
+                        
 
                         var code = await _userManager.GeneratePasswordResetTokenAsync(applicationUser);
 

@@ -1,11 +1,15 @@
 ﻿@using DVLA.Data.Models.DataObjects.ViewModels
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration _configuration;
 @{
     ViewData["Title"] = "Login";
     Layout = "~/Views/Shared/_AuthLayout.cshtml";
+
 }
 @model LoginViewModel
 
 <form asp-action="Login" method="post">
+    <img src="~/logos/ODDVLAFullcolor.png" width="150" height="150" alt="logo..."/>
     <div class="mb-3">
         <label for="Email" class="form-label">Email</label>
         <input type="email" asp-for="Email" class="form-control" aria-describedby="emailHelp">
@@ -28,6 +32,13 @@
         <p class="fs-4 mb-0 fw-medium">Register a Facility?</p>
         <a class="text-primary fw-medium ms-2" asp-action="Create" asp-controller="OnlineApplicant" asp-area="Registration" >
             Applicant Registration
+        </a>
+    </div>
+
+    <div class="d-flex align-items-center justify-content-center">
+       @*  <p class="fs-4 mb-0 fw-medium">Verification Portal</p> *@
+        <a class="text-primary fw-medium ms-2" href="@_configuration["AppConstants:VerificationPortal"]">
+            Verification Portal
         </a>
     </div>
 </form>

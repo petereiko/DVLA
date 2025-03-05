@@ -317,7 +317,7 @@ namespace DVLA.Business.ReportModule
             return result;
         }
 
-        public async Task<List<OptometristFirmModel>> FetchAllOptometristFirms()
+        public async Task<List<OptometristFirmModel>> FetchAllOptometristFirms(int region, int? district)
         {
             var result = new List<OptometristFirmModel>();
             try
@@ -328,6 +328,8 @@ namespace DVLA.Business.ReportModule
                     using (SqlCommand cmd = new SqlCommand("FetchAllOptometristFirms", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.Add(new SqlParameter("@Region", region));
+                        cmd.Parameters.Add(new SqlParameter("@District", district ?? System.Data.SqlTypes.SqlInt32.Null));
 
                         await conn.OpenAsync();
                         using (var reader = await cmd.ExecuteReaderAsync())

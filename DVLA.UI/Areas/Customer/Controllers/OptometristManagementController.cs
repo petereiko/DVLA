@@ -51,11 +51,13 @@ namespace DVLA.UI.Areas.Customer.Controllers
             _logger = logger;
         }
         // GET: User
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var optometristFirmUser = _optometristUserQuery.FilterAsync(x => x.ApplicationUserId == currentUserId).Result.FirstOrDefault();
             int OptometristFirmId = optometristFirmUser == null ? 0 : optometristFirmUser.OptometristFirmId;
-            var users = _userRepository.GetUsers(AppRoles.SYSTEMADMIN,currentUserId).Where(x => x.OptometristFirmId == OptometristFirmId && x.DefaultRole == AppRoles.OPTOMETRIST);
+            ApplicationUser user = await _userManager.FindByIdAsync(currentUserId);
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+            var users = _userRepository.GetUsers(AppRoles.SYSTEMADMIN, currentUserId).Where(x => x.OptometristFirmId == OptometristFirmId && roles.Contains(AppRoles.OPTOMETRIST));
             _AuditRepo.AddAudit(Activities.VIEW_OPTOMETRIST, "View Optomstrist");
             return View(users);
         }

@@ -9,6 +9,7 @@ using DVLA.DATA.Domains;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -70,15 +71,16 @@ namespace DVLA.UI.Areas.Admin.Controllers
         }
 
 
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
             if (string.IsNullOrEmpty(User.Identity.Name))
             {
                 return RedirectToAction("Index", "Admin", new { area = "Admin" });
             }
-            ViewBag.Roles = _roleManager.Roles.ToList();
+            UserViewModel model = new();
+            model.Roles = await _roleManager.Roles.AsNoTracking().Select(x => new CheckBoxListItemDto { Id = x.Id, IsChecked = false, Name = x.Name }).ToListAsync();
             ViewBag.OptometristFirms = _optometristQuery.GetAll().OrderBy(x => x.BusinessName).ToList();
-            return View(new UserViewModel());
+            return View(model);
         }
 
         [HttpPost]
@@ -124,7 +126,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                         UserName = model.Email,
                         CreatedBy = currentUserId,
                         Pin = model.PIN,
-                        DefaultRole = model.DefaultRole,
+                        //DefaultRole = model.DefaultRole,
                         EmailConfirmed = model.EmailConfirmed,
                         PhoneNumber = model.Phone,
                         IsDeleted = false
@@ -136,7 +138,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
 
                     if (user.Succeeded)
                     {
-                        if (model.OptometristFirmId > 0 && (model.DefaultRole != AppRoles.SYSTEMADMIN || model.DefaultRole != AppRoles.SLOTMANAGER))
+                        if (model.OptometristFirmId > 0 && (model.Roles.Where(x=>x.IsChecked).Any(r=>r.Name != AppRoles.SYSTEMADMIN || r.Name != AppRoles.SLOTMANAGER)))
                         {
                             _optometristUserQuery.Add(new OptometristFirmUser()
                             {
@@ -149,7 +151,11 @@ namespace DVLA.UI.Areas.Admin.Controllers
                         }
 
                         //var userId = applicationUser.Id;
-                        await _userManager.AddToRoleAsync(applicationUser, model.DefaultRole);
+                        foreach (var item in model.Roles.Where(x=>x.IsChecked))
+                        {
+                            await _userManager.AddToRoleAsync(applicationUser, item.Name);
+                        }
+                        
 
                         var code = await _userManager.GeneratePasswordResetTokenAsync(applicationUser);
 
@@ -188,7 +194,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
             }
             ViewBag.Roles = _roleManager.Roles.ToList();
             ViewBag.OptometristFirms = _optometristQuery.GetAll().OrderBy(x => x.BusinessName).ToList();
-            var model = _userRepository.GetUserDetails(Id);
+            UserViewModel model = _userRepository.GetUserDetails(Id);
             model.Id = Id;
             return View(model);
         }

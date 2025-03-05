@@ -41,6 +41,11 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                             <h2 class="mb-1 fs-7 fw-bolder">@_configuration["AppConstants:AppNameName"]</h2>
+                                            <p style="font-size: 20px !important;"> <strong>THE OFFICIAL EYE TEST PLATFORM</strong></p>
+                                            <p style="font-size: 16px !important;"> <strong>IN PARTNERSHIP WITH DVLA AND GHANA OPTOMETRIC ASSOCIATION</strong></p>
+
+                                            <a href="@_configuration["AppConstants:VerificationPortal"]" target="_blank" class="btn btn-rounded btn-primary w-30 py-9 mb-3 " style="background-color: #4690AD;"><i class="ti ti-send fs-4 me-2"></i>VERIFY APPLICANT</a>
+                                            <p style="font-size: 16px !important;">© Copyright @DateTime.UtcNow.Year. All Rights Reserved. Powered by Ingtech LLC <a href="https://www.ingtechllc.com"> <img src="https://ingtechllc.com/wp-content/uploads/2024/07/it-logo.png" width="20px"></a></p>
                                         </div>
                                         <div class="col-md-12">
                                             <img src="~/dist/assets/images/backgrounds/Federal-Ministry-of-health-Colour-Version-2.webp" alt="" class="img-fluid">
@@ -245,26 +250,28 @@
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <script>
+        @* <script>
             Swal.fire({
                 title: 'Success',
                 text: '@TempData["SuccessMessage"].ToString()',
                 icon: 'success'
             });
-        </script>
+        </script> *@
+        <div class="alert alert-danger">@TempData["SuccessMessage"].ToString()</div>
 
         TempData["SuccessMessage"] = null;
     }
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <script>
+        @* <script>
             Swal.fire({
                 title: 'Error',
                 text: '@TempData["ErrorMessage"].ToString()',
                 icon: 'error'
             });
-        </script>
+        </script> *@
+        <div class="alert alert-danger">@TempData["ErrorMessage"].ToString()</div>
 
         TempData["ErrorMessage"] = null;
     }
@@ -298,6 +305,7 @@
         });
 
     </script>
+    <footer style="text-align:center">copyright @DateTime.Now.Year, In Partnership with DVLA and Ghana Optometric Association. Powered by Ingtech LLC.</footer>
 </body>
 
 </html>

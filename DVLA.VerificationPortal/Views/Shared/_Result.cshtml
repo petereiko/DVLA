@@ -1,0 +1,50 @@
+﻿@using DVLA.VerificationPortal.Shared.DTOs
+@model IEnumerable<VisualAssessmentResultDto>
+@{
+    int sn = 0;
+}
+
+
+
+
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title">Visual Assessment Result</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>First Name</th>
+                            <th>Surname</th>
+                            <th>Reference #</th>
+                            <th>Test Date</th>
+                            <th>Access Type</th>
+                            <th>Result</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            sn++;
+                            <tr>
+                                <td>@sn</td>
+                                <td>@item.FirstName</td>
+                                <td>@item.Surname</td>
+                                <td>@item.ReferenceNumber</td>
+                                <td>@item.TestDate?.ToString("yyyy-MM-dd")</td>
+                                <td>@item.AccessType</td>
+                                <td>@item.ResultConclusion</td>
+                                <td><a class="btn btn-primary" asp-action="Details" asp-route-id="@item.VisualAssessmentResultId">Details</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

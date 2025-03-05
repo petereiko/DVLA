@@ -26,7 +26,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Favicon icon-->
-    <link rel="shortcut icon" type="image/png" href="~/favicons/favicon.ico" />
+    <link rel="shortcut icon" type="image/png" href="~/logos/ODDVLAFullcolor.png" />
 
     <!-- Core Css -->
     <link rel="stylesheet" href="@Url.Content("~/bootstrapdemos.wrappixel.com/materialpro/dist/assets/css/styles.css")" />
@@ -37,7 +37,7 @@
     <link href="@Url.Content("~/cdn.datatables.net/buttons/2.4.2/css/buttons.datatables.min.css")" rel="stylesheet" />
     <link href="@Url.Content("~/bootstrapdemos.wrappixel.com/materialpro/dist/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css")" rel="stylesheet" />
 
-    <title>DVLA</title>
+    <title>OPTODRIVE</title>
 </head>
 
 <body>
@@ -63,10 +63,10 @@
                         <div class="d-none d-lg-block">
                             <div class="brand-logo d-flex align-items-center justify-content-between">
                                 <a href="../main/index.html" class="text-nowrap logo-img d-flex align-items-center gap-2">
-                                    <b class="logo-icon">
+                                    <b class="logo-icon" style="display:block !important">
                                         <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
                                         <!-- Dark Logo icon -->
-                                        <img src="~/logos/ds_logo.png" height="50" width="50" alt="homepage" class="dark-logo" />
+                                        <img src="~/logos/ODDVLAwhite.png" height="50" width="50" alt="homepage" class="dark-logo" />
                                         <!-- Light Logo icon -->
                                         <img src="~/logos/white_ds_logo.png" height="50" width="50" alt="homepage" class="light-logo" />
                                     </b>
@@ -1512,7 +1512,7 @@
                                         <div class="d-sm-flex d-none gap-3 no-block justify-content-end align-items-center">
                                             <div class="d-flex gap-2">
                                                 <div class="">
-                                                    <small>Unused Learner's Slots</small>
+                                                    <small>Available Learner’s Slots</small>
                                                     <h4 class="text-primary mb-0">@quantities[0]</h4>
                                                 </div>
                                                 <div class="">
@@ -1521,7 +1521,7 @@
                                             </div>
                                             <div class="d-flex gap-2">
                                                 <div class="">
-                                                    <small>Unused Other Slots</small>
+                                                    <small>Available Other Slots</small>
                                                     <h4 class="text-secondary mb-0">@quantities[1]</h4>
                                                 </div>
                                                 <div class="">
@@ -1851,26 +1851,29 @@
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <script>
+       @*  <script>
             Swal.fire({
                 title: 'Success',
                 text: '@TempData["SuccessMessage"].ToString()',
                 type: 'success'
             });
-        </script>
+        </script> *@
+        <div class="alert alert-danger">@TempData["SuccessMessage"].ToString()</div>
 
         TempData["SuccessMessage"] = null;
     }
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <script>
+        @* <script>
             Swal.fire({
                 title: 'Error',
                 text: '@TempData["ErrorMessage"].ToString()',
                 type: 'error'
             });
-        </script>
+        </script> *@
+
+        <div class="alert alert-danger">@TempData["ErrorMessage"].ToString()</div>
 
         TempData["ErrorMessage"] = null;
     }

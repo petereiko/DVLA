@@ -1,0 +1,144 @@
+﻿@using DVLA.VerificationPortal.Shared.DTOs
+@model VisualAssessmentResultDto
+
+@{
+    ViewData["Title"] = "Visual Assessment Details";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+
+        .details-section {
+            margin-bottom: 20px;
+        }
+
+        .details-section h2 {
+            font-size: 1.5em;
+            color: #333;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .details-section p {
+            margin: 5px 0;
+        }
+
+        .image-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .value {
+            color: #000;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #4a90e2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Visual Assessment Details</h1>
+
+        <!-- Personal Information Section -->
+        <div class="details-section">
+            <h2>Personal Information</h2>
+            <p><span class="label">Name:</span> <span class="value">@Model.NameTitle @Model.FirstName @Model.Surname</span></p>
+            <p><span class="label">Date of Birth:</span> <span class="value">@Model.DOB?.ToString("dd/MM/yyyy")</span></p>
+            <p><span class="label">Drivers Licence:</span> <span class="value">@Model.DriversLicence</span></p>
+            <p><span class="label">DVLA Reference No:</span> <span class="value">@Model.DVLAReferenceNo</span></p>
+            <p><span class="label">Contact Number:</span> <span class="value">@Model.ContactNumber</span></p>
+            <p><span class="label">Email:</span> <span class="value">@Model.Email</span></p>
+            <p><span class="label">Postal Address:</span> <span class="value">@Model.PostalAddress</span></p>
+        </div>
+
+        <!-- Test Details Section -->
+        <div class="details-section">
+            <h2>Test Details</h2>
+            <p><span class="label">Test Type:</span> <span class="value">@Model.TestType</span></p>
+            <p><span class="label">Result Service Type:</span> <span class="value">@Model.ResultServiceType</span></p>
+            <p><span class="label">Pass/Fail:</span> <span class="value">@Model.PassOrFail</span></p>
+            <p><span class="label">Test Date:</span> <span class="value">@Model.TestDate?.ToString("dd/MM/yyyy")</span></p>
+            <p><span class="label">Result Conclusion:</span> <span class="value">@Model.ResultConclusion</span></p>
+        </div>
+
+        <!-- Visual Test Results Section -->
+        <div class="details-section">
+            <h2>Visual Test Results</h2>
+            <p><span class="label">Unaided OD:</span> <span class="value">@Model.Unaided_OD</span></p>
+            <p><span class="label">Unaided OS:</span> <span class="value">@Model.Unaided_OS</span></p>
+            <p><span class="label">Unaided OU:</span> <span class="value">@Model.Unaided_OU</span></p>
+            <p><span class="label">BCV OD:</span> <span class="value">@Model.BCV_OD</span></p>
+            <p><span class="label">BCV OS:</span> <span class="value">@Model.BCV_OS</span></p>
+            <p><span class="label">BCV OU:</span> <span class="value">@Model.BCV_OU</span></p>
+            <p><span class="label">Glare Test OD:</span> <span class="value">@Model.GlareTest_BCV_OD</span></p>
+            <p><span class="label">Glare Test OS:</span> <span class="value">@Model.GlareTest_BCV_OS</span></p>
+            <p><span class="label">Glare Test OU:</span> <span class="value">@Model.GlareTest_BCV_OU</span></p>
+            <p><span class="label">Colour Vision OU:</span> <span class="value">@Model.ColourVision_BCV_OU</span></p>
+            <p><span class="label">Contrast Sensitivity:</span> <span class="value">@Model.ContrastSensitivity_BCV</span></p>
+            <p><span class="label">Pathological Remarks:</span> <span class="value">@Model.PathologicalRemarks</span></p>
+        </div>
+
+        <!-- Passport Image Section -->
+        <div class="details-section">
+            <h2>Passport Image</h2>
+            <div class="image-container">
+                <img src="@Model.PassportImageUrl" alt="Passport Image" />
+            </div>
+        </div>
+
+        <!-- Back Link -->
+        <a href="javascript:history.back()" class="back-link">← Back to List</a>
+    </div>
+</body>
+</html>

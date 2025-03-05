@@ -33,8 +33,8 @@ namespace DVLA.VerificationPortal.Domain.Entities
         [StringLength(50)]
         public string? DVLAReferenceNo { get; set; }
 
-        [StringLength(50)]
-        public string? OldDVLAReferenceNo { get; set; }
+        //[StringLength(50)]
+        //public string? OldDVLAReferenceNo { get; set; }
 
         [StringLength(50)]
         public string? FirstName { get; set; }
@@ -93,7 +93,7 @@ namespace DVLA.VerificationPortal.Domain.Entities
         //[StringLength(500)]
         public string? ResultConclusion { get; set; }
 
-        public bool? IsSynchronized { get; set; }
+        //public bool? IsSynchronized { get; set; }
         //public bool? IsGHDriveSynchronized { get; set; }
 
         public DateTime? TestDate { get; set; }
@@ -104,14 +104,14 @@ namespace DVLA.VerificationPortal.Domain.Entities
         public bool? IsRegistration { get; set; }
         public AccessType? AccessType { get; set; }
         public PassResult? PassResult { get; set; }
-        public bool IsTransmitted { get; set; }
+        //public bool IsTransmitted { get; set; }
         public DateTime TransmittedDate { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
-        public DateTime? ModifiedDate { get; set; }
-        public string CreatedBy { get; set; }
-        public string ModifiedBy { get; set; }
-        public bool IsActive { get; set; } = true;
-        public bool IsDeleted { get; set; } = false;
+        //public DateTime? ModifiedDate { get; set; }
+        public string? CreatedBy { get; set; }
+        //public string ModifiedBy { get; set; }
+        //public bool IsActive { get; set; } = true;
+        //public bool IsDeleted { get; set; } = false;
     }
 }

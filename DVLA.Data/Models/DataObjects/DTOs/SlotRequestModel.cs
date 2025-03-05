@@ -35,7 +35,7 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public string ReferenceNumber { get; set; }
         public decimal? AmountPaid { get; set; }
         public List<PriceModel> SlotPriceList { get; set; }
-        public PaymentMethod PaymentMethod { get; set; }
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Online;
 
 
     }

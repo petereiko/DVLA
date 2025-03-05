@@ -19,5 +19,12 @@ namespace DVLA.UI.Areas.Admin.Controllers
             var districts = await _locationService.GetDistrictsByRegion(regionId);
             return Json(districts);
         }
+
+        [HttpGet]
+        public async Task<JsonResult> GetDistrictsByRegionWithFacilities(int regionId)
+        {
+            var districts = await _locationService.GetDistrictsByRegionWithFacilities(regionId);
+            return Json(districts);
+        }
     }
 }

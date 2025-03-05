@@ -2,6 +2,7 @@
 using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Requests;
 using DVLA.VerificationPortal.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -12,10 +13,10 @@ namespace DVLA.VerificationPortal.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly IUserRepository _userService;
+        private readonly IUserService _userService;
         private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IUserRepository userService, ILogger<AccountController> logger)
+        public AccountController(IUserService userService, ILogger<AccountController> logger)
         {
             _userService = userService;
             _logger = logger;
@@ -38,7 +39,7 @@ namespace DVLA.VerificationPortal.Controllers
             }
             
 
-            ApplicationUserDto userModel = await _userService.GetUserByEmail(model.Email);
+            ApplicationUserDto userModel = await _userService.GetUserByEmailAsync(model.Email);
             if (userModel == null)
             {
                 model.Errors.Add("Invalid Email/Password");
@@ -46,16 +47,16 @@ namespace DVLA.VerificationPortal.Controllers
             }
             if (userModel.IsFirstLogin)
             {
-                string token = await _userService.GeneratePasswordResetToken(userModel.Id);
+                string token = await _userService.GeneratePasswordResetTokenAsync(userModel.Id);
                 return RedirectToAction("ResetPassword", new { id = userModel.Id, token = token });
             }
-            MessageResponse<ApplicationUserDto> loginResult = await _userService.Login(model);
-            if (loginResult.Success)
+            ApplicationUserDto loginResult = await _userService.LoginAsync(model);
+            if (loginResult!=null)
             {
                 TempData["SuccessMessage"] = "Login Successful";
                     return RedirectToAction("Index", "Home");
             }
-            model.Errors.Add(loginResult.Message);
+            model.Errors.Add("Invalid Email/Password");
             return View(model);
         }
 
@@ -76,7 +77,7 @@ namespace DVLA.VerificationPortal.Controllers
                 model.Errors.Add(ModelState.Values.SelectMany(x => x.Errors).FirstOrDefault()?.ErrorMessage);
                 return View(model);
             }
-            var onboardUserResult = await _userService.OnboardUser(model);
+            var onboardUserResult = await _userService.OnboardUserAsync(model);
             return View(model);
         }
 
@@ -90,7 +91,7 @@ namespace DVLA.VerificationPortal.Controllers
         [HttpPost]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest model)
         {
-            MessageResponse<string> response = await _userService.SendResetPasswordToken(model);
+            MessageResponse response = await _userService.SendResetPasswordTokenAsync(model);
             if (response.Success)
             {
                 //Call Notification Service
@@ -106,7 +107,7 @@ namespace DVLA.VerificationPortal.Controllers
         [HttpGet]
         public async Task<IActionResult> ConfirmEmail(string encodedToken, string userid)
         {
-            var result = await _userService.ConfirmEmail(encodedToken, userid);
+            var result = await _userService.ConfirmEmailAsync(encodedToken, userid);
             if (result)
             {
                 TempData["SuccessMessage"] = "Your account has been successfully activated.";
@@ -131,7 +132,7 @@ namespace DVLA.VerificationPortal.Controllers
                 model.Errors.Add(ModelState.Values.SelectMany(x => x.Errors).FirstOrDefault()?.ErrorMessage);
                 return View(model);
             }
-            var resetPasswordResult = await _userService.ResetPassword(model);
+            var resetPasswordResult = await _userService.ResetPasswordAsync(model);
             if (resetPasswordResult.Success)
             {
                 TempData["SuccessMessage"] = resetPasswordResult.Message;
@@ -141,10 +142,37 @@ namespace DVLA.VerificationPortal.Controllers
             return View(model);
         }
 
+        [Authorize]
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            ChangePasswordRequest request = new();
+            return View(request);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
+        {
+            string email = HttpContext.User.Identity.Name;
+            if (!ModelState.IsValid)
+            {
+                request.Errors.Add(ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage).FirstOrDefault());
+                return View(request);
+            }
+            MessageResponse response = await _userService.ChangePasswordAsync(request);
+            if(response.Success)
+            {
+                TempData["SuccessMessage"] = response.Message;
+                return RedirectToAction("Index", "Home");
+            }
+            return View(request);
+        }
+
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            await _userService.Logout();
+            await _userService.LogoutAsync();
             return RedirectToAction("Login");
         }
 

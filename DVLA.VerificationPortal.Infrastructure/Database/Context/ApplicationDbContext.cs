@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using DVLA.VerificationPortal.Domain.Entities;
@@ -17,8 +18,47 @@ namespace DVLA.VerificationPortal.Infrastructure.Database.Context
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<ApplicationRole> ApplicationRoles { get; set; }
         public DbSet<ApplicationUserRole> ApplicationUserRoles { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<EmailLog> EmailLogs { get; set; }
+        public DbSet<EmailAttachment> EmailAttachments { get; set; }
 
         public DbSet<OptometristFirm> OptometristFirms { get; set; }
         public DbSet<VisualAssessmentResult> VisualAssessmentResults { get; set; }
+
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            //builder.Entity<ApplicationUserRole>(entity =>
+            //{
+            //    entity.HasKey(ur => new { ur.UserId, ur.RoleId }); // Composite primary key
+            //});
+
+            //builder.Entity<ApplicationUser>(entity =>
+            //{
+            //    entity.ToTable("Users");
+            //});
+
+            //builder.Entity<ApplicationRole>(entity =>
+            //{
+            //    entity.ToTable("Roles");
+            //});
+
+            //builder.Entity<ApplicationUserRole>(entity =>
+            //{
+            //    entity.ToTable("UserRoles");
+
+            //    entity.HasOne<ApplicationUser>()
+            //    .WithMany()
+            //    .HasForeignKey(ur => ur.UserId)
+            //    .OnDelete(DeleteBehavior.Restrict);
+
+            //    entity.HasOne<ApplicationRole>()
+            //    .WithMany()
+            //    .HasForeignKey(ur=>ur.RoleId)
+            //    .OnDelete(DeleteBehavior.Restrict);
+            //});
+        }
     }
 }

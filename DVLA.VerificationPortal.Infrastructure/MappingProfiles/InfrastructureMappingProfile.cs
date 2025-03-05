@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DVLA.VerificationPortal.Domain.Entities;
 using DVLA.VerificationPortal.Infrastructure.Database.Entities;
 using DVLA.VerificationPortal.Shared.DTOs;
 using System;
@@ -14,6 +15,8 @@ namespace DVLA.VerificationPortal.Infrastructure.MappingProfiles
         public InfrastructureMappingProfile()
         {
             CreateMap<ApplicationUserDto, ApplicationUser>().ReverseMap();
+            CreateMap<RoleDto, ApplicationRole>().ReverseMap();
+            CreateMap<VisualAssessmentResultDto, VisualAssessmentResult>().ReverseMap();
         }
     }
 }

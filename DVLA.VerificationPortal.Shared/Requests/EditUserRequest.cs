@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,5 +15,7 @@ namespace DVLA.VerificationPortal.Shared.Requests
         public string Email { get; set; }
         public bool IsActive { get; set; }
         public bool EmailConfirmed { get; set; }
+        public List<SelectListItem> Roles { get; set; } = new();
+        public List<string> Errors { get; set; } = new();
     }
 }

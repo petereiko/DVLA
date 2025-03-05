@@ -57,7 +57,7 @@
                                         <div class="col-sm">
                                             Service Type
                                             <select asp-for="FormData.AccessType" asp-items="Html.GetEnumSelectList<AccessType>()" onchange="AccessTypeChange()" class="form-control">
-                                                <option>Select Access Type</option>
+                                                <option>Select Slot Type</option>
                                             </select>
                                             @Html.ValidationMessageFor(m => m.FormData.AccessType, "", new { @class = "text-danger" })
                                         </div>
@@ -86,7 +86,7 @@
                                         </div>
                                     </div>
                                     <br />
-                                    <div class="form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                    @* <div class="form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
                                         <div class="col-sm">
                                             Payment Type
                                             <select asp-for="FormData.PaymentMethod" asp-items="EnumExtensions.GetEnumSelectListWithDescriptions<PaymentMethod>()" onchange="PaymentMethodChange(this)" class="form-control">
@@ -94,9 +94,9 @@
                                             </select>
                                             @Html.ValidationMessageFor(m => m.FormData.AccessType, "", new { @class = "text-danger" })
                                         </div>
-                                    </div>
+                                    </div> *@
                                     <br />
-                                    <div id="upload-section" class="form-group" style="display:none; margin-bottom:0px !important; padding-bottom:0px !important;">
+                                    @* <div id="upload-section" class="form-group" style="display:none; margin-bottom:0px !important; padding-bottom:0px !important;">
                                         <div mat-input-field id="password-mat-input-field" class="mat-input-field form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
                                             Upload Payment Proof
                                             <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
@@ -104,22 +104,22 @@
                                                 @Html.ValidationMessageFor(m => m.FormData.PostedFile, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> *@
 
-                                    <div id="payment-proof-div" style="width:100%; display:none">
+                                    @* <div id="payment-proof-div" style="width:100%; display:none">
                                         <br />
                                         <center>
                                             <iframe id="payment-proof-display" style="width:100%; height:400px; border:none; text-align:center">
                                             </iframe>
                                         </center>
-                                    </div>
+                                    </div> *@
 
 
                                     <br />
 
                                     <br />
                                     <div class="form-group">
-                                        <input id="btnSubmit" style="display:none;" type="submit" value="Submit Request" class="btn btn-success" />
+                                        <input id="btnSubmit" type="submit" value="Submit Request" class="btn btn-success" />
                                         <input id="btnMakePayment" onclick="ProceedToPayment(this)" style="display:none;" type="button" value="Proceed to Payment" class="btn btn-success" />
                                     </div>
 
@@ -153,19 +153,19 @@
             }
         }
 
-        function PaymentMethodChange(e){
-            console.log(e.value);
-            if (e.value == "Upload") {
-                $('#upload-section').show();
-                $('#btnSubmit').show();
-                $('#btnMakePayment').hide();
-            }
-            else {
-                $('#upload-section').hide();
-                $('#btnSubmit').hide();
-                $('#btnMakePayment').show();
-            }
-        }
+        // function PaymentMethodChange(e){
+        //     console.log(e.value);
+        //     if (e.value == "Upload") {
+        //         $('#upload-section').show();
+        //         $('#btnSubmit').show();
+        //         $('#btnMakePayment').hide();
+        //     }
+        //     else {
+        //         $('#upload-section').hide();
+        //         $('#btnSubmit').hide();
+        //         $('#btnMakePayment').show();
+        //     }
+        // }
 
         function ProceedToPayment(e) {
 

@@ -9,6 +9,5 @@ namespace DVLA.VerificationPortal.Infrastructure.Database.Entities
 {
     public class ApplicationRole:IdentityRole<string>
     {
-
     }
 }

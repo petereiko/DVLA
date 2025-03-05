@@ -3,21 +3,17 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.AspNetCore.Http;
-using System;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using System.IO;
-using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Authentication;
 using System.Globalization;
 using DVLA.VerificationPortal.Infrastructure.Database.Entities;
 using DVLA.VerificationPortal.Infrastructure.Database.Context;
 using DVLA.VerificationPortal.Domain.Interfaces;
 using DVLA.VerificationPortal.Infrastructure.Repositories;
 using DVLA.VerificationPortal.Application.Interfaces;
+using DVLA.VerificationPortal.Infrastructure.MappingProfiles;
+using DVLA.VerificationPortal.Infrastructure;
+using DVLA.VerificationPortal.Application;
+using DVLA.VerificationPortal.Middleware;
+using DVLA.VerificationPortal.Shared.MappingProfiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +32,32 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 //builder.Services.AddMemoryCache();
 builder.Services.AddSignalR();
 
+
+
+//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+//    .AddCookie(options =>
+//    {
+//        options.Cookie.HttpOnly = true;
+//        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Ensure cookies are only sent over HTTPS
+//        options.ExpireTimeSpan = TimeSpan.FromMinutes(10); // Set cookie expiration time
+//        options.LoginPath = "/Account/Login";
+//        options.AccessDeniedPath = "/Account/AccessDenied";
+//        options.SlidingExpiration = true; // Enables sliding expiration
+//    });
+
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    });
 // Add Identity
+builder.Services.AddScoped<UserManager<ApplicationUser>>();
+builder.Services.AddScoped<RoleManager<ApplicationRole>>();
+builder.Services.AddScoped<SignInManager<ApplicationUser>>();
+
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
     //Configure Identity Options
@@ -55,30 +76,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 .AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, string, ApplicationUserRole, IdentityRoleClaim<string>>>()
 .AddDefaultTokenProviders();
 
-//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-//    .AddCookie(options =>
-//    {
-//        options.Cookie.HttpOnly = true;
-//        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Ensure cookies are only sent over HTTPS
-//        options.ExpireTimeSpan = TimeSpan.FromMinutes(10); // Set cookie expiration time
-//        options.LoginPath = "/Account/Login";
-//        options.AccessDeniedPath = "/Account/AccessDenied";
-//        options.SlidingExpiration = true; // Enables sliding expiration
-//    });
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-    });
-
-
-//Add UserManager<ApplicationUser>, RoleManager<ApplicationRole>, and SignInManager<ApplicationUser>
-builder.Services.AddScoped<UserManager<ApplicationUser>>();
-builder.Services.AddScoped<RoleManager<ApplicationRole>>();
-builder.Services.AddScoped<SignInManager<ApplicationUser>>();
 
 
 builder.Services.AddSession(options =>
@@ -90,16 +88,24 @@ builder.Services.AddSession(options =>
 builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
 
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddInfrastructureServices();
+builder.Services.AddApplicationServices();
 
 
+builder.Services.AddAutoMapper(config =>
+{
+    config.AddMaps(typeof(InfrastructureMappingProfile));
+    config.AddMaps(typeof(SharedMappingProfile));
+});
 
 
 
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -135,11 +141,11 @@ using (var scope = app.Services.CreateScope())
     var scopedProvider = scope.ServiceProvider;
 
     // Resolve the scoped service
-    var userService = scopedProvider.GetRequiredService<IUserRepository>();
+    var userService = scopedProvider.GetRequiredService<IUserService>();
 
     // Call the method on the scoped service
-    await userService.SeedRoles();
-    await userService.SeedSuperAdmin();
+    await userService.SeedRolesAsync();
+    await userService.SeedSuperAdminAsync();
 }
 
 app.Run();

@@ -34,7 +34,6 @@
     <link href="@Url.Content("~/bootstrapdemos.wrappixel.com/materialpro/dist/assets/libs/datatables.net-bs5/css/datatables.bootstrap5.min.css")" rel="stylesheet" />
     <link href="@Url.Content("~/cdn.datatables.net/buttons/2.4.2/css/buttons.datatables.min.css")" rel="stylesheet" />
     <link href="@Url.Content("~/bootstrapdemos.wrappixel.com/materialpro/dist/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css")" rel="stylesheet" />
-
     <title>DVLA</title>
 </head>
 
@@ -147,6 +146,11 @@
                                     
                                 </ul>
                                 <ul class="navbar-nav gap-2 flex-row ms-auto align-items-center justify-content-center">
+                                    @* <li class="nav-item hover-dd dropdown">
+                                        <a style="width:auto !important" class="nav-link" href="javascript:void(0)" id="drop2" aria-expanded="false">
+                                            [@userData.Role]
+                                        </a>
+                                    </li> *@
                                     <li class="nav-item hover-dd dropdown">
                                         <a style="width:auto !important" class="nav-link" href="javascript:void(0)" id="drop2" aria-expanded="false">
                                             @userData.Email
@@ -227,10 +231,10 @@
                                                     </div>
                                                 </div>
                                                 <div class="message-body pb-3">
-                                                    @* <div class="px-3 pt-3">
+                                                    <div class="px-3 pt-3">
                                                         <div class="h6 mb-0 dropdown-item py-8 px-3 rounded-2 link">
-                                                            <a href="../main/page-user-profile.html" class=" d-flex  align-items-center ">
-                                                                My Profile
+                                                            <a asp-action="ChangePassword" asp-controller="Account" class=" d-flex  align-items-center ">
+                                                                Change Password
                                                             </a>
                                                         </div>
                                                         <div class="h6 mb-0 dropdown-item py-8 px-3 rounded-2 link">
@@ -243,7 +247,7 @@
                                                                 Inbox
                                                             </a>
                                                         </div>
-                                                    </div> *@
+                                                    </div>
                                                     <hr>
                                                     <div class="px-3">
                                                         @* <div class="py-8 px-3 d-flex justify-content-between dropdown-item align-items-center h6 mb-0  rounded-2 link">

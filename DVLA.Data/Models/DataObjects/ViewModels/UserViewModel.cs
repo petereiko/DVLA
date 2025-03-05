@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DVLA.Data.Models.DataObjects.DTOs;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -33,9 +34,11 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
         //[Compare("Password")]
         //public string ConfirmPassword { get; set; }
         public bool EmailConfirmed { get; set; }
-        public RoleViewModel Role { get; set; }
-        public string DefaultRole { get; set; }
-        public List<RoleViewModel> Roles { get; set; }
+        //public RoleViewModel Role { get; set; }
+        //public string DefaultRole { get; set; }
+        public List<CheckBoxListItemDto> Roles { get; set; }
+
+        //public List<RoleViewModel> Roles { get; set; }
         public bool IsFirstLogin { get; set; }
         public DateTime CreatedDate { get; set; }
         public string CreatedBy { get; set; }
