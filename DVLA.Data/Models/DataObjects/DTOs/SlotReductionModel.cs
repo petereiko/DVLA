@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DVLA.Data.Models.Enumerables;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,5 +16,7 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public DateTime DateCreated { get; set; }
         public string CreatedBy { get; set; }
         public string CreatedByFullName { get; set; }
+        public AccessType AccessType { get; set; }
+        public int Quantity { get; set; }
     }
 }

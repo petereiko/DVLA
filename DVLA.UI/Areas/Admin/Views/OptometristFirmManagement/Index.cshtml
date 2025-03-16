@@ -16,27 +16,31 @@
             @* <div class="mb-2">
             <h4 class="card-title mb-0">File export</h4>
             </div> *@
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+            }
+
             <p class="card-subtitle mb-3">
                 <a asp-action="Create" class="btn btn-primary">Create New @ViewData["Title"].ToString()</a>
             </p>
 
-            <form class="row g-3 align-items-center" asp-action="Index">
+            <form method="post" class="row g-3 align-items-center" asp-action="Index">
                 <div class="col-auto">
                     <label for="Region" class="col-form-label">Region</label>
                 </div>
                 <div class="col-auto">
                     <select id="Region" name="Region" class="form-control">
-                        <option value="@ViewBag.Region">--Select Region--</option>
+                        <option value="">--Select Region--</option>
                         @foreach (var region in (List<Region>)ViewBag.Regions)
                         {
-                            if (selectedRegion == region.Id)
-                            {
-                                                <option value="@region.Id" selected>@region.Name</option>
-                            }
-                            else
-                            {
-                                                <option value="@region.Id">@region.Name</option>
-                            }
+                            <option value="@region.Id">@region.Name</option>
+
                         }
                     </select>
                 </div>
@@ -47,13 +51,16 @@
                 </div>
                 <div class="col-auto">
                     <span id="passwordHelpInline" class="form-text">
-                        <button type="submit" class="btn btn-primary">Search</button>
+                        <button type="submit" id="btn-search" class="btn btn-primary">Search</button>
                     </span>
                 </div>
             </form>
             <br />
+            <label id="lblMessage"></label>
+            <br />
             <div class="table-responsive">
-                <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap"
+                >
                     <thead>
                         <!-- start row -->
                         <tr>
@@ -68,36 +75,36 @@
                         </tr>
                         <!-- end row -->
                     </thead>
-                    <tbody>
+                    <tbody id="table-content">
                         @foreach (OptometristFirmModel item in Model)
                         {
-                                    <!-- start row -->
-                                    <tr>
-                                        <td>@item.BusinessName</td>
-                                        <td>@item.SlotBalance</td>
-                                        <td>@item.ContactPhoneNumber</td>
-                                        <td>@item.AccreditationNumber</td>
-                                        <td>@item.RegionName</td>
-                                        <td>@item.Town</td>
-                                        <td>@item.DigitalAddress</td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button class="btn btn-primary dropdown-toggle show" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="true">
-                                                    Action
-                                                </button>
-                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(0px, 40.8px, 0px);">
-                                                    <li>
-                                                        <a asp-action="Update" asp-route-token="@Utility.Encrypt(item.Id.ToString())" class="dropdown-item">Update</a>
-                                                    </li>
-                                                    <li>
-                                                        <a onclick="ChangeStatus(@item.Id)" class="dropdown-item">Deactivate</a>
-                                                    </li>
-                                                </ul>
-                                            </div>
+                            <!-- start row -->
+                            <tr>
+                                <td>@item.BusinessName</td>
+                                <td>@item.SlotBalance</td>
+                                <td>@item.ContactPhoneNumber</td>
+                                <td>@item.AccreditationNumber</td>
+                                <td>@item.RegionName</td>
+                                <td>@item.Town</td>
+                                <td>@item.DigitalAddress</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-primary dropdown-toggle show" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="true">
+                                            Action
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(0px, 40.8px, 0px);">
+                                            <li>
+                                                <a asp-action="Update" asp-route-token="@Utility.Encrypt(item.Id.ToString())" class="dropdown-item">Update</a>
+                                            </li>
+                                            <li>
+                                                <a asp-action="ChangeOptometristFirmStatus" asp-route-Id="@item.Id" class="dropdown-item">Deactivate</a>
+                                            </li>
+                                        </ul>
+                                    </div>
 
-                                        </td>
-                                    </tr>
-                                    <!-- end row -->
+                                </td>
+                            </tr>
+                            <!-- end row -->
                         }
                     </tbody>
                 </table>
@@ -110,52 +117,60 @@
 
 
 @section Scripts {
-            <script>
-                function ChangeStatus(Id) {
-                    $.ajax({
-                        url: '@Url.Action("ChangeStatus")?Id=' + Id,
-                        type: 'get',
-                        dataType: 'json',
-                        success: function (response) {
-                            location.reload();
-                        },
-                        error: function (err) {
-                            console.log(err.responseText);
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'Please try again later',
-                                icon: 'error'
-                            });
-                        }
-                    })
-                }
+    <script>
+        function Update(id){
+            location.href='@Url.Action("Update", "OptometristFirmManagement", new { area = "Admin" })?token='+btoa(id);
+        }
 
-                $(function(){
-                    $('#Region').change(function(){
-                        if($(this).val()=="0")
-                        return;
-                            $.ajax({
-                                url: '@Url.Action("GetDistrictsByRegionWithFacilities", "Location")?regionId=' + $(this).val(),
-                            type: 'get',
-                            dataType: 'json',
-                            success: function (response) {
-                                let html = '<option value="">--Select District--</option>';
-                                $.each(response, function(index, district){
-                                    html+=`<option value="${district.value}">${district.text}</option>`;
-                                });
-
-                                $('#District').html(html);
-                            },
-                            error: function (err) {
-                                console.log(err.responseText);
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: 'Please try again later',
-                                    icon: 'error'
-                                });
-                            }
-                        });
+        function ChangeStatus(Id) {
+            $.ajax({
+                url: '@Url.Action("ChangeStatus")?Id=' + Id,
+                type: 'get',
+                dataType: 'json',
+                success: function (response) {
+                    location.reload();
+                },
+                error: function (err) {
+                    console.log(err.responseText);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Please try again later',
+                        icon: 'error'
                     });
+                }
+            })
+        }
+
+        $(function(){
+            $('#Region').change(function(){
+                if($(this).val()=="0")
+                return;
+                    $.ajax({
+                        url: '@Url.Action("GetDistrictsByRegionWithFacilities", "Location")?regionId=' + $(this).val(),
+                    type: 'get',
+                    dataType: 'json',
+                    success: function (response) {
+                        let html = '<option value="">--Select District--</option>';
+                        $.each(response, function(index, district){
+                            html+=`<option value="${district.value}">${district.text}</option>`;
+                        });
+
+                        $('#District').html(html);
+                    },
+                    error: function (err) {
+                        console.log(err.responseText);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Please try again later',
+                            icon: 'error'
+                        });
+                    }
                 });
-            </script>
+            });
+
+        });
+       
+    </script>
+    
+    
 }

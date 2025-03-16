@@ -1,4 +1,5 @@
-﻿using DVLA.Business.NotificationModule;
+﻿using DVLA.Business.EmailModule;
+using DVLA.Business.NotificationModule;
 using DVLA.Business.Repository;
 using DVLA.Business.UserModule;
 using DVLA.Business.VisualAssessmentResultModule;
@@ -27,11 +28,12 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Transactions;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace DVLA.UI.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [Authorize(Roles = $"{AppRoles.FACILITYOWNER}, {AppRoles.OPTOMETRIST}, {AppRoles.SYSTEMADMIN}")]
+    [Authorize(Roles = $"{AppRoles.FACILITYOWNER}, {AppRoles.OPTOMETRIST}, {AppRoles.FRONTOFFICER}, {AppRoles.SYSTEMADMIN}")]
     public class VisualAssessmentResultController : Controller
     {
 
@@ -54,6 +56,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
         private readonly string currentUserId;
         private readonly DVLADbContext _context;
         private readonly IUserService _userService;
+        private readonly IEmailService _emailService;
 
 
         public VisualAssessmentResultController(IRepositoryQuery<OptometristFirmUser> optometristFirmUserRepositoryQuery,
@@ -64,7 +67,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             IRepositoryQuery<VisualAcuityScore> visualAcuityScoreRepositoryQuery,
             IRepositoryQuery<VisualFieldScore> visualFieldScoreRepositoryQuery,
             IUserService userService,
-            IRepositoryQuery<Slot> slotRepositoryQuery, ISmsRepository smsRepository, IAuditRepo AuditRepo, INotificationRepository notificationRepository, ILogger<VisualAssessmentResultController> logger, IWebHostEnvironment environment, DVLADbContext context, IConfiguration configuration)
+            IRepositoryQuery<Slot> slotRepositoryQuery, ISmsRepository smsRepository, IAuditRepo AuditRepo, INotificationRepository notificationRepository, ILogger<VisualAssessmentResultController> logger, IWebHostEnvironment environment, DVLADbContext context, IConfiguration configuration, IEmailService emailService)
         {
             _userService = userService;
             _visualAcuityScoreRepositoryQuery = visualAcuityScoreRepositoryQuery;
@@ -83,6 +86,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             _environment = environment;
             _context = context;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         // GET: Customer/VisualAssessmentResult
@@ -409,12 +413,12 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
                     var newEntry = new VisualAssessmentResult()
                     {
-                        NameTitle = Title == "MR" ? NameTitle.Mr : Title == "MRS" ? NameTitle.Mrs : NameTitle.Other,
+                        //NameTitle = Title == "MR" ? NameTitle.Mr : Title == "MRS" ? NameTitle.Mrs : NameTitle.Other,
                         PassOrFail = PassOrFail == "PASS" ? Data.Models.Enumerables.PassOrFail.Pass : Data.Models.Enumerables.PassOrFail.Fail,
                         PassResult = PassType == "UNLIMITED" ? PassResult.Unlimited : PassType == "LIMITED FOR 3 MONTHS" ? PassResult.ThreeMonths : PassResult.SixMonths,
                         Surname = Surname,
-                        DriversLicence = LicenceNumber,
-                        DVLAReferenceNo = DVLAReferenceNumber,
+                        //DriversLicence = LicenceNumber,
+                        //DVLAReferenceNo = DVLAReferenceNumber,
                         FirstName = FirstName,
                         OtherName = OtherName,
                         DOB = Convert.ToDateTime(DOB),   //(DateTime)DOB.GetDateValue(),
@@ -449,7 +453,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         Status = Status.InProgress,
                         IsSynchronized = false,
                         TestType = TestType == "NEW" ? Data.Models.Enumerables.TestType.NewTest : Data.Models.Enumerables.TestType.ReTest,
-                        OldDVLAReferenceNo = OldDVLAReferenceNumber
+                        //OldDVLAReferenceNo = OldDVLAReferenceNumber
                     };
 
                     list.Add(newEntry);
@@ -506,7 +510,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             return resultService;
         }
 
-        public ActionResult Create(string page, string token = "")
+        public async Task<ActionResult> Create(string page, string token = "")
         {
             try
             {
@@ -527,15 +531,15 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
                     id = long.Parse(Utility.Decrypt(token));
 
-                    var visualAssessmentResults = _visualAssessmentResultRepositoryQuery.FilterAsync(x => x.Id == id).Result.Select(y => new VisualAssessmentResultViewModel()
+                    var visualAssessmentResults = (await _visualAssessmentResultRepositoryQuery.FilterAsync(x => x.Id == id)).Select(y => new VisualAssessmentResultViewModel()
                     {
                         Id = y.Id,
                         //NameTitle = y.NameTitle,
                         PassOrFail = y.PassOrFail,
                         PassResult = y.PassResult,
                         Surname = y.Surname,
-                        DriversLicence = y.DriversLicence,
-                        DVLAReferenceNo = y.DVLAReferenceNo,
+                        //DriversLicence = y.DriversLicence,
+                        //DVLAReferenceNo = y.DVLAReferenceNo,
                         FirstName = y.FirstName,
                         OtherName = y.OtherName,
                         DOB = (DateTime)y.DOB,
@@ -567,9 +571,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         OptometristFirmId = y.OptometristFirmId,
                         PassportImageUrl = y.PassportImageUrl,
                         Status = y.Status,
-                        TestType = (byte)y.TestType,
-                        OldDVLAReferenceNo = y.OldDVLAReferenceNo,
-                        ActionType = "Modify"
+                        TestType = y.TestType,
+                        //OldDVLAReferenceNo = y.OldDVLAReferenceNo,
+                        ActionType = "Modify",
+                        Gender = y.Gender
 
 
                     }).FirstOrDefault();
@@ -602,12 +607,235 @@ namespace DVLA.UI.Areas.Customer.Controllers
             return View(new VisualAssessmentResultViewModel());
         }
 
+
+        private MessageResponse Validation(VisualAssessmentResultViewModel model)
+        {
+            MessageResponse result = new();
+            if (model.Action == Status.Complete && string.IsNullOrEmpty(model.ResultConclusion))
+            {
+                result.Message = "Result Conclusion is required";
+                return result;
+            }
+            if (model.Id > 0) 
+            {
+                VisualAssessmentResult visualAssessmentResult = _visualAssessmentResultRepositoryQuery.GetById(model.Id);
+                if(string.IsNullOrEmpty(visualAssessmentResult.PassportImageUrl) && model.Status==Status.Complete)
+                {
+                    result.Message = "Kindly take a Snapshot or upload a Passport";
+                    return result;
+                }
+                if (model.Gender == null)
+                {
+                    result.Message = "Gender is required";
+                    return result;
+                }
+            }
+            else
+            {
+                if (model.Status == Status.Complete && string.IsNullOrEmpty(model.PassportUploadType))//Validate only when its a Create
+                {
+                    result.Message = "Kindly take a Snapshot or upload a Passport";
+                    return result;
+                }
+                if (model.Gender == null)
+                {
+                    result.Message = "Gender is required";
+                    return result;
+                }
+            }
+
+            
+            if (model.Action == Status.Complete && model.PassOrFail == null)
+            {
+                result.Message = "PassOrFail is required";
+                return result;
+            }
+            if (model.PassOrFail != null)
+            {
+                if (model.PassOrFail == PassOrFail.Pass && model.ResultConclusion == "Not fit to drive")
+                {
+                    result.Message = "Result Conclusion cannot be 'Not fit to drive and PassOrFail is Pass'";
+                    return result;
+                }
+            }
+            if (string.IsNullOrEmpty(model.Surname))
+            {
+                result.Message = "Please enter surname";
+                return result;
+            }
+
+            if (string.IsNullOrEmpty(model.FirstName))
+            {
+                result.Message = "Please enter first name";
+                return result;
+            }
+            if (model.ResultServiceType == null)
+            {
+                result.Message = "Please select a result service type";
+                return result;
+            }
+
+            if (string.IsNullOrEmpty(model.ContactNumber))
+            {
+                result.Message = "Please enter contact number";
+                return result;
+            }
+            if (model.DOB == null)
+            {
+                result.Message = "Please select DOB";
+                return result;
+            }
+            string[] dob = model.DateOfBirth != null ? model.DateOfBirth.Split('-') : null;
+            model.DOB = dob != null ? new DateTime(Convert.ToInt32(dob[0]), Convert.ToInt32(dob[1]), Convert.ToInt32(dob[2])) : model.DOB;
+
+            bool isSubmitted = model.ActionType != "Modify";
+            bool useSlot = isSubmitted;
+
+            if (model.ActionType != "Modify")
+            {
+                if (model.PassportUploadType == "WebCam")
+                {
+
+                    if (string.IsNullOrEmpty(model.PassportImageUrl))
+                    {
+                        result.Message = "Please capture/upload passport";
+                        return result;
+                    }
+                }
+                if (model.PassportUploadType == "FileUpload")
+                {
+                    if (model.Image == null)
+                    {
+                        result.Message = "Please capture/upload passport";
+                        return result;
+                    }
+                }
+
+                if (model.ResultServiceType == null)
+                {
+                    result.Message = "Please select service type";
+                    return result;
+                }
+
+                if (model.ResultServiceType != null)
+                {
+                    if (model.ResultServiceType == ResultServiceType.LearnerDriversLicence)
+                    {
+                        if (model.LearnerDriversLicence == null)
+                        {
+                            result.Message = "Please select learner licence type";
+                            return result;
+                        }
+                    }
+                }
+
+                if (string.IsNullOrEmpty(model.Unaided_OD))
+                {
+                    result.Message = "Please select Unaided OD";
+                    return result;
+                }
+
+                if (string.IsNullOrEmpty(model.Unaided_OS))
+                {
+                    result.Message = "Please select Unaided OS";
+                    return result;
+                }
+
+                if (string.IsNullOrEmpty(model.BCV_OD))
+                {
+                    result.Message = "Please select BCV OD";
+                    return result;
+                }
+
+                if (string.IsNullOrEmpty(model.BCV_OS))
+                {
+                    result.Message = "Please select BCV OS";
+                    return result;
+                }
+
+                if (string.IsNullOrEmpty(model.BCV_OU))
+                {
+                    result.Message = "Please select BCV OU";
+                    return result;
+                }
+
+                if (string.IsNullOrEmpty(model.HX_BCV_OD))
+                {
+                    result.Message = "Please select HX BCV OD";
+                    return result;
+                }
+
+                if (string.IsNullOrEmpty(model.HX_BCV_OS))
+                {
+                    result.Message = "Please select HX BCV OS";
+                    return result;
+                }
+
+                if (string.IsNullOrEmpty(model.PathologicalRemarks))
+                {
+                    result.Message = "Please type in your observation(s)";
+                    return result;
+                }
+
+                if (string.IsNullOrEmpty(model.ResultConclusion))
+                {
+                    result.Message = "Please type in your observation(s)";
+                    return result;
+                }
+                if (model.PassOrFail == PassOrFail.Pass && model.PassResult == null)
+                {
+                    result.Message = "Please select pass type";
+                    return result;
+                }
+            }
+            result.Success = true;
+            return result;
+        }
+
+
+        public async Task<string> SaveImage(VisualAssessmentResultViewModel model)
+        {
+
+            if (string.IsNullOrEmpty(model.PassportUploadType))
+                return null;
+            string filename = Guid.NewGuid().ToString();
+
+            if (model.PassportUploadType == "WebCam")
+            {
+                model.PassportImageUrl = model.PassportImageUrl.Substring(model.PassportImageUrl.IndexOf(',') + 1);
+                byte[] imageBytes = Convert.FromBase64String(model.PassportImageUrl);
+                var contents = new MemoryStream(imageBytes);
+                // store the file inside ~/project folder(Img)  
+                var path = Path.Combine(_environment.ContentRootPath, "wwwroot", "Passports", filename + ".png");
+                string directory = Path.GetDirectoryName(path);
+                if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+
+                Utility.ResizePicture(contents, path);
+                System.IO.File.WriteAllBytes(path, imageBytes);
+                model.PassportImageUrl = filename + ".png";
+            }
+            else
+            {
+                string extension = Path.GetExtension(model.Image.FileName);
+                var path = Path.Combine(_environment.ContentRootPath, "wwwroot", "Passports", filename + extension);
+                string directory = Path.GetDirectoryName(path);
+                if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+
+                FileStream fs = new FileStream(path, FileMode.Create);
+                await model.Image.CopyToAsync(fs);
+
+                model.PassportImageUrl = Path.GetFileName(path);
+            }
+            return model.PassportImageUrl;
+        }
+
+        
+
         [HttpPost]
         public async Task<ActionResult> Create(VisualAssessmentResultViewModel model)
         {
             try
             {
-
                 var visualAcuitys = _visualAcuityScoreRepositoryQuery.FilterAsync(x => x.IsActive).Result.ToList();
                 var visualFieldScores = _visualFieldScoreRepositoryQuery.FilterAsync(x => x.IsActive).Result.ToList();
                 var colourVisionScores = _visualAssessmentResultRepository.GetColorVisionScores();
@@ -618,181 +846,30 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 ViewBag.SingleImage = new SelectList(visualAcuitys.Where(x => x.Id > 4), "Score", "Score");
                 ViewBag.ResultConclusions = new SelectList(_visualAssessmentResultRepository.ResultConclusion(), "Value", "Text");
 
-                if (model.Action == Status.Complete && string.IsNullOrEmpty(model.ResultConclusion))
+
+                MessageResponse validationResponse = Validation(model);
+                if (!validationResponse.Success)
                 {
-                    ModelState.AddModelError("ResultConclusion", "Result Conclusion is required");
-                    model.Errors.Add("Result Conclusion is required");
+                    model.Errors.Add(validationResponse.Message);
                     return View(model);
                 }
 
-                if (string.IsNullOrEmpty(model.Surname))
+                if (model.Image != null)
                 {
-                    ModelState.AddModelError("Surname", "Please enter surname");
-                    return View(model);
+                    bool isValidSize = Utility.ValidatePassport(model.Image);
+                    if (!isValidSize)
+                    {
+                        model.Errors.Add("Your passport photo is too large. Kindly upload a photo that is 120KB or less");
+                        return View(model);
+                    }
                 }
 
-                if (string.IsNullOrEmpty(model.FirstName))
-                {
-                    ModelState.AddModelError("FirstName", "Please enter first name");
-                    return View(model);
-                }
-                if (model.ResultServiceType == null)
-                {
-                    ModelState.AddModelError("ResultServiceType", "Please select a result service type");
-                    return View(model);
-                }
-
-                if (string.IsNullOrEmpty(model.ContactNumber))
-                {
-                    ModelState.AddModelError("ContactNumber", "Please enter contact number");
-                    return View(model);
-                }
-                if (model.DOB == null)
-                {
-                    ModelState.AddModelError("DOB", "Please select DOB");
-                    return View(model);
-                }
+                model.PassportImageUrl = await SaveImage(model);
 
 
 
-                string[] dob = model.DateOfBirth != null ? model.DateOfBirth.Split('-') : null;
-                model.DOB = dob != null ? new DateTime(Convert.ToInt32(dob[0]), Convert.ToInt32(dob[1]), Convert.ToInt32(dob[2])) : model.DOB;
-
-                bool isSubmitted = model.ActionType != "Modify";
-
-                if (model.ActionType != "Modify")
-                {
-
-                    if (string.IsNullOrEmpty(model.PassportImageUrl) && (model.Image.Length == 0 || model.Image == null))
-                    {
-                        ModelState.AddModelError("PassportImageUrl", "Please capture/upload passport");
-                        return View(model);
-                    }
-
-                    if (model.ResultServiceType == null)
-                    {
-                        ModelState.AddModelError("ResultServiceType", "Please select service type");
-                        return View(model);
-                    }
-
-                    if (model.ResultServiceType != null)
-                    {
-                        if (model.ResultServiceType == ResultServiceType.LearnerDriversLicence)
-                        {
-                            if (model.LearnerDriversLicence == null)
-                            {
-                                ModelState.AddModelError("LearnerDriversLicence", "Please select learner licence type");
-                                return View(model);
-                            }
-                        }
-                    }
-
-                    if (string.IsNullOrEmpty(model.Unaided_OD))
-                    {
-                        ModelState.AddModelError("Unaided_OD", "Please select Unaided OD");
-                        return View(model);
-                    }
-
-                    if (string.IsNullOrEmpty(model.Unaided_OS))
-                    {
-                        ModelState.AddModelError("Unaided_OS", "Please select Unaided OS");
-                        return View(model);
-                    }
-
-                    if (string.IsNullOrEmpty(model.BCV_OD))
-                    {
-                        ModelState.AddModelError("BCV_OD", "Please select BCV OD");
-                        return View(model);
-                    }
-
-                    if (string.IsNullOrEmpty(model.BCV_OS))
-                    {
-                        ModelState.AddModelError("BCV_OS", "Please select BCV OS");
-                        return View(model);
-                    }
-
-                    if (string.IsNullOrEmpty(model.BCV_OU))
-                    {
-                        ModelState.AddModelError("BCV_OU", "Please select BCV OU");
-                        return View(model);
-                    }
-
-                    if (string.IsNullOrEmpty(model.HX_BCV_OD))
-                    {
-                        ModelState.AddModelError("HX_BCV_OD", "Please select HX BCV OD");
-                        return View(model);
-                    }
-
-                    if (string.IsNullOrEmpty(model.HX_BCV_OS))
-                    {
-                        ModelState.AddModelError("HX_BCV_OS", "Please select HX BCV OS");
-                        return View(model);
-                    }
-
-                    if (string.IsNullOrEmpty(model.PathologicalRemarks))
-                    {
-                        ModelState.AddModelError("PathologicalRemarks", "Please type in your observation(s)");
-                        return View(model);
-                    }
-
-                    if (string.IsNullOrEmpty(model.ResultConclusion))
-                    {
-                        ModelState.AddModelError("ResultConclusion", "Please type in your observation(s)");
-                        return View(model);
-                    }
-                    else
-                    {
-                        if (model.PassOrFail == PassOrFail.Pass)
-                        {
-                            if (model.PassResult == null)
-                            {
-                                ModelState.AddModelError("PassResultId", "Please select pass type");
-                                return View(model);
-                            }
-                        }
-                    }
-
-                    model.PassportImageUrl = model.PassportImageUrl.Substring(model.PassportImageUrl.IndexOf(',') + 1);
-
-                    //if (!ModelState.IsValid)
-                    //{
-
-                    //    return View(model);
-                    //}
-
-                    string filename = Guid.NewGuid().ToString();
-
-                    //model.PassportImageUrl = model.PassportImageUrl.Substring(model.PassportImageUrl.IndexOf(',') + 1);
-                    if (model.Image != null && model.Image.Length > 0)
-                    {
-                        string extension = Path.GetExtension(model.Image.FileName);
-                        var path = Path.Combine(_environment.ContentRootPath, "wwwroot", "Passports", filename + extension);
-                        string directory = Path.GetDirectoryName(path);
-                        if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
-
-                        FileStream fs = new FileStream(path, FileMode.Create);
-                        await model.Image.CopyToAsync(fs);
-
-                        model.PassportImageUrl = Path.GetFileName(path);
-                    }
-                    else if (!string.IsNullOrEmpty(model.PassportImageUrl))
-                    {
-                        byte[] imageBytes = Convert.FromBase64String(model.PassportImageUrl);
 
 
-                        var contents = new MemoryStream(imageBytes);
-
-
-                        // store the file inside ~/project folder(Img)  
-                        var path = Path.Combine(_environment.ContentRootPath, "wwwroot", "Passports", filename + ".png");
-                        string directory = Path.GetDirectoryName(path);
-                        if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
-
-                        Utility.ResizePicture(contents, path);
-                        System.IO.File.WriteAllBytes(path, imageBytes);
-                        model.PassportImageUrl = filename + ".png";
-                    }
-                }
 
                 var optometristUser = _optometristFirmUserRepositoryQuery.FilterAsync(x => x.ApplicationUserId == currentUserId).Result.FirstOrDefault();
 
@@ -803,15 +880,18 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 }
 
                 Slot slot = _slotRepositoryQuery.FilterAsync(x => x.OptometristFirmId == optometristUser.OptometristFirmId && x.AccessType == (model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory)).Result.FirstOrDefault();
-                if (slot == null)
+                if (model.Action == Status.Complete)
                 {
-                    model.Errors.Add("There is no available slot to continue with this assessment result");
-                    return View(model);
-                }
-                if (slot.Quantity == 0)
-                {
-                    model.Errors.Add("There is no available slot to continue with this assessment result");
-                    return View(model);
+                    if (slot == null)
+                    {
+                        model.Errors.Add("There is no available slot to continue with this assessment result");
+                        return View(model);
+                    }
+                    if (slot.Quantity <= 0)
+                    {
+                        model.Errors.Add("There is no available slot to continue with this assessment result");
+                        return View(model);
+                    }
                 }
 
                 var context = _context;
@@ -829,32 +909,28 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         if (model.ActionType == "Modify") model.Status = Status.InProgress;
                         else model.Status = Status.Complete;
 
-                        var visualAssessmentResult = await context.VisualAssessmentResults.FirstOrDefaultAsync(x => x.Id == model.Id); //_visualAssessmentResultRepositoryQuery.FilterAsync(x => x.Id == model.Id).Result.FirstOrDefault();
-                        if (visualAssessmentResult == null)
+                        //_visualAssessmentResultRepositoryQuery.FilterAsync(x => x.Id == model.Id).Result.FirstOrDefault();
+                        if (model.Id == 0)
                         {
-                            if (model.Status == Status.Complete && string.IsNullOrEmpty(model.PassportImageUrl))
-                            {
-                                await scope.RollbackAsync();
-                                model.Errors.Add("Kindly upload Passport");
-                                return View(model);
-                            }
+                            
                             string referenceNumber = _visualAssessmentResultRepository.GenerateReferenceNo(optometristUser.OptometristFirmId);
 
-                            visualAssessmentResult = new VisualAssessmentResult()
+                            VisualAssessmentResult visualAssessmentResult = new VisualAssessmentResult()
                             {
                                 //NameTitle = model.NameTitle,
                                 PassOrFail = (model.ResultConclusion == "Fit to drive" || model.ResultConclusion == "Fit to drive with glasses") ? PassOrFail.Pass : PassOrFail.Fail,
                                 PassResult = model.PassResult,
-                                Surname = model.Surname,
-                                DriversLicence = model.DriversLicence,
-                                DVLAReferenceNo = model.DVLAReferenceNo,
+                                Surname = model.Surname, 
+                                 Gender=model.Gender,
+                                //DriversLicence = model.DriversLicence,
+                                //DVLAReferenceNo = model.DVLAReferenceNo,
                                 FirstName = model.FirstName,
                                 OtherName = model.OtherName,
                                 DOB = (DateTime)model.DOB,
                                 PostalAddress = model.PostalAddress,
                                 ContactNumber = model.ContactNumber,
                                 TaxIdentificationNumber = model.TaxIdentificationNumber,
-                                Email = model.Email,
+                                Email = string.IsNullOrEmpty(model.Email) ? "" : _emailService.IsValidEmail(model.Email.Trim()) ? model.Email.Trim() : "",
                                 Unaided_OD = model.Unaided_OD,
                                 Unaided_OS = model.Unaided_OS,
                                 Unaided_OU = model.Unaided_OU,
@@ -869,7 +945,6 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 GlareTest_BCV_OS = model.GlareTest_BCV_OS,
                                 GlareTest_BCV_OU = model.GlareTest_BCV_OU,
                                 ColourVision_BCV_OU = model.ColourVision_BCV_OU,
-                                //ContrastSensitivity_BCV = model.ContrastSensitivity_BCV,
                                 PathologicalRemarks = model.PathologicalRemarks,
                                 ResultConclusion = model.ResultConclusion,
                                 ResultServiceType = model.ResultServiceType,
@@ -884,54 +959,59 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 Status = model.Status,
                                 IsSynchronized = false,
                                 TestType = (TestType)model.TestType,
-                                OldDVLAReferenceNo = model.OldDVLAReferenceNo,
-                                IsTransmitted = false,
+                                //OldDVLAReferenceNo = model.OldDVLAReferenceNo,
+                                IsTransmitted = false, 
+                                CreatedDate=DateTime.UtcNow, IsRegistration=false,
+                                 ContrastSensitivity_BCV=model.ContrastSensitivity_BCV,
                                 AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
-                                
+
                             };
-                            //if (model.LearnerDriversLicence != null) visualAssessmentResultCreate.LearnerDriversLicence = model.LearnerDriversLicence;
                             context.VisualAssessmentResults.Add(visualAssessmentResult);
                             await context.SaveChangesAsync();
-
-
-
-
-                            if (model.Status == Status.Complete)
+                            if (model.Status==Status.Complete)
                             {
+
                                 slot.Quantity = slot.Quantity - 1;
                                 await context.SaveChangesAsync();
 
-                                //Send Sms Notification
-                                string result = model.PassOrFail.ToString(); //EnumHelper<PassOrFail>.GetDisplayValue(model.PassOrFail.GetValueOrDefault());
-
-                                //OnCreateVisualAssessment.Invoke(model, referenceNumber, result, _context);
+                                string result = model.PassOrFail.ToString(); 
 
                                 _smsRepository.SendAssessmentResult(model.FirstName, model.ContactNumber, referenceNumber, result, context);
                                 //send email
                                 _notificationRepository.SendAssessmentResult(model.FirstName, model.ContactNumber, referenceNumber, result, model.Email, context);
-
                             }
-
+                            await scope.CommitAsync();
+                            TempData["SuccessMessage"] = "Eye Test Result created asuccessfully";
+                            _AuditRepo.AddAudit(Activities.CREATE_VISUAL_ASSESSMENT_RESULT, "Create Eye Test Result");
+                            return RedirectToAction("Index");
                         }
                         else
                         {
-
+                            var visualAssessmentResult = await context.VisualAssessmentResults.FirstOrDefaultAsync(x => x.Id == model.Id);
+                            if (visualAssessmentResult == null)
+                            {
+                                model.Errors.Add("Invalid Assessment Result");
+                                return View(model);
+                            }
                             string passFile = visualAssessmentResult.PassportImageUrl;
                             if (model.Status == Status.Complete)
                             {
-                                if(string.IsNullOrEmpty(passFile) && string.IsNullOrEmpty(model.PassportImageUrl))
+                                if (string.IsNullOrEmpty(model.PassportImageUrl) && string.IsNullOrEmpty(model.PassportUploadType) && string.IsNullOrEmpty(passFile))
                                 {
                                     await scope.RollbackAsync();
-                                    model.Errors.Add("Kindly upload Passport");
+                                    ModelState.AddModelError("PassportImageUrl", "Please capture/upload passport");
+                                    model.Errors.Add("Please capture/upload passport");
                                     return View(model);
                                 }
                             }
                             //visualAssessmentResult.NameTitle = model.NameTitle;
+                            visualAssessmentResult.Gender = model.Gender;
                             visualAssessmentResult.PassOrFail = model.PassOrFail;
                             visualAssessmentResult.PassResult = model.PassResult;
                             visualAssessmentResult.Surname = model.Surname;
-                            visualAssessmentResult.DriversLicence = model.DriversLicence;
-                            visualAssessmentResult.DVLAReferenceNo = model.DVLAReferenceNo;
+                            visualAssessmentResult.ContrastSensitivity_BCV = model.ContrastSensitivity_BCV;
+                            //visualAssessmentResult.DriversLicence = model.DriversLicence;
+                            //visualAssessmentResult.DVLAReferenceNo = model.DVLAReferenceNo;
                             visualAssessmentResult.FirstName = model.FirstName;
                             visualAssessmentResult.OtherName = model.OtherName;
                             visualAssessmentResult.DOB = (DateTime)model.DOB;
@@ -958,18 +1038,18 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             visualAssessmentResult.ResultConclusion = model.ResultConclusion;
                             visualAssessmentResult.ResultServiceType = model.ResultServiceType;
                             visualAssessmentResult.LearnerDriversLicence = model.LearnerDriversLicence;
-                            visualAssessmentResult.PassportImageUrl = model.PassportImageUrl;
+                            visualAssessmentResult.PassportImageUrl = string.IsNullOrEmpty(visualAssessmentResult.PassportImageUrl) ? model.PassportImageUrl : visualAssessmentResult.PassportImageUrl;
                             visualAssessmentResult.Status = model.Status;
                             visualAssessmentResult.TestType = (TestType)model.TestType;
-                            visualAssessmentResult.OldDVLAReferenceNo = model.OldDVLAReferenceNo;
+                            visualAssessmentResult.TestDate = DateTime.UtcNow;
+                            //visualAssessmentResult.OldDVLAReferenceNo = model.OldDVLAReferenceNo;
                             visualAssessmentResult.AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory;
                             visualAssessmentResult.IsTransmitted = false;
+                            visualAssessmentResult.ReferenceNumber = string.IsNullOrEmpty(visualAssessmentResult.ReferenceNumber) ? _visualAssessmentResultRepository.GenerateReferenceNo(optometristUser.OptometristFirmId) : visualAssessmentResult.ReferenceNumber;
+                            visualAssessmentResult.CreatedBy = string.IsNullOrEmpty(visualAssessmentResult.CreatedBy) ? _userService.GetUserData().Id : visualAssessmentResult.CreatedBy;
+                            visualAssessmentResult.ModifiedBy = _userService.GetUserData().Id;
+                            visualAssessmentResult.ModifiedDate = DateTime.UtcNow;
 
-                            if (model.Status == Status.Complete)
-                            {
-                                slot.Quantity = slot.Quantity - 1;
-                                context.SaveChanges();
-                            }
                             //visualAssessmentResult.TestDate = DateTime.UtcNow;
                             await context.SaveChangesAsync();
 
@@ -978,11 +1058,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 var deleteFilePath = Path.Combine(_environment.ContentRootPath, "wwwroot", "Passports", passFile);
                                 System.IO.File.Delete(deleteFilePath);
                             }
-
-
                             //Send Sms Notification
-                            if (model.Status == Status.Complete)
+                            if (model.Status==Status.Complete)
                             {
+                                slot.Quantity = slot.Quantity - 1;
                                 string result = model.PassOrFail.ToString(); //EnumHelper<PassOrFail>.GetDisplayValue(model.PassOrFail.GetValueOrDefault());
 
                                 _smsRepository.SendAssessmentResult(model.FirstName, model.ContactNumber, visualAssessmentResult.ReferenceNumber, result, context);
@@ -990,17 +1069,11 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 _notificationRepository.SendAssessmentResult(model.FirstName, model.ContactNumber, visualAssessmentResult.ReferenceNumber, result, model.Email, context);
 
                             }
+                            await scope.CommitAsync();
+                            TempData["SuccessMessage"] = "Record saved successfully";
+                            _AuditRepo.AddAudit(Activities.CREATE_VISUAL_ASSESSMENT_RESULT, "Create Visual Assessment Result");
+                            return RedirectToAction("Index");
                         }
-
-                        TempData["SuccessMessage"] = "Record saved successfully";
-                        _AuditRepo.AddAudit(Activities.CREATE_VISUAL_ASSESSMENT_RESULT, "Create Visual Assessment Result");
-                        await scope.CommitAsync();
-                        if (model.Status == Status.Complete)
-                        {
-                            HttpContext.Session.SetString(AppConstants.VISUALASSESSMENTSUBMISSION, JsonConvert.SerializeObject(visualAssessmentResult));
-                            return View("AssessmentDetails", visualAssessmentResult);
-                        }
-                        return RedirectToAction("Index");
                     }
                     catch (Exception ex)
                     {
@@ -1062,6 +1135,15 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     if (result != null)
                     {
                         ApplicationUser optometrist = await _context.ApplicationUsers.AsNoTracking().FirstOrDefaultAsync(x => x.Id == result.CreatedBy);
+
+                        if (result.CreatedBy == "System")
+                        {
+                            var optometristFirmUser = await _context.OptometristFirmUsers.Include(x=>x.ApplicationUser).FirstOrDefaultAsync(x => x.OptometristFirmId == result.OptometristFirmId);
+                            optometrist = optometristFirmUser.ApplicationUser;
+                        }
+
+                        ViewBag.Optometrist = optometrist.LastName + " " + optometrist.FirstName;
+
                         model = new()
                         {
                             Id = id,
@@ -1080,17 +1162,17 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             ContactPhoneNumber = result.OptometristFirm.ContactPhoneNumber,
                             ContrastSensitivity_BCV = result.ContrastSensitivity_BCV,
                             CreatedBy = result.CreatedBy,
-                            CreatedByFullName = optometrist.FirstName + " " + optometrist.LastName,
-                            CreatedByUsername = optometrist.UserName,
+                            //CreatedByFullName = optometrist.FirstName + " " + optometrist.LastName,
+                            //CreatedByUsername = optometrist.UserName,
                             DateCreated = result.CreatedDate,
                             DigitalAddress = result.OptometristFirm.DigitalAddress,
                             DistrictName = result.OptometristFirm.District?.Name,
                             DOB = result.DOB,
-                            DriversLicence = result.DriversLicence,
-                            DVLAReferenceNo = result.DVLAReferenceNo,
+                            //DriversLicence = result.DriversLicence,
+                            //DVLAReferenceNo = result.DVLAReferenceNo,
                             Email = result.Email,
                             FirstName = result.FirstName,
-                            FormNumber = result.FormNumber,
+                            //FormNumber = result.FormNumber,
                             GlareTest_BCV_OD = result.GlareTest_BCV_OD,
                             GlareTest_BCV_OS = result.GlareTest_BCV_OS,
                             GlareTest_BCV_OU = result.GlareTest_BCV_OU,
@@ -1104,8 +1186,8 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             IsSynchronized = result.IsSynchronized,
                             LearnerDriversLicence = result.LearnerDriversLicence,
                             MobileNumber = result.ContactNumber,
-                            NameTitle = result.NameTitle,
-                            Optometrist = optometrist.FullName,
+                            //NameTitle = result.NameTitle,
+                            //Optometrist = optometrist.FullName,
                             OptometristFirmId = result.OptometristFirmId,
                             OtherName = result.OtherName,
                             PassOrFail = result.PassOrFail,
@@ -1129,7 +1211,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             Unaided_OU = result.Unaided_OU,
                             UpdatedBy = result.ModifiedBy,
                             UserName = optometrist.UserName,
-                            UpdatedByUsername = optometrist.UserName
+                            //UpdatedByUsername = optometrist.UserName
                         };
                         //var assessmentItem = _visualAssessmentResultRepository.FetchAssessmentResult(result.DriversLicence, result.DVLAReferenceNo, result.ReferenceNumber);
                         if (model != null)
@@ -1165,6 +1247,14 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 _logger.LogError(ex.Message, ex);
             }
 
+            return View(model);
+        }
+
+
+        [HttpGet]
+        public IActionResult InitiateEyeTest()
+        {
+            ApplicantViewModel model = new();
             return View(model);
         }
 

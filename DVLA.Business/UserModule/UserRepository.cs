@@ -16,6 +16,8 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Identity;
+using NPOI.SS.Formula.Functions;
+using DVLA.Data.Models.DataObjects.UtilityObjects;
 
 namespace DVLA.Business.UserModule
 {
@@ -27,7 +29,8 @@ namespace DVLA.Business.UserModule
         private readonly string _connectionString;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
-        public UserRepository(DVLADbContext context, ILogger<UserRepository> logger, IConfiguration configuration, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+        private readonly IUserService _userService;
+        public UserRepository(DVLADbContext context, ILogger<UserRepository> logger, IConfiguration configuration, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IUserService userService)
         {
             _context = context;
             _logger = logger;
@@ -35,6 +38,7 @@ namespace DVLA.Business.UserModule
             _connectionString = configuration.GetConnectionString("DefaultConnection");
             _userManager = userManager;
             _roleManager = roleManager;
+            _userService = userService;
         }
 
         public void Dispose()
@@ -79,8 +83,8 @@ namespace DVLA.Business.UserModule
                                 //    Id = reader.IsDBNull(reader.GetOrdinal("RoleId")) ? null : reader.GetString(reader.GetOrdinal("RoleId")),
                                 //    Name = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName"))
                                 //},
-                                
-                                
+
+
                             };
                         }
                     }
@@ -93,7 +97,7 @@ namespace DVLA.Business.UserModule
             ApplicationUser applicationUser = _userManager.FindByIdAsync(user.Id).GetAwaiter().GetResult();
             IList<string> roles = _userManager.GetRolesAsync(applicationUser).GetAwaiter().GetResult();
 
-            var allRoles =_roleManager.Roles.AsNoTracking().ToList();
+            var allRoles = _roleManager.Roles.AsNoTracking().ToList();
 
             foreach (ApplicationRole role in allRoles)
             {
@@ -131,8 +135,8 @@ namespace DVLA.Business.UserModule
                                 OptometristFirmId = reader.IsDBNull(reader.GetOrdinal("OptometristFirmId")) ? null : reader.GetInt32(reader.GetOrdinal("OptometristFirmId")),
                                 MobileNumber = reader.IsDBNull(reader.GetOrdinal("MobileNumber")) ? null : reader.GetString(reader.GetOrdinal("MobileNumber")),
                                 OptometristFirmName = reader.IsDBNull(reader.GetOrdinal("OptometristFirmName")) ? null : reader.GetString(reader.GetOrdinal("OptometristFirmName")),
-                                RoleId = reader.IsDBNull(reader.GetOrdinal("RoleId")) ? null : reader.GetString(reader.GetOrdinal("RoleId")),
-                                //DefaultRole = reader.IsDBNull(reader.GetOrdinal("RoleName")) ? null : reader.GetString(reader.GetOrdinal("RoleName")),
+                                //RoleId = reader.IsDBNull(reader.GetOrdinal("RoleId")) ? null : reader.GetString(reader.GetOrdinal("RoleId")),
+                                BusinessName = reader.IsDBNull(reader.GetOrdinal("BusinessName")) ? null : reader.GetString(reader.GetOrdinal("BusinessName")),
                                 CreatedDate = reader.GetDateTime(reader.GetOrdinal("CreatedDate")),
                                 EmailConfirmed = reader.IsDBNull(reader.GetOrdinal("EmailConfirmed")) ? false : reader.GetBoolean(reader.GetOrdinal("EmailConfirmed")),
                                 IsFirstLogin = reader.IsDBNull(reader.GetOrdinal("IsFirstLogin")) ? false : reader.GetBoolean(reader.GetOrdinal("IsFirstLogin")),
@@ -207,9 +211,9 @@ namespace DVLA.Business.UserModule
             return users;
         }
 
-        public bool Update(UserViewModel model, string updatedBy, out string responseMessage)
+        public async Task<MessageResponse> UpdateAsync(UserViewModel model)
         {
-            responseMessage = "";
+            MessageResponse result = new();
 
             var context = _context;
             var scope = context.Database.BeginTransaction();
@@ -221,14 +225,14 @@ namespace DVLA.Business.UserModule
                     if (userDetails == null)
                     {
                         scope.Rollback();
-                        responseMessage = "No user record found";
-                        return false;
+                        result.Message = "No user record found";
+                        return result;
                     }
                     if (model.Email != userDetails.Email)
                     {
                         scope.Rollback();
-                        responseMessage = "Email address cannot be changed.";
-                        return false;
+                        result.Message = "Email address cannot be changed.";
+                        return result;
                     }
 
                     userDetails.Id = model.Id;
@@ -238,7 +242,7 @@ namespace DVLA.Business.UserModule
                     userDetails.LastName = model.LastName;
                     userDetails.MobileNumber = model.MobileNumber;
                     userDetails.UserName = model.Email;
-                    userDetails.ModifiedBy = updatedBy;
+                    userDetails.ModifiedBy = _userService.GetUserData().Id;
                     userDetails.IsActive = model.IsActive;
                     userDetails.EmailConfirmed = model.IsActive;
                     //userDetails.DefaultRole = model.DefaultRole;
@@ -249,67 +253,84 @@ namespace DVLA.Business.UserModule
 
                     //var role = _context.ApplicationRoles.FirstOrDefault(r => r.Name == model.DefaultRole);
                     var userRoleQuery = _context.ApplicationUserRoles.Where(u => u.UserId == model.Id);
-                    //Detect if there are role changes
-                    if (model.Roles.Count(x => x.IsChecked) != userRoleQuery.Count() && !model.Roles.Select(x=>x.Id).SequenceEqual(userRoleQuery.Select(x=>x.RoleId)))
+
+                    IList<string> roles = _userManager.GetRolesAsync(userDetails).GetAwaiter().GetResult();
+                    if (roles.Contains(AppRoles.SYSTEMADMIN))
                     {
-                       List<ApplicationUserRole> userRoles = userRoleQuery.ToList();
+                        scope.Rollback();
+                        result.Message = "You cannot update your record";
+                        return result;
+                    }
+
+                    //Detect if there are role changes
+                    if (model.Roles.Count(x => x.IsChecked) != userRoleQuery.Count() && !model.Roles.Select(x => x.Id).SequenceEqual(userRoleQuery.Select(x => x.RoleId)))
+                    {
+                        List<ApplicationUserRole> userRoles = userRoleQuery.ToList();
                         _context.ApplicationUserRoles.RemoveRange(userRoles);
 
-                        userRoles = model.Roles.Where(x=>x.IsChecked).Select(x => new ApplicationUserRole
+                        userRoles = model.Roles.Where(x => x.IsChecked).Select(x => new ApplicationUserRole
                         {
                             RoleId = x.Id,
                             UserId = model.Id,
                         }).ToList();
                         _context.ApplicationUserRoles.AddRange(userRoles);
                         _context.SaveChanges();
-                           
+
                     }
 
-                    var optometristUserDetails = _context.OptometristFirmUsers.FirstOrDefault(x => x.ApplicationUserId == model.Id);
-                    if (optometristUserDetails == null)
+                    var selectedRoles = model.Roles.Where(x => x.IsChecked).Select(x => x.Name).ToList();
+                    if (selectedRoles.Contains(AppRoles.FRONTOFFICER) || selectedRoles.Contains(AppRoles.FACILITYOWNER) || selectedRoles.Contains(AppRoles.OPTOMETRIST))
                     {
-                        //optometristUserDetails.OptometristFirmId = model.OptometristFirmId.GetValueOrDefault();
-                        var optometristUser = new OptometristFirmUser
+
+                        var optometristUserDetails = _context.OptometristFirmUsers.FirstOrDefault(x => x.ApplicationUserId == model.Id);
+
+                        if (optometristUserDetails == null)
                         {
-                            OptometristFirmId = model.OptometristFirmId.GetValueOrDefault(),
-                            ApplicationUserId = model.Id
-                        };
-                        _context.OptometristFirmUsers.Add(optometristUser);
-                        _context.SaveChanges();
+                            //optometristUserDetails.OptometristFirmId = model.OptometristFirmId.GetValueOrDefault();
+                            var optometristUser = new OptometristFirmUser
+                            {
+                                OptometristFirmId = model.OptometristFirmId.GetValueOrDefault(),
+                                ApplicationUserId = model.Id
+                            };
+                            _context.OptometristFirmUsers.Add(optometristUser);
+                            _context.SaveChanges();
+                        }
+                        else
+                        {
+
+                            if (optometristUserDetails.OptometristFirmId != model.OptometristFirmId)
+                            {
+                                var oldData = _context.OptometristFirmUsers.Where(x => x.ApplicationUserId == model.Id);
+                                _context.RemoveRange(oldData);
+
+                                var newData = new OptometristFirmUser
+                                {
+                                    ApplicationUserId = model.Id,
+                                    CreatedDate = DateTime.UtcNow,
+                                    OptometristFirmId = model.OptometristFirmId.GetValueOrDefault(),
+                                    IsActive = true,
+                                    IsDeleted = false
+                                };
+                                _context.OptometristFirmUsers.Add(newData);
+                               await _context.SaveChangesAsync();
+                            }
+                        }
+
                     }
-                    //else if (optometristUserDetails != null && optometristUserDetails.OptometristFirmId != model.OptometristFirmId && model.DefaultRole != AppRoles.SYSTEMADMIN)
-                    //{
-                    //    var oldData = _context.OptometristFirmUsers.FirstOrDefault(x => x.ApplicationUserId == model.Id && x.OptometristFirmId == optometristUserDetails.OptometristFirmId);
-                    //    _context.OptometristFirmUsers.Remove(oldData);
-                    //    _context.SaveChanges(true);
 
-                    //    optometristUserDetails.OptometristFirmId = model.OptometristFirmId.GetValueOrDefault();
-                    //    var optometristUser = new OptometristFirmUser
-                    //    {
-                    //        OptometristFirmId = model.OptometristFirmId.GetValueOrDefault(),
-                    //        ApplicationUserId = model.Id
-                    //    };
-                    //    _context.OptometristFirmUsers.Add(optometristUser);
-                    //    _context.SaveChanges();
 
-                       
-                    //}
-
-                    
-
-                    responseMessage = "Record saved successfully";
+                    result.Message = "Record saved successfully";
+                    result.Success = true;
                     scope.Commit();
-                    return true;
-                    
+
                 }
                 catch (Exception ex)
                 {
                     scope.Rollback();
-                    responseMessage = "Kindly try again later";
+                    result.Message = "Kindly try again later";
                     _logger.LogError(ex.Message, ex);
-                    return false;
                 }
-
+                return result;
             }
         }
     }

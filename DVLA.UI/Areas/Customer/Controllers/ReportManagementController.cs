@@ -136,9 +136,12 @@ namespace DVLA.UI.Areas.Customer.Controllers
         public ActionResult BiodataUpdate(int Entries = 10)
         {
             TempData["Action"] = Url.Action("BiodataUpdate", "ReportManagement", new { area = "Customer" });
+
+            
+
             PaginationRequestModel<ClientSearchRequest> request = new()
             {
-                InputModel = new() { OptometristFirmId = null, Search = "" },
+                InputModel = new() { OptometristFirmId = _userService.GetUserData().OptometristFirmId, Search = "" },
                 PageIndex = Entries
             };
             ViewBag.Entries = Entries.ToString();
@@ -155,7 +158,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             ViewBag.Entries = model.Entries.ToString();
             PaginationRequestModel<ClientSearchRequest> request = new()
             {
-                InputModel = new() { OptometristFirmId = model.OptometristFirmId, Search = "", StartDate = model.StartDate, EndDate = model.EndDate },
+                InputModel = new() { OptometristFirmId = _userService.GetUserData().OptometristFirmId, Search = "", StartDate = model.StartDate, EndDate = model.EndDate },
                 PageSize = model.Entries
             };
             ViewBag.StartDate = request.InputModel.StartDate.ToString("dd/MM/yyyy");
@@ -191,10 +194,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
         }
 
-        public IActionResult VisualAssessmentDetails(string driverslicence, string dvlaReferenceNo, string vasReferenceNo)
+        public IActionResult VisualAssessmentDetails(string vasReferenceNo)
         {
             VisualAssessmentResultModel model = new VisualAssessmentResultModel();
-            var assessments = _assessmentResultRepository.FetchAssessmentResult(driverslicence, dvlaReferenceNo, vasReferenceNo);
+            var assessments = _assessmentResultRepository.FetchAssessmentResult(vasReferenceNo);
             if (assessments != null)
             {
                 if (!string.IsNullOrEmpty(model.PassportImageUrl))
@@ -225,10 +228,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
                 var model = new ApplicantModel();
                 model.Id = applicant.Id;
-                model.NameTitle = applicant.NameTitle;
+                //model.NameTitle = applicant.NameTitle;
                 model.Surname = applicant.Surname;
-                model.DriversLicence = applicant.DriversLicence;
-                model.DVLAReferenceNo = applicant.DVLAReferenceNo;
+                //model.DriversLicence = applicant.DriversLicence;
+                //model.DVLAReferenceNo = applicant.DVLAReferenceNo;
                 model.FirstName = applicant.FirstName;
                 model.OtherName = applicant.OtherName;
                 model.DOB = (DateTime)applicant.DOB;
@@ -241,9 +244,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 model.PassportImageUrl = applicant.PassportImageUrl;
                 model.Status = applicant.Status;
                 model.OptometristFirmId = applicant.OptometristFirmId;
-                model.FormNumber = applicant.FormNumber;
+                //model.FormNumber = applicant.FormNumber;
                 model.TestType = applicant.TestType;
-                model.InvoiceNumber = applicant.OldDVLAReferenceNo;
+                //model.InvoiceNumber = applicant.OldDVLAReferenceNo;
                 model.Optometrist = optometristUser == null ? "" : optometristUser.OptometristFirm.BusinessName;
                 model.IsActive = applicant.IsActive;
                 model.CreatedBy = applicant.CreatedBy;
@@ -306,12 +309,12 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 }
 
 
-                if (model.NameTitle == null)
-                {
-                    ModelState.AddModelError("NameTitle", "Please select name title");
-                    TempData["ErrorMessage"] = "Please select name title";
-                    return View(model);
-                }
+                //if (model.NameTitle == null)
+                //{
+                //    ModelState.AddModelError("NameTitle", "Please select name title");
+                //    TempData["ErrorMessage"] = "Please select name title";
+                //    return View(model);
+                //}
 
                 if (string.IsNullOrEmpty(model.Surname))
                 {
@@ -436,10 +439,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 //var firm = _optometristFirmQuery.FilterAsync(x => x.Id == OptometristFirmId).Result.FirstOrDefault();
 
 
-                applicant.NameTitle = model.NameTitle;
+                //applicant.NameTitle = model.NameTitle;
                 applicant.Surname = model.Surname;
-                applicant.DriversLicence = model.DriversLicence;
-                applicant.DVLAReferenceNo = model.DVLAReferenceNo;
+                //applicant.DriversLicence = model.DriversLicence;
+                //applicant.DVLAReferenceNo = model.DVLAReferenceNo;
                 applicant.FirstName = model.FirstName;
                 applicant.OtherName = model.OtherName;
                 applicant.DOB = (DateTime)model.DOB;
@@ -455,7 +458,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 }
                 //applicant.Status = model.Status;
                 applicant.TestType = (TestType)model.TestType;
-                applicant.OldDVLAReferenceNo = model.InvoiceNumber;
+                //applicant.OldDVLAReferenceNo = model.InvoiceNumber;
                 //applicant.IsActive = model.IsActive;
                 //applicant.CreatedBy = model.CreatedBy;
                 //applicant.IsDeleted = model.IsDeleted;

@@ -84,7 +84,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
     });
 
 
@@ -96,7 +96,7 @@ builder.Services.AddScoped<SignInManager<ApplicationUser>>();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Set session duration
+    options.IdleTimeout = TimeSpan.FromMinutes(25); // Set session duration
     options.Cookie.HttpOnly = false; // Make the cookie HTTP only
     options.Cookie.IsEssential = true; // Make the cookie essential
 });
@@ -170,6 +170,13 @@ app.UseStaticFiles(new StaticFileOptions()
     Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "logos")),
     RequestPath = "/wwwroot/logos"
 });
+
+app.UseStaticFiles(new StaticFileOptions()
+{
+    FileProvider = new PhysicalFileProvider(
+    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Passports")),
+    RequestPath = "/passports"
+});
 app.UseSession();
 
 app.UseRouting();
@@ -190,8 +197,7 @@ app.MapControllerRoute(
 
 app.MapHub<NotificationHub>("/notification");
 
-RecurringJob.AddOrUpdate<BackgroundJobService>("SendBulkEmail", service => service.SendBulkEmail(), "*/1 * * * *");
-//RecurringJob.AddOrUpdate<BackgroundJobService>("SendBulkSms", service => service.SendBulkEmail(), "*/1 * * * *");
+RecurringJob.AddOrUpdate<BackgroundJobService>("SendBulkEmail", service => service.SendBulkEmail(), "*/2 * * * *");
 RecurringJob.AddOrUpdate<BackgroundJobService>("VerifyTransfers", service => service.VerifyPayments(), "*/1 * * * *");
 RecurringJob.AddOrUpdate<BackgroundJobService>("PushVisualAssessmentResult", service => service.PushVisualAssessmentResult(), "*/5 * * * *");//Every 1 minute
 

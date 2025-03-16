@@ -10,6 +10,7 @@ namespace DVLA.Business.EmailModule
 {
     public interface IEmailService
     {
+        bool IsValidEmail(string email);
         bool SendEmail(string email, string subject, string message);
         bool SendEmailWithAttachment(string email, string subject, string message, Attachment attachment);
         void SendEmailToAllSubscribers(string subject, string message, List<string> emails);

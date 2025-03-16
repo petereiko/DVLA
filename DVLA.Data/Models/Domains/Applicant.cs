@@ -21,19 +21,19 @@ namespace DVLA.DATA.Domains
         public ResultServiceType? ResultServiceType { get; set; }
         public TestType? TestType { get; set; }
 
-        public NameTitle? NameTitle { get; set; }  
+        //public NameTitle? NameTitle { get; set; }  
 
         [StringLength(50)]
         public string Surname { get; set; }
 
-        [StringLength(50)]
-        public string DriversLicence { get; set; }
+        //[StringLength(50)]
+        //public string DriversLicence { get; set; }
 
-        [StringLength(50)]
-        public string DVLAReferenceNo { get; set; }
+        //[StringLength(50)]
+        //public string DVLAReferenceNo { get; set; }
 
-        [StringLength(50)]
-        public string InvoiceNumber { get; set; }
+        //[StringLength(50)]
+        //public string InvoiceNumber { get; set; }
 
         [StringLength(50)]
         public string FirstName { get; set; }
@@ -58,8 +58,8 @@ namespace DVLA.DATA.Domains
         public string PassportImageUrl { get; set; }
         public Status? Status { get; set; }
         public LearnerDriversLicenceType? LearnerDriversLicence { get; set; }
-        public string OldDVLAReferenceNo { get; set; }
-        public string FormNumber { get; set; }
+        //public string OldDVLAReferenceNo { get; set; }
+        //public string FormNumber { get; set; }
         public bool IsRegistration { get; set; }
     }
 }

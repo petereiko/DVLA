@@ -101,10 +101,10 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     }
                 }
 
-                if (string.IsNullOrEmpty(model.PassportImageUrl) && (model.Image==null || model.Image.Length==0))
-                {
-                    ModelState.AddModelError("PassportImageUrl", "Please capture/upload passport");
-                }
+                //if (string.IsNullOrEmpty(model.PassportImageUrl) && (model.Image==null || model.Image.Length==0))
+                //{
+                //    ModelState.AddModelError("PassportImageUrl", "Please capture/upload passport");
+                //}
 
                 //if (model.NameTitle == null)
                 //{
@@ -139,6 +139,11 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 if (string.IsNullOrEmpty(model.ContactNumber))
                 {
                     ModelState.AddModelError("ContactNumber", "Please enter contact number");
+                }
+
+                if (model.Gender == null)
+                {
+                    ModelState.AddModelError("Gender", "Gender is required");
                 }
 
                 //if (string.IsNullOrEmpty(model.TaxIdentificationNumber))
@@ -179,8 +184,16 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     System.IO.File.WriteAllBytes(path, imageBytes);
                     model.PassportImageUrl = filename + ".png";
                 }
-                else
+                else if (model.Image != null)
                 {
+                    bool isValidSize = Utility.ValidatePassport(model.Image);
+                    if (!isValidSize)
+                    {
+                        model.Errors.Add("Your passport photo is too large. Kindly upload a photo that is 120KB or less");
+                        TempData["ErrorMessage"] = "Your passport photo is too large. Kindly upload a photo that is 120KB or less";
+                        return View(model);
+                    }
+
                     string extension = Path.GetExtension(model.Image.FileName);
                     var path = Path.Combine(_environment.ContentRootPath, "wwwroot", "Passports", filename + extension);
                     string directory = Path.GetDirectoryName(path);
@@ -198,11 +211,12 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     {
                         CreatedDate = DateTime.Now,
                         Id = model.Id,
-                        NameTitle = model.NameTitle,
+                        //NameTitle = model.NameTitle,
                         Surname = model.Surname,
-                        DriversLicence = model.DriversLicence,
-                        DVLAReferenceNo = model.DVLAReferenceNo,
-                        OldDVLAReferenceNo = model.InvoiceNumber,
+                        Gender=model.Gender,
+                        //DriversLicence = model.DriversLicence,
+                        //DVLAReferenceNo = model.DVLAReferenceNo,
+                        //OldDVLAReferenceNo = model.InvoiceNumber,
                         LearnerDriversLicence = model.LearnerDriversLicence,
                         OptometristFirmId = model.OptometristFirmId,
                         ResultServiceType = model.ResultServiceType,
@@ -215,11 +229,11 @@ namespace DVLA.UI.Areas.Registration.Controllers
                         DOB = (DateTime)model.DOB,                       
                         PostalAddress = model.PostalAddress,
                         ContactNumber = model.ContactNumber,
-                        FormNumber = formNumber,
+                        //FormNumber = formNumber,
                         TaxIdentificationNumber = model.TaxIdentificationNumber,
                         Email = model.Email,
                         IsRegistration = true,
-                        CreatedBy = "System"
+                        CreatedBy = null
                     };
 
                     if (model.LearnerDriversLicence != null) model.LearnerDriversLicence = model.LearnerDriversLicence;
@@ -267,8 +281,8 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 model.Id = applicant.Id;
                 //model.NameTitle = Enum.GetName(typeof(NameTitle), applicant.NameTitle); ;             
                 model.Surname = applicant.Surname;
-                model.DriversLicence = applicant.DriversLicence;
-                model.DVLAReferenceNo = applicant.DVLAReferenceNo;
+                //model.DriversLicence = applicant.DriversLicence;
+                //model.DVLAReferenceNo = applicant.DVLAReferenceNo;
                 model.FirstName = applicant.FirstName;
                 model.OtherName = applicant.OtherName;
                 model.DOB = (DateTime)applicant.DOB;
@@ -281,9 +295,9 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 model.PassportImageUrl = applicant.PassportImageUrl;
                 model.Status = applicant.Status;
                 model.OptometristFirmId = applicant.OptometristFirmId;
-                model.FormNumber = applicant.FormNumber;
+                //model.FormNumber = applicant.FormNumber;
                 model.TestType = Enum.GetName(typeof(TestType), applicant.TestType); ;
-                model.OldDVLAReferenceNo = applicant.OldDVLAReferenceNo;
+                //model.OldDVLAReferenceNo = applicant.OldDVLAReferenceNo;
              
 
 

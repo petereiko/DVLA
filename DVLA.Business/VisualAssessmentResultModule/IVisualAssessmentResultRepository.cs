@@ -18,7 +18,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
 
         string GenerateReferenceNo(int optometristFirmId);
         string GenerateFormNo();
-        VisualAssessmentResultModel FetchAssessmentResult(string driverslicence, string dvlaReferenceNo, string vasReferenceNo);
+        VisualAssessmentResultModel FetchAssessmentResult(string ReferenceNumber);
         List<VisualAssessmentResultModel> FetchAssessmentResults(long? optometristAdminId, long? optometristId, long? id);
         ResultViewModel FetchAssessmentResults(int displayLength, int displayStart, int sortCol, string sortDir, string search, Int64? optometricId);
         ResultViewModel FetchAssessmentResults(ClientSearchRequest model);

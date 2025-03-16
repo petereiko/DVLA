@@ -24,7 +24,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Favicon icon-->
-    <link rel="shortcut icon" type="image/png" href="~/favicons/favicon.ico" />
+    <link rel="shortcut icon" type="image/png" href="~/logos/ODDVLAFullcolor.png" />
 
     <!-- Core Css -->
     <link rel="stylesheet" href="@Url.Content("~/bootstrapdemos.wrappixel.com/materialpro/dist/assets/css/styles.css")" />
@@ -156,56 +156,7 @@
                                             @userData.Email
                                         </a>
                                     </li>
-                                    <!-- ------------------------------- -->
-                                    <!-- start language Dropdown -->
-                                    <!-- ------------------------------- -->
-                                    @* <li class="nav-item hover-dd dropdown nav-icon-hover-bg rounded-circle">
-                                    <a class="nav-link" href="javascript:void(0)" id="drop2" aria-expanded="false">
-                                    <img src="../assets/images/svgs/icon-flag-en.svg" alt="" width="20px" height="20px" class="round-20" />
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
-                                    <div class="message-body">
-                                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 py-2 px-4 dropdown-item">
-                                    <div class="position-relative">
-                                    <img src="../assets/images/svgs/icon-flag-en.svg" alt="" width="20px" height="20px" class="round-20" />
-                                    </div>
-                                    <p class="mb-0 fs-3">English</p>
-                                    </a>
-                                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 py-2 px-4 dropdown-item">
-                                    <div class="position-relative">
-                                    <img src="../assets/images/svgs/icon-flag-cn.svg" alt="" width="20px" height="20px" class="round-20" />
-                                    </div>
-                                    <p class="mb-0 fs-3">Chinese</p>
-                                    </a>
-                                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 py-2 px-4 dropdown-item">
-                                    <div class="position-relative">
-                                    <img src="../assets/images/svgs/icon-flag-fr.svg" alt="" width="20px" height="20px" class="round-20" />
-                                    </div>
-                                    <p class="mb-0 fs-3">French</p>
-                                    </a>
-                                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 py-2 px-4 dropdown-item">
-                                    <div class="position-relative">
-                                    <img src="../assets/images/svgs/icon-flag-sa.svg" alt="" width="20px" height="20px" class="round-20" />
-                                    </div>
-                                    <p class="mb-0 fs-3">Arabic</p>
-                                    </a>
-                                    </div>
-                                    </div>
-                                    </li> *@
-
-
-                                    <!-- ------------------------------- -->
-                                    <!-- end language Dropdown -->
-                                    <!-- ------------------------------- -->
-
-                                    <li class="nav-item nav-icon-hover-bg rounded-circle">
-                                        <a class="nav-link nav-icon-hover moon dark-layout" href="javascript:void(0)">
-                                            <iconify-icon icon="solar:moon-line-duotone" class="moon"></iconify-icon>
-                                        </a>
-                                        <a class="nav-link nav-icon-hover sun light-layout" href="javascript:void(0)">
-                                            <iconify-icon icon="solar:sun-2-line-duotone" class="sun"></iconify-icon>
-                                        </a>
-                                    </li>
+                                   
 
                                     <!-- ------------------------------- -->
                                     <!-- end notification Dropdown -->
@@ -231,43 +182,16 @@
                                                     </div>
                                                 </div>
                                                 <div class="message-body pb-3">
-                                                    <div class="px-3 pt-3">
+                                                    @* <div class="px-3 pt-3">
                                                         <div class="h6 mb-0 dropdown-item py-8 px-3 rounded-2 link">
                                                             <a asp-action="ChangePassword" asp-controller="Account" class=" d-flex  align-items-center ">
                                                                 Change Password
                                                             </a>
                                                         </div>
-                                                        <div class="h6 mb-0 dropdown-item py-8 px-3 rounded-2 link">
-                                                            <a href="javascript:void(0)" class=" d-flex  align-items-center ">
-                                                                My Projects
-                                                            </a>
-                                                        </div>
-                                                        <div class="h6 mb-0 dropdown-item py-8 px-3 rounded-2 link">
-                                                            <a href="../main/app-email.html" class=" d-flex  align-items-center ">
-                                                                Inbox
-                                                            </a>
-                                                        </div>
-                                                    </div>
+                                                        
+                                                    </div> *@
                                                     <hr>
                                                     <div class="px-3">
-                                                        @* <div class="py-8 px-3 d-flex justify-content-between dropdown-item align-items-center h6 mb-0  rounded-2 link">
-                                                            <a href="javascript:void(0)" class="">
-                                                                Mode
-                                                            </a>
-                                                            <div>
-                                                                <a class="moon dark-layout" href="javascript:void(0)">
-                                                                    <iconify-icon icon="solar:moon-line-duotone" class="moon"></iconify-icon>
-                                                                </a>
-                                                                <a class="sun light-layout" href="javascript:void(0)">
-                                                                    <iconify-icon icon="solar:sun-2-line-duotone" class="sun"></iconify-icon>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="h6 mb-0 dropdown-item py-8 px-3 rounded-2 link">
-                                                            <a href="../main/page-account-settings.html" class=" d-flex  align-items-center  ">
-                                                                Account Settings
-                                                            </a>
-                                                        </div> *@
                                                         <div class="h6 mb-0 dropdown-item py-8 px-3 rounded-2 link">
                                                             <a asp-action="Logout" asp-controller="Account" asp-area="" class=" d-flex  align-items-center ">
                                                                 Sign Out
@@ -1851,7 +1775,7 @@
 
 
 
-    @if (TempData["SuccessMessage"] != null)
+    @* @if (TempData["SuccessMessage"] != null)
     {
         <script>
             Swal.fire({
@@ -1862,7 +1786,7 @@
         </script>
 
         TempData["SuccessMessage"] = null;
-    }
+    } *@
 
     @if (TempData["ErrorMessage"] != null)
     {

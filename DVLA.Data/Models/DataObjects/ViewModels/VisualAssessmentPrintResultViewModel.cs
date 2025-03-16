@@ -13,22 +13,22 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
     {
         public VisualAssessmentPrintResultViewModel()
         {
-            PassportImageUrl = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Vw8AAoEBfymqrywAAAAASUVORK5CYII=";
+            //PassportImageUrl = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Vw8AAoEBfymqrywAAAAASUVORK5CYII=";
             Status = Enumerables.Status.InProgress;
         }
 
         public long? Id { get; set; }
         public long OptometristFirmId { get; set; }
         public string ReferenceNumber { get; set; }
-        public string FormNumber { get; set; }
+        ///public string FormNumber { get; set; }
         public string ResultServiceType { get; set; }
         public string LearnerDriversLicenceType { get; set; }
         public string NameTitle { get; set; }
         public string Surname { get; set; }
-        public string DriversLicence { get; set; }
-        public string DVLAReferenceNo { get; set; }
+        //public string DriversLicence { get; set; }
+        //public string DVLAReferenceNo { get; set; }
         public string TestType { get; set; }
-        public string OldDVLAReferenceNo { get; set; }
+        //public string OldDVLAReferenceNo { get; set; }
         public string FirstName { get; set; }
         public string OtherName { get; set; }
         //[DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]

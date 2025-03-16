@@ -12,23 +12,17 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public long Id { get; set; }
         public long VisualAssessmentResultId { get; set; }
         public int OptometristFirmId { get; set; }
+        public Gender? Gender { get; set; }
+        public string OptometristFirmName { get; set; }
+        public string OptometristName { get; set; }
         public string? ReferenceNumber { get; set; }
 
-        public string? FormNumber { get; set; }
         public ResultServiceType? ResultServiceType { get; set; }
         public TestType TestType { get; set; }
 
-        public NameTitle? NameTitle { get; set; }
         public PassOrFail? PassOrFail { get; set; }
 
-
         public string? Surname { get; set; }
-
-
-        public string? DriversLicence { get; set; }
-
-        public string? DVLAReferenceNo { get; set; }
-
 
         public string? FirstName { get; set; }
 

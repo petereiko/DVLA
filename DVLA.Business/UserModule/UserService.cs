@@ -23,6 +23,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Azure.Core;
 using DVLA.DATA.Domains;
+using Microsoft.Extensions.Hosting;
 
 namespace DVLA.Business.UserModule
 {
@@ -531,12 +532,15 @@ namespace DVLA.Business.UserModule
                 }
                 string token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var encodedToken = WebUtility.UrlEncode(token);
-                string baseUrl = _configuration["AppConstants:BaseUrl"];
+
+                var request = _contextAccessor.HttpContext?.Request;
+
+                string baseUrl = $"{request.Scheme}://{request.Host}{request.PathBase}";
                 string url = $"{baseUrl}/Account/ResetPassword?encodedToken={encodedToken}&userid={user.Id}";
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"<h4>Dear {user.FirstName},</h4>");
                 sb.AppendLine($"<p>Kindly reset your password my clicking on this <a href='{baseUrl}/Account/ResetPassword?token={encodedToken}&id={user.Id}'>link</a></p>");
-                sb.AppendLine("<p>From Driver's Sight Application</p>");
+                sb.AppendLine($"<p>From {_configuration["AppConstants:AppName"]}</p>");
                 string message = sb.ToString();
                 bool EmailLogSuccess = await _emailService.LogEmail(new EmailLogDto
                 {

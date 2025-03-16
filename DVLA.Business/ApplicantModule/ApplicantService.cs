@@ -45,10 +45,10 @@ namespace DVLA.Business.ApplicantModule
                 if (applicant == null) return model;
                 
                 model.Id = applicant.Id;
-                model.NameTitle = applicant.NameTitle;
+                //model.NameTitle = applicant.NameTitle;
                 model.Surname = applicant.Surname;
-                model.DriversLicence = applicant.DriversLicence;
-                model.DVLAReferenceNo = applicant.DVLAReferenceNo;
+                //model.DriversLicence = applicant.DriversLicence;
+                //model.DVLAReferenceNo = applicant.DVLAReferenceNo;
                 model.FirstName = applicant.FirstName;
                 model.OtherName = applicant.OtherName;
                 model.DOB = (DateTime)applicant.DOB;
@@ -61,9 +61,9 @@ namespace DVLA.Business.ApplicantModule
                 model.PassportImageUrl = applicant.PassportImageUrl;
                 model.Status = applicant.Status;
                 model.OptometristFirmId = applicant.OptometristFirmId;
-                model.FormNumber = applicant.FormNumber;
+                //model.FormNumber = applicant.FormNumber;
                 model.TestType = (TestType)applicant.TestType;
-                model.InvoiceNumber = applicant.OldDVLAReferenceNo;
+                //model.InvoiceNumber = applicant.OldDVLAReferenceNo;
                 model.IsActive = applicant.IsActive;
                 model.CreatedBy = applicant.CreatedBy;
                 model.IsDeleted = applicant.IsDeleted;
@@ -120,11 +120,11 @@ namespace DVLA.Business.ApplicantModule
                 }
 
 
-                if (model.NameTitle == null)
-                {
-                    response.Message = "Please select name title";
-                    return response;
-                }
+                //if (model.NameTitle == null)
+                //{
+                //    response.Message = "Please select name title";
+                //    return response;
+                //}
 
                 if (string.IsNullOrEmpty(model.Surname))
                 {
@@ -186,10 +186,10 @@ namespace DVLA.Business.ApplicantModule
 
                 string passFile = applicant.PassportImageUrl;
 
-                applicant.NameTitle = model.NameTitle;
+                //applicant.NameTitle = model.NameTitle;
                 applicant.Surname = model.Surname;
-                applicant.DriversLicence = model.DriversLicence;
-                applicant.DVLAReferenceNo = model.DVLAReferenceNo;
+                //applicant.DriversLicence = model.DriversLicence;
+                //applicant.DVLAReferenceNo = model.DVLAReferenceNo;
                 applicant.FirstName = model.FirstName;
                 applicant.OtherName = model.OtherName;
                 applicant.DOB = (DateTime)model.DOB;
@@ -202,7 +202,7 @@ namespace DVLA.Business.ApplicantModule
                 applicant.PassportImageUrl = model.PassportImageUrl;
                 //applicant.Status = model.Status;
                 applicant.TestType = (TestType)model.TestType;
-                applicant.OldDVLAReferenceNo = model.InvoiceNumber;
+                //applicant.OldDVLAReferenceNo = model.InvoiceNumber;
                 //applicant.IsActive = model.IsActive;
                 //applicant.CreatedBy = model.CreatedBy;
                 //applicant.IsDeleted = model.IsDeleted;

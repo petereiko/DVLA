@@ -294,6 +294,9 @@ namespace DVLA.VerificationPortal.Infrastructure.Migrations
                     b.Property<bool?>("IsRegistration")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("LearnerDriversLicence")
                         .HasColumnType("int");
 
@@ -364,6 +367,9 @@ namespace DVLA.VerificationPortal.Infrastructure.Migrations
 
                     b.Property<string>("Unaided_OU")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("VerifiedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<long>("VisualAssessmentResultId")
                         .HasColumnType("bigint");

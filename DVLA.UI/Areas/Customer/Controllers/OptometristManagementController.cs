@@ -171,7 +171,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
         }
 
         [HttpPost]
-        public ActionResult Update(UserViewModel model, string Id)
+        public async Task<ActionResult> Update(UserViewModel model, string Id)
         {
             if (string.IsNullOrEmpty(User.Identity.Name))
             {
@@ -189,10 +189,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     return View(model);
                 }
                 string responseMessage = "";
-                bool result = _userRepository.Update(model, currentUserId, out responseMessage);
-                if (result)
+                var result = await _userRepository.UpdateAsync(model);
+                if (result.Success)
                 {
-                    TempData["SuccessMessage"] =  responseMessage;
+                    TempData["SuccessMessage"] =  result.Message;
                     _AuditRepo.AddAudit(Activities.UPDATE_OPTOMETRIST, "Update Optometrist");
                     return RedirectToAction("Index");
                 }

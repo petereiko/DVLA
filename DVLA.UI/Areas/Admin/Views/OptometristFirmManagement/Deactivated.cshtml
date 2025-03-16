@@ -55,7 +55,10 @@
                                                 <a asp-action="Update" asp-route-token="@Utility.Encrypt(item.Id.ToString())" class="dropdown-item">Update</a>
                                             </li> *@
                                             <li>
-                                                <a onclick="ChangeStatus(@item.Id)" class="dropdown-item">Activate</a>
+                                                @{
+                                                    string text = item.IsActive ? "Deactivate" : "Activate";
+                                                }
+                                                <a onclick="ChangeStatus(@item.Id)" class="dropdown-item">@text</a>
                                             </li>
                                         </ul>
                                     </div>

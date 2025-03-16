@@ -107,11 +107,11 @@ namespace DVLA.UI.Controllers
             MessageResponse response = await _userService.SendResetPasswordToken(model);
             if (response.Success)
             {
-                TempData["SuccessMessage"] = response.Message;
+                model.SuccessMessage = response.Message;
             }
             else
             {
-                TempData["ErrorMessage"] = response.Message;
+                model.ErrorMessage = response.Message;
             }
             return View(model);
         }

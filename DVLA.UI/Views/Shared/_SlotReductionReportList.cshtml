@@ -1,52 +1,67 @@
-﻿@using DVLA.Data.Models.DataObjects.DTOs
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.Enumerables
 @model IEnumerable<SlotReductionModel>
 @{
     int counter = 0;
 }
 
-    <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
-        <thead>
-            <tr>
-                <th>
-                    #
-                </th>
-                <th>
-                    Created By
-                </th>
-                <th>
-                    Optometrist Firm
-                </th>
-                <th>
-                    Comment
-                </th>
-                <th>
-                    Created On
-                </th>
-            </tr>
+<table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+    <thead>
+        <tr>
+            <th>
+                #
+            </th>
+            <th>
+                Created By
+            </th>
+            <th>
+                Optometrist Firm
+            </th>
+            <th>Slot Type</th>
+            <th>
+                Quantity
+            </th>
+            <th>
+                Comment
+            </th>
+            <th>
+                Created On
+            </th>
+        </tr>
 
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                counter = counter + 1;
-                <tr>
-                    <td>
-                        @counter
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.CreatedByFullName)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.OptometristFirm)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Comment)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.DateCreated)
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            counter = counter + 1;
+            <tr>
+                <td>
+                    @counter
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedByFullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OptometristFirm)
+                </td>
+                <td>
+                    @{
+                        string type = EnumHelper<AccessType>.GetDisplayValue(item.AccessType);
+                    }
+                    <span>@type</span>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Comment)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DateCreated)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 

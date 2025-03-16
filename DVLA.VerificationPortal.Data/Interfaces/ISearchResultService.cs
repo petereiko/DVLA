@@ -14,5 +14,6 @@ namespace DVLA.VerificationPortal.Application.Interfaces
         Task<VisualAssessmentResultDto> GetResultAsync(int id);
         Task<MessageResponse> PushBulk(VisualAssessmentResultDto result);
         Task<MessageResponse> Push();
+        Task<MessageResponse> VerifyResult(string token);
     }
 }

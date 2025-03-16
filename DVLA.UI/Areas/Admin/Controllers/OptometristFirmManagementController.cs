@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -88,6 +89,14 @@ namespace DVLA.UI.Areas.Admin.Controllers
             }
             return View(new List<OptometristFirmModel>());
 
+        }
+
+
+        [HttpPost]
+        public async Task<JsonResult> GetOptometristFirms(int? Region, int? District) 
+        {
+            var model = await _reportRepository.FetchAllOptometristFirms(Region, District);
+            return Json(model);
         }
 
 
@@ -417,8 +426,13 @@ namespace DVLA.UI.Areas.Admin.Controllers
                     Value = x.Id.ToString()
                 }).ToList();
 
+                // Convert Base64 string to byte array
+                byte[] byteArray = Convert.FromBase64String(token);
 
-                int optometristId = Convert.ToInt32(Utility.Decrypt(token));
+                // Convert byte array back to original string
+                string idString = System.Text.Encoding.UTF8.GetString(byteArray);
+
+                int optometristId = Convert.ToInt32(idString);//Convert.ToInt32(Utility.Decrypt(token));
                 OptometristFirm optometrist = _optometristQuery.Filter(x => x.Id == optometristId).FirstOrDefault();
                 var optometristUser = _optometristUserQuery.Filter(u => u.OptometristFirmId == optometristId).FirstOrDefault();
                 var region = _regionQuery.Filter(r => r.Id == optometrist.RegionId).FirstOrDefault();
@@ -620,40 +634,98 @@ namespace DVLA.UI.Areas.Admin.Controllers
         public async Task<JsonResult> ChangeStatus(int Id)
         {
             string message = "";
-            try
+            var scope = await _context.Database.BeginTransactionAsync();
+            using (scope)
             {
-                var optometrist = _optometristQuery.Filter(x => x.Id == Id).FirstOrDefault();
-                if (optometrist.IsActive)
+                try
                 {
-                    message = "Optometrist successfully deactivated";
-                    optometrist.IsActive = false;
+                    var optometrist = _optometristQuery.Filter(x => x.Id == Id).FirstOrDefault();
+                    if (optometrist == null)
+                    {
+                       await scope.RollbackAsync();
+                        message = "Optometrist Firm does not exist";
+                        return Json(new { success = false, message });
+                    }
+                    optometrist.IsActive = !optometrist.IsActive;
+                    optometrist.ModifiedBy = currentUserId;
+                    optometrist.ModifiedDate = DateTime.Now;
+                    await _context.SaveChangesAsync();
+
+                    string respMessage = "";
+                    var optometristUsers = _context.OptometristFirmUsers.Where(x => x.OptometristFirmId == optometrist.Id);
+                    var userIds = optometristUsers.Select(x => x.ApplicationUserId);
+                    foreach (var user in userIds)
+                    {
+
+                        var applicationUser = _context.ApplicationUsers.FirstOrDefault(x => x.Id == user);
+                        if (applicationUser != null)
+                        {
+                            applicationUser.IsActive = optometrist.IsActive;
+                            _context.SaveChanges();
+                        }
+                    }
+
+                    await scope.CommitAsync();
+                    return Json(new { success = true, message });
                 }
-                else
+                catch (Exception ex)
                 {
-                    message = "Optometrist successfully activated";
-                    optometrist.IsActive = true;
+                    await scope.RollbackAsync();
+                    _logger.LogError(ex.Message, ex);
+                    return Json(new { success = false, message = "Kindly try again later" });
                 }
-
-
-                string respMessage = "";
-                var users = _userRepository.GetUsersByOptometristFirm(optometrist.Id);
-                foreach (var user in users)
-                {
-                    if (user.IsDeleted) continue;
-                    user.IsActive = optometrist.IsActive;
-                    _userRepository.Update(user, currentUserId, out respMessage);
-                }
-
-                optometrist.ModifiedBy = currentUserId;
-                optometrist.ModifiedDate = DateTime.Now;
-                await _optometristQuery.UpdateAsync(optometrist);
-                return Json(new { success = true, message });
             }
-            catch (Exception ex)
+            
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> ChangeOptometristFirmStatus(int Id)
+        {
+            string message = "";
+            var scope = await _context.Database.BeginTransactionAsync();
+            using (scope)
             {
-                _logger.LogError(ex.Message, ex);
-                return Json(new { success = false, message = "Kindly try again later" });
+                try
+                {
+                    var optometrist = await _context.OptometristFirms.FirstOrDefaultAsync(x => x.Id == Id);
+                    if (optometrist == null)
+                    {
+                        await scope.RollbackAsync();
+                        TempData["ErrorMessage"] = "Optometrist Firm does not exist";
+                        return RedirectToAction("Index");
+                    }
+                    optometrist.IsActive = !optometrist.IsActive;
+                    optometrist.ModifiedBy = currentUserId;
+                    optometrist.ModifiedDate = DateTime.Now;
+                    await _context.SaveChangesAsync();
+
+                    string respMessage = "";
+                    var optometristUsers = _context.OptometristFirmUsers.Where(x => x.OptometristFirmId == optometrist.Id);
+                    var userIds = optometristUsers.Select(x => x.ApplicationUserId);
+                    foreach (var user in userIds)
+                    {
+
+                        var applicationUser = _context.ApplicationUsers.FirstOrDefault(x => x.Id == user);
+                        if (applicationUser != null)
+                        {
+                            applicationUser.IsActive = optometrist.IsActive;
+                            _context.SaveChanges();
+                        }
+                    }
+
+                    await scope.CommitAsync();
+                    TempData["SuccessMessage"] = "Changes successful";
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    await scope.RollbackAsync();
+                    _logger.LogError(ex.Message, ex);
+                    TempData["ErrorMessage"] = "Error occurred. Try again later" + ex.Message + ex.StackTrace;
+                    return RedirectToAction("Index");
+                }
             }
+
         }
 
         public JsonResult GetDistrict(int id)

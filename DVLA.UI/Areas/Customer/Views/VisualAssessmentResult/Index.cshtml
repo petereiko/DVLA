@@ -6,7 +6,7 @@
 @model PaginationResponseModel<List<VisualAssessmentResultListItem>>
 
 @{
-    ViewBag.Title = "Assessment Results";
+    ViewBag.Title = "Eye Test Results";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var i = 0;
 }
@@ -98,14 +98,20 @@
                                 <p class="card-subtitle mb-3">
                                     <a asp-action="Create" asp-controller="VisualAssessmentResult" asp-area="Customer" class="btn btn-primary">Create New @ViewData["Title"].ToString()</a>
 
-                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bs-example-modal-md">
+                                    @* <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bs-example-modal-md">
                                         Upload
-                                    </button>
+                                    </button> *@
                                 </p>
                             </div>
 
 
                         </div>
+
+                        <br />
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">@TempData["SuccessMessage"].ToString()</div>
+                        }
 
                         <div class="table-responsive">
                             @* <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap"> *@

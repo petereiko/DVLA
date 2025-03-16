@@ -39,7 +39,7 @@
                                         }
                                     </div>
                                 }
-                                <form asp-action="InitiateSlotRequest" asp-controller="Slot" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post" enctype="multipart/form-data">
+                                <form id="myForm" asp-action="InitiateSlotRequest" asp-controller="Slot" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post" enctype="multipart/form-data">
 
 
                                     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
@@ -152,6 +152,14 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
+
+        document.getElementById('myForm').addEventListener('keydown', function(event) {
+          if (event.key === 'Enter') {
+            event.preventDefault();  // Prevent the default action (form submission)
+            document.getElementById('btnSubmit').disabled = true;  // Disable the button
+          }
+        });
 
         // function PaymentMethodChange(e){
         //     console.log(e.value);
@@ -267,6 +275,7 @@
                         }
                         else {
                             $('#slot-quantity-message').show();
+                            
                         }
                         $('#slot-computing-message').hide();
                     }

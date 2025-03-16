@@ -65,7 +65,7 @@ namespace DVLA.UI.Components
                 if (result != null)
                 {
 
-                    model = _visualAssessmentResultRepository.FetchAssessmentResult(result.DriversLicence, result.DVLAReferenceNo, result.ReferenceNumber);
+                    model = _visualAssessmentResultRepository.FetchAssessmentResult(result.ReferenceNumber);
                     if (model != null)
                     {
                         if (!string.IsNullOrEmpty(model.PassportImageUrl))

@@ -4,6 +4,7 @@ using DVLA.Business.UserModule;
 using DVLA.Data;
 using DVLA.Data.Models.Auth;
 using DVLA.Data.Models.DataObjects.DTOs;
+using DVLA.Data.Models.DataObjects.UtilityObjects;
 using DVLA.Data.Models.DataObjects.ViewModels;
 using DVLA.DATA.Domains;
 using Microsoft.AspNetCore.Authorization;
@@ -90,8 +91,6 @@ namespace DVLA.UI.Areas.Admin.Controllers
             {
                 return RedirectToAction("Index", "Admin", new { area = "Admin" });
             }
-           // ViewBag.Optometrists = _optometristQuery.GetAll().OrderBy(x => x.BusinessName).ToList();
-
             try
             {
                 ViewBag.Roles = _roleManager.Roles.ToList();
@@ -114,7 +113,27 @@ namespace DVLA.UI.Areas.Admin.Controllers
 
                 using (scope)
                 {
-                    var applicationUser = new ApplicationUser()
+                    if(model.Roles.Where(x=>x.IsChecked).Select(x=>x.Name).Contains(AppRoles.OPTOMETRIST) && string.IsNullOrEmpty(model.PIN))
+                    {
+                        scope.Rollback();
+                        model.Errors.Add("You must enter Personal Identification Number");
+                        return View(model);
+                    }
+                    ApplicationUser applicationUser = await _context.ApplicationUsers.AsNoTracking().FirstOrDefaultAsync(x => x.Email.Trim().ToLower() == model.Email.ToLower().Trim());
+                    if (applicationUser != null)
+                    {
+                        scope.Rollback();
+                        model.Errors.Add("User with the email already exist");
+                        return View(model);
+                    }
+                    applicationUser = await _context.ApplicationUsers.AsNoTracking().FirstOrDefaultAsync(x => x.Pin.Trim().ToLower() == model.PIN.ToLower().Trim());
+                    if (applicationUser != null)
+                    {
+                        scope.Rollback();
+                        model.Errors.Add("User with the Pin already exist");
+                        return View(model);
+                    }
+                    applicationUser = new ()
                     {
                         Id = Guid.NewGuid().ToString(),
                         CreatedDate = DateTime.Now,
@@ -126,7 +145,6 @@ namespace DVLA.UI.Areas.Admin.Controllers
                         UserName = model.Email,
                         CreatedBy = currentUserId,
                         Pin = model.PIN,
-                        //DefaultRole = model.DefaultRole,
                         EmailConfirmed = model.EmailConfirmed,
                         PhoneNumber = model.Phone,
                         IsDeleted = false
@@ -200,7 +218,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public ActionResult Update(UserViewModel model, string Id)
+        public async Task<ActionResult> Update(UserViewModel model, string Id)
         {
             if (string.IsNullOrEmpty(User.Identity.Name))
             {
@@ -217,17 +235,16 @@ namespace DVLA.UI.Areas.Admin.Controllers
                     model.Errors.AddRange(ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage));
                     return View(model);
                 }
-                string responseMessage = "";
-                bool result = _userRepository.Update(model, currentUserId, out responseMessage);
-                if (result)
+                var updateResult = await _userRepository.UpdateAsync(model);
+                if (updateResult.Success)
                 {
-                    TempData["SuccessMessage"] =responseMessage;
+                    TempData["SuccessMessage"] =updateResult.Message;
                     _AuditRepo.AddAudit(Activities.UPDATE_USER, "Update User Details");
                     return RedirectToAction("Index");
                 }
                 else
                 {
-                    model.Errors.Add(responseMessage);
+                    model.Errors.Add(updateResult.Message);
                     return View(model);
                  }
             }

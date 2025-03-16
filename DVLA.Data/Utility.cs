@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -12,6 +14,23 @@ namespace DVLA.Data
 {
     public static class Utility
     {
+        private static readonly IConfigurationRoot _configuration;
+        static Utility()
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory()) // Set path to the appsettings.json file
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            _configuration = builder.Build();
+        }
+
+        public static bool ValidatePassport(IFormFile passportData)
+        {
+            int size = Convert.ToInt32(_configuration["AppConstants:PassportMaxSize"]);
+            return passportData.Length < 1024 * size;
+        }
+
+
         public static string Encrypt(string plainText, string password="Securityr&d1", string salt="HEFRA")
         {
             byte[] saltBytes = Encoding.UTF8.GetBytes(salt);
@@ -99,6 +118,19 @@ namespace DVLA.Data
             {
 
             }
+        }
+
+        public static DateTime StartOfDay(DateTime startDate)
+        {
+            DateTime date = startDate.Date;
+            return date;
+        }
+
+        public static DateTime EndOfDay(DateTime endDate)
+        {
+            DateTime date = endDate.Date;
+            date = date.AddHours(23).AddMinutes(59).AddSeconds(59);
+            return date;
         }
 
     }

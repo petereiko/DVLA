@@ -25,6 +25,8 @@ namespace DVLA.UI.Areas.Registration.Controllers
 {
     [Authorize(Roles = AppRoles.FRONTOFFICER)]
 
+    [Area("Registration")]
+
     public class FrontOfficeController : Controller
     {
         private readonly IAuditRepo _AuditRepo;
@@ -62,21 +64,24 @@ namespace DVLA.UI.Areas.Registration.Controllers
         {
             try
             {
-                //await _smsRepository.SendPendingSms();
                 var optometristUser = _optometristFirmUserQuery.Filter(u => u.ApplicationUserId == currentUserId).FirstOrDefault();
+                var query = _applicantQuery.Filter(x => x.IsRegistration == true && x.Status == Status.InProgress && x.OptometristFirmId == optometristUser.OptometristFirmId);
+                //await _smsRepository.SendPendingSms();
+                
                 var obj = _applicantQuery.GetAll().Join(_optometristFirmQuery.GetAll(),
                     a => a.OptometristFirmId,
-                    o => o.Id, (a, o) => new { a, o }).Where(x => x.a.IsRegistration == true && x.a.OptometristFirmId == optometristUser.OptometristFirmId)
+                    o => o.Id, (a, o) => new { a, o }).Where(x => x.a.IsRegistration == true && x.a.OptometristFirmId == optometristUser.OptometristFirmId && x.a.Status==Status.InProgress)
                     .Select(p => new ApplicantModel
                     {
                         ContactNumber = p.a.ContactNumber,
                         FirstName = p.o.BusinessAddress,
                         DOB = p.a.DOB,
-                        DriversLicence = p.a.DriversLicence,
-                        DVLAReferenceNo = p.a.DVLAReferenceNo,
+                        Status = p.a.Status,
+                        //DriversLicence = p.a.DriversLicence,
+                        //DVLAReferenceNo = p.a.DVLAReferenceNo,
                         Email = p.a.Email,
                         LearnerDriversLicence = p.a.LearnerDriversLicence,
-                        NameTitle = p.a.NameTitle,
+                        //NameTitle = p.a.NameTitle,
                         OtherName = p.a.OtherName,
                         Fullname = p.a.Surname + " " + p.a.FirstName + " " + p.a.OtherName,
                         CreatedBy = p.o.CreatedBy,
@@ -84,10 +89,11 @@ namespace DVLA.UI.Areas.Registration.Controllers
                         OptometristFirmId = p.o.Id,
                         //PassportImageUrl = p.a.PassportImageUrl,
                         PostalAddress = p.a.PostalAddress,
-                        FormNumber = p.a.FormNumber,
+                        //FormNumber = p.a.FormNumber,
                         Surname = p.a.Surname,
                         TaxIdentificationNumber = p.a.TaxIdentificationNumber,
-                        InvoiceNumber = p.a.OldDVLAReferenceNo,
+                        DateCreated = p.a.CreatedDate,
+                        //InvoiceNumber = p.a.OldDVLAReferenceNo,
                         Id = p.a.Id,
                         IsActive = p.o.IsActive,
                         IsDeleted = p.o.IsDeleted,
@@ -147,16 +153,6 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     }
                 }
 
-                //if (string.IsNullOrEmpty(model.PassportImageUrl))
-                //{
-                //    ModelState.AddModelError("PassportImageUrl", "Please capture/upload passport");
-                //}
-
-                //if (model.NameTitle == null)
-                //{
-                //    ModelState.AddModelError("NameTitle", "Please select name title");
-                //}
-
                 if (string.IsNullOrEmpty(model.Surname))
                 {
                     ModelState.AddModelError("Surname", "Please enter surname");
@@ -197,55 +193,45 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     return View(model);
                 }
 
-
-
-
-                //var user = UserManager.FindByEmail(model.Email);
-                //if (user != null)
-                //{
-                //    TempData["MESSAGE"] = new AlertMessage { Message = "User already exist", MessageType = MessageType.ErrorMessage };
-                //}
-
-                //model.PassportImageUrl = model.PassportImageUrl.Substring(model.PassportImageUrl.IndexOf(',') + 1);
-
-                string referenceNumber = _visualAssessmentResultRepository.GenerateFormNo();
+                //string referenceNumber = _visualAssessmentResultRepository.GenerateFormNo();
 
                 var applicant = new VisualAssessmentResult()
-                    {
-                        CreatedDate = DateTime.Now,
-                        Id = model.Id,
-                    NameTitle = model.NameTitle,
+                {
+                    CreatedDate = DateTime.Now,
+                    Id = model.Id,
+                    //NameTitle = model.NameTitle,
                     Surname = model.Surname,
-                        DriversLicence = model.DriversLicence,
-                        DVLAReferenceNo = model.DVLAReferenceNo,
-                        OldDVLAReferenceNo = model.InvoiceNumber,
-                        LearnerDriversLicence = model.LearnerDriversLicence,
-                        OptometristFirmId = model.OptometristFirmId,
-                        ResultServiceType = model.ResultServiceType,
-                        AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
-                        PassportImageUrl = model.Filename,
-                        TestType = model.TestType,
-                        Status = Status.InProgress,
-                        FirstName = model.FirstName,
-                        OtherName = model.OtherName,
-                        DOB = (DateTime)model.DOB,                       
-                        PostalAddress = model.PostalAddress,
-                        ContactNumber = model.ContactNumber,
-                        FormNumber = referenceNumber,
-                        TaxIdentificationNumber = model.TaxIdentificationNumber,
-                        Email = model.Email,
-                        IsRegistration = true,
-                        CreatedBy = currentUserId
-                    };
+                    //DriversLicence = model.DriversLicence,
+                    //DVLAReferenceNo = model.DVLAReferenceNo,
+                    //OldDVLAReferenceNo = model.InvoiceNumber,
+                    LearnerDriversLicence = model.LearnerDriversLicence,
+                    OptometristFirmId = model.OptometristFirmId,
+                    ResultServiceType = model.ResultServiceType,
+                    AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
+                    PassportImageUrl = model.Filename,
+                    TestType = model.TestType,
+                    Status = Status.InProgress,
+                    FirstName = model.FirstName,
+                    OtherName = model.OtherName,
+                    DOB = (DateTime)model.DOB,
+                    PostalAddress = model.PostalAddress,
+                    ContactNumber = model.ContactNumber,
+                    //FormNumber = referenceNumber,
+                    TaxIdentificationNumber = model.TaxIdentificationNumber,
+                    Email = model.Email,
+                    IsRegistration = true,
+                    CreatedBy = currentUserId
+                    //ReferenceNumber = referenceNumber
+                };
 
                     if (model.LearnerDriversLicence != null) model.LearnerDriversLicence = model.LearnerDriversLicence;
                     _applicantQuery.Add(applicant);
 
 
 
-                await _smsRepository.SendRegistrationDetail(model.FirstName, model.ContactNumber, referenceNumber);
+                //await _smsRepository.SendRegistrationDetail(model.FirstName, model.ContactNumber, referenceNumber);
                 //send email
-                await _notificationRepository.SendRegistrationDetail(model.FirstName, model.ContactNumber, referenceNumber, model.Email);
+               // await _notificationRepository.SendRegistrationDetail(model.FirstName, model.ContactNumber, referenceNumber, model.Email);
 
 
 
@@ -285,8 +271,8 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 var model = new ApplicantModel();
                 model.Id = applicant.Id;
                 model.Surname = applicant.Surname;
-                model.DriversLicence = applicant.DriversLicence;
-                model.DVLAReferenceNo = applicant.DVLAReferenceNo;
+                //model.DriversLicence = applicant.DriversLicence;
+                //model.DVLAReferenceNo = applicant.DVLAReferenceNo;
                 model.FirstName = applicant.FirstName;
                 model.OtherName = applicant.OtherName;
                 model.DOB = (DateTime)applicant.DOB;
@@ -300,9 +286,9 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 model.Status = applicant.Status;
                 model.OptometristFirmId = applicant.OptometristFirmId;
                 model.Optometrist = firm.BusinessName;
-                model.FormNumber = applicant.FormNumber;
+                //model.FormNumber = applicant.FormNumber;
                 model.TestType = (TestType)applicant.TestType;
-                model.InvoiceNumber = applicant.OldDVLAReferenceNo;
+                //model.InvoiceNumber = applicant.OldDVLAReferenceNo;
                 model.IsActive = applicant.IsActive;
                 model.CreatedBy = applicant.CreatedBy;
                 model.IsDeleted = applicant.IsDeleted;
@@ -417,10 +403,10 @@ namespace DVLA.UI.Areas.Registration.Controllers
 
 
 
-                applicant.NameTitle = model.NameTitle;
+                //applicant.NameTitle = model.NameTitle;
                 applicant.Surname = model.Surname;
-                applicant.DriversLicence = model.DriversLicence;
-                applicant.DVLAReferenceNo = model.DVLAReferenceNo;
+                //applicant.DriversLicence = model.DriversLicence;
+                //applicant.DVLAReferenceNo = model.DVLAReferenceNo;
                 applicant.FirstName = model.FirstName;
                 applicant.OtherName = model.OtherName;
                 applicant.DOB = (DateTime)model.DOB;
@@ -434,7 +420,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 applicant.PassportImageUrl = model.Filename;
                 //applicant.Status = model.Status;
                 applicant.TestType = (TestType)model.TestType;
-                applicant.OldDVLAReferenceNo = model.InvoiceNumber;
+                //applicant.OldDVLAReferenceNo = model.InvoiceNumber;
                 applicant.IsActive = model.IsActive;
                 applicant.CreatedBy = model.CreatedBy;
                 applicant.IsDeleted = model.IsDeleted;

@@ -1,0 +1,196 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.DataObjects.UtilityObjects
+@using DVLA.Data.Models.DataObjects.ViewModels
+@using DVLA.Data.Models.Enumerables
+@model List<ApplicantModel>
+
+@{
+    ViewBag.Title = "Assessment Results";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var i = 0;
+}
+<link href="~/cdn.datatables.net/jquerydatatable/datatable.css" rel="stylesheet" />
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            @* <div class="mb-2">
+            <h4 class="card-title mb-0">File export</h4>
+            </div> *@
+
+            <form asp-action="Index" asp-controller="FrontOffice" method="post">
+
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control mydatepicker" value="@ViewBag.StartDate" id="StartDate" name="StartDate" autocomplete="off" placeholder="Enter Start Date" data-date-format="dd/mm/yyyy" />
+                            <label for="StartDate">Start Date</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control mydatepicker" value="@ViewBag.EndDate" autocomplete="off" id="EndDate" name="EndDate" placeholder="Enter End Date" data-date-format="dd/mm/yyyy" />
+                            <label for="EndDate">End Date</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <br />
+                        Show
+                        <select id="Entries" name="Entries">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="100000"> >100 </option>
+                        </select>
+                        entries
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-md-flex align-items-center">
+
+                            <div class="ms-auto mt-3 mt-md-0">
+                                <button type="submit" class="btn btn-primary hstack gap-6">
+                                    Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <br />
+            <div class="section-wrapper">
+                <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                    <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+                        @* <partial name="_Upload" , model="new VisualAssessmentResultUploadViewModel()" /> *@
+                        <div class="d-flex mb-2 float-right">
+
+                            <div class="d-flex">
+                                <p class="card-subtitle mb-3">
+                                    <a asp-action="Create" asp-controller="FrontOffice" asp-area="Registration" class="btn btn-primary">Create New @ViewData["Title"].ToString()</a>
+
+                                    @* <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bs-example-modal-md">
+                                        Upload
+                                    </button> *@
+                                </p>
+                            </div>
+
+
+                        </div>
+
+                        <br />
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">@TempData["SuccessMessage"].ToString()</div>
+                        }
+
+                        <div class="table-responsive">
+                            @* <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap"> *@
+                            <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            #
+                                        </th>
+                                        <th>
+                                            Full Name
+                                        </th>
+                                        <th>
+                                            Contact
+                                        </th>
+                                        <th>
+                                            Service Type
+                                        </th>
+                                        <th>
+                                            Optometrist
+                                        </th>
+                                        <th>
+                                            Status
+                                        </th>
+                                        <th>Created On</th>
+                                        <th></th>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        i = i + 1;
+                                        <tr>
+                                            <td>
+                                                @i
+                                            </td>
+                                            <td>
+                                                @item.Fullname
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ContactNumber)
+                                            </td>
+                                            <td>
+                                                @{
+                                                    string serviceType = "N/A";
+                                                    if (item.ResultServiceType != null)
+                                                    {
+                                                        serviceType = EnumHelper<ResultServiceType>.GetDisplayValue((ResultServiceType)item.ResultServiceType);
+                                                    }
+                                                }
+                                                <span>@serviceType</span>
+                                            </td>
+
+                                            <td>
+                                                @item.Optometrist
+                                            </td>
+                                            <td>
+                                                @item.Status
+                                            </td>
+                                            <td>
+                                                @item.DateCreated
+                                            </td>
+                                            <td style="text-align:right;">
+
+
+
+                                                @if (item.Status == Status.InProgress)
+                                                {
+                                                    <a class="btn btn-primary mb-2 btn-sm" id="btnProcess" href="@Url.Action("Create", "VisualAssessmentResult", new { page="Details", token=Utility.Encrypt(item.Id.ToString()) })">Edit</a>
+
+                                                }
+
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/cdn.datatables.net/jquerydatatable/datatable.js"></script>
+@section Scripts {
+    <script>
+
+        $('#mytable').dataTable();
+
+        function ShowModal() {
+            $('#myModal').show();
+        }
+    </script>
+}
+
+
+
+
+
+
+
+

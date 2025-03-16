@@ -17,12 +17,12 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public string ReferenceNumber { get; set; }
         public ResultServiceType? ResultServiceType { get; set; }
         public LearnerDriversLicenceType? LearnerDriversLicence { get; set; }
-        public NameTitle? NameTitle { get; set; }
+        //public NameTitle? NameTitle { get; set; }
         public PassOrFail? PassOrFail { get; set; }
         public PassResult? PassResult { get; set; }
         public string Surname { get; set; }
-        public string DriversLicence { get; set; }
-        public string DVLAReferenceNo { get; set; }
+        //public string DriversLicence { get; set; }
+        //public string DVLAReferenceNo { get; set; }
         public string FirstName { get; set; }
         public string OtherName { get; set; }
         public DateTime? DOB { get; set; }
@@ -65,14 +65,14 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public string ContactPhoneNumber { get; set; }
         public string ContactEmail { get; set; }
         public string UserName { get; set; }
-        public string CreatedByUsername { get; set; }
-        public string CreatedByFullName { get; set; }
-        public string UpdatedByUsername { get; set; }
+        //public string CreatedByUsername { get; set; }
+        //public string CreatedByFullName { get; set; }
+        //public string UpdatedByUsername { get; set; }
         public string RegionName { get; set; }
-        public string Optometrist { get; set; }
+        //public string Optometrist { get; set; }
         public string DistrictName { get; set; }
         public bool? IsRegistration { get; set; }
-        public string FormNumber { get; set; }
+        //public string FormNumber { get; set; }
         public bool IsDeleted { get; set; }
         public bool IsActive { get; set; }
 

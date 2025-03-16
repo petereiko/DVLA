@@ -1,9 +1,12 @@
 ﻿@using DVLA.Data
 @using DVLA.Data.Models.DataObjects.ViewModels
 @using DVLA.Data.Models.Enumerables
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration _config;
 @{
-    ViewBag.Title = "Visual Assessment Results";
+    ViewBag.Title = "Eye Test Results";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    int passportMaxSize = Convert.ToInt32(_config["AppConstants:PassportMaxSize"]);
 }
 @model VisualAssessmentResultViewModel
 <div class="datatables">
@@ -11,7 +14,7 @@
     <div class="card">
         <div class="card-body">
             <div class="mb-2">
-                <h4 class="card-title mb-0">Visual Assessment Results</h4>
+                <h4 class="card-title mb-0">Eye Test Results</h4>
             </div>
             <div id="DivIdToPrint">
                 <div class="card form-card">
@@ -38,28 +41,35 @@
                                 <div class="col-sm-4" style="padding:0px">
                                     <canvas id="canvas" width="200" height="200" />
                                     <img src="" hidden id="photo" style="height: 200px; width:200px; border:1px solid black" />
-
-
+                                </div>
+                                <div class="col-sm-4" style="padding:0px">
+                                    @if (!string.IsNullOrEmpty(Model.PassportImageUrl))
+                                    {
+                                        <img src="/Passports/@Model.PassportImageUrl" id="photo1" style="height: 200px; width:200px;" />
+                                    }
                                 </div>
 
                             </div>
                         </div>
-
+                        <br/>
                         <form asp-action="Create" method="post" enctype="multipart/form-data" id="target">
                             <div class="container">
                                 @if (Model.Errors.Any())
                                 {
                                     <div class="alert alert-danger">@Model.Errors.FirstOrDefault()</div>
                                 }
-                                
+
 
                                 <div class="row">
                                     <div class="col-sm-4">
-                                        Upload Image
+                                        <label>Upload Image <strong style="color:red">(Max Passport Size @passportMaxSize KB)</strong></label>
                                         <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
-                                            @Html.TextBoxFor(m => m.Image, new { @class = "form-control", type = "file", accept = "image/jpeg", onchange = "handleImage(e)" })
+                                            @Html.TextBoxFor(m => m.Image, new { @class = "form-control", type = "file", accept = "image/jpeg" })
                                             @Html.ValidationMessageFor(m => m.Image, "", new { @class = "text-danger" })
                                         </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <img src="" id="passportpreview" style="height: 200px; width:200px; display:none" />
                                     </div>
                                 </div>
 
@@ -76,14 +86,24 @@
                             <input type="hidden" asp-for="Action" />
                             <input type="hidden" asp-for="Status" />
                             <input type="hidden" asp-for="ReferenceNumber" />
+                            <input type="hidden" asp-for="OptometristFirmId" />
+                            <input type="hidden" asp-for="PassportUploadType" value="" />
+
 
                             <div class="container">
+                                <br />
+                                <div id="ServiceTypeArea">
+                                    <ul class="nav nav-tabs" id="ServiceTypeTab">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-toggle="tab">Service Type</a>
+                                        </li>
 
+                                    </ul>
+                                </div>
+                                <br />
                                 <div class="row row-xs mg-b-10">
-                                    @* <div class="col-sm">
-                                    DVLA Invoice Number
-                                    @Html.TextBoxFor(model => model.OldDVLAReferenceNo, new { @class = "form-control", @autocomplete = "off" })
-                                    </div> *@
+
+
                                     <div class="col-sm">
                                         Service Type
                                         <select asp-for="ResultServiceType" class="form-control" asp-items="Html.GetEnumSelectList<ResultServiceType>()">
@@ -121,6 +141,7 @@
                                 </div>
 
                                 </div> *@
+                                <br />
                                 <div class="row row-xs mg-b-10">
                                     @if (Model != null)
                                     {
@@ -147,7 +168,7 @@
                                         </li>
 
                                     </ul>
-
+                                    <br />
                                     <div class="tab-content mb-4">
                                         <div class="tab-pane active" id="DetailsTab">
 
@@ -185,7 +206,16 @@
                                             </div>
                                             <div class="row row-xs mg-b-10">
 
-                                                <div class="col-sm">
+                                                <div class="col-sm-4">
+                                                    Gender
+                                                    <div class="form-floating mb-3">
+                                                        <select asp-for="Gender" class="form-control" required asp-items="@Html.GetEnumSelectList<Gender>()">
+                                                            <option value="">--Select Gender--</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-8">
                                                     Digital/Residential Address
 
                                                     @Html.TextAreaFor(model => model.PostalAddress, new { @class = "form-control" })
@@ -226,7 +256,7 @@
                                         </li>
 
                                     </ul>
-
+                                    <br />
                                     <div class="tab-content mb-4">
                                         <div class="tab-pane active" id="DetailsTab">
                                             <div class="row">
@@ -434,7 +464,7 @@
                                             <div class="row row-xs mg-b-10">
 
                                                 <div class="col-sm">
-                                                    <select asp-for="PassOrFail" class="form-control" asp-items="Html.GetEnumSelectList<PassOrFail>()" disabled>
+                                                    <select asp-for="PassOrFail" class="form-control" asp-items="Html.GetEnumSelectList<PassOrFail>()">
                                                         @* <option value="">Select pass type</option> *@
                                                     </select>
                                                     @* @Html.DropDownList("PassOrFail", EnumHelper.GetSelectList(typeof(PassOrFail)), "", new { @style = "width:100%;", @class = "form-control" }) *@
@@ -501,178 +531,8 @@
 
 @section scripts
 {
+    <script src="~/createvisualassessment.js"></script>
 
-    <script>
-        $(function () {
-
-            $("#DOB").datepicker({
-                dateFormat: "dd-mm-yyyy"
-            });
-
-
-            let currentYear = (new Date).getFullYear();
-            let currentMonth = (new Date).getMonth();
-            let currentDay = (new Date).getDate();
-
-            $('#DOB').on('changeDate', function (e) {
-                var date = e.date;
-                var day = ('0' + date.getDate()).slice(-2);
-                var month = ('0' + (date.getMonth() + 1)).slice(-2);
-                var year = date.getFullYear();
-                $('#DateOfBirth').val(year + '-' + month + '-' + day);
-
-            });
-
-
-            StartCam();
-
-
-            $('#HX_BCV_OD').change(function () {
-
-                if ($('#HX_BCV_OD').val() && $('#HX_BCV_OS').val()) {
-
-                    $('#HX_BCV_OU').val(parseInt($('#HX_BCV_OD').val()) + parseInt($('#HX_BCV_OS').val()));
-                }
-            });
-
-            $('#HX_BCV_OS').change(function () {
-
-                if ($('#HX_BCV_OS').val() && $('#HX_BCV_OD').val()) {
-
-                    $('#HX_BCV_OU').val(parseInt($('#HX_BCV_OD').val()) + parseInt($('#HX_BCV_OS').val()));
-                }
-            });
-
-
-            $('#PassOrFail').change(function () {
-
-                $('#PassResult').empty();
-
-                var id = $('#PassOrFail').val();
-
-                if (id == 2 || id == null || id == '') {
-                    $('#PassResult').empty()
-                    $('#PassResult').hide()
-                    return false;
-                }
-                $('#PassResult').show();
-
-            });
-
-            $('#ResultServiceType').change(function () {
-                var serviceType = $(this).val();
-                if (serviceType == 1) {
-                    $("#LearnerType").css("display", "block");
-                    $('#LearnerDriversLicenceType').rules('add', { required: true, messages: "Learner Drivers Licence Type is required" });
-                } else {
-                    $("#LearnerType").css("display", "none");
-                    $('#LearnerDriversLicenceType').rules('remove', 'required')
-                }
-
-            });
-
-            let isSubmitted = false;
-
-            $('#btnSave').click(function () {
-                $('#ActionType').val('Modify');
-                $('#Action').val('2');
-                $("#target").submit();
-                $(this).val('Submitting.. Please Wait..');
-            });
-
-            $('#btnSubmit').click(function () {
-                $('#ActionType').val('Finalize');
-                $('#Action').val('1');
-                $("#target").submit();
-                $(this).val('Submitting.. Please Wait..');
-            });
-
-
-
-        });
-
-
-        function StartCam() {
-            // Access the webcam
-            const video = document.getElementById("video");
-            video.style.display = "block";
-
-            const photo = document.getElementById("photo");
-            photo.style.display = "none";
-
-            //const canvas = document.getElementById("canvas");
-            //canvas.style.display = "block";
-
-            navigator.mediaDevices
-                .getUserMedia({ video: true })
-                .then((stream) => {
-                    video.srcObject = stream; // Set the stream to the video element
-                })
-                .catch((error) => {
-                    console.error("Error accessing webcam:", error);
-                });
-        }
-
-        function Capture() {
-            let photo = document.getElementById('photo');
-            let video = document.getElementById('video');
-            let canvas = document.getElementById('canvas');
-            // Draw the current frame from the video to the canvas
-            const context = canvas.getContext("2d");
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Get the image data from the canvas as a data URL (base64 encoded image)
-            const imageData = canvas.toDataURL("image/png");
-
-            // Set the captured image as the source of the img element
-            photo.src = imageData;
-
-            //document.getElementById("PassportUrl").value = imageData;
-
-            $('#PassportImageUrl').val(imageData);
-
-            console.log('Image', imageData);
-
-            // Display the captured image
-            photo.style.display = "block";
-
-            //video.style.display = "none";
-        }
-
-        function ChangeResultConclusion(e) {
-            if (e.value == "Fit to drive" || e.value == "Fit to drive with glasses") {
-                $('#PassOrFail').val("1");
-                $('#PassResult').show();
-                load();
-            }
-            else if (e.value = "Not fit to drive") {
-                $('#PassOrFail').val("2");
-                $('#PassResult').hide();
-            }
-            else {
-                $('#PassOrFail').val("");
-                $('#PassResult').hide();
-            }
-        }
-
-        document.getElementById('image').onchange = function (e) {
-
-            const size =
-                (this.files[0].size / 1024 / 1024).toFixed(2);
-
-            if (size > 4) {
-                alert("File must be less than 4 MB");
-                this.value = ''
-                return false
-            }
-
-            var img = new Image();
-            img.onload = draw;
-            img.onerror = failed;
-            img.src = URL.createObjectURL(this.files[0]);
-        };
-
-    </script>
 
 }
 

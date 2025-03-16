@@ -14,6 +14,7 @@ using NPOI.XSSF.UserModel;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using Microsoft.Extensions.Configuration;
+using DVLA.Data.Models.Enumerables;
 
 namespace DVLA.Business.ReportModule
 {
@@ -279,7 +280,6 @@ namespace DVLA.Business.ReportModule
             var result = new List<SlotReductionModel>();
             try
             {
-
                 using (SqlConnection conn = new SqlConnection(_connectionString))
                 {
                     using (SqlCommand cmd = new SqlCommand("FetchSlotReductionLogs", conn))
@@ -302,7 +302,9 @@ namespace DVLA.Business.ReportModule
                                     DateCreated = reader.GetDateTime("CreatedDate"),
                                     Id = reader.GetInt64(reader.GetOrdinal("Id")),
                                     OptometristFirm = reader.IsDBNull(reader.GetOrdinal("OptometristFirm")) ? null : reader.GetString("OptometristFirm"),
-                                    OptometristFirmId = reader.GetInt32("OptometristFirmId")
+                                    OptometristFirmId = reader.GetInt32("OptometristFirmId"),
+                                     AccessType= (AccessType)reader.GetInt32("AccessType"),
+                                      Quantity= reader.GetInt32("Quantity")
                                 });
                             }
                         }
@@ -317,7 +319,7 @@ namespace DVLA.Business.ReportModule
             return result;
         }
 
-        public async Task<List<OptometristFirmModel>> FetchAllOptometristFirms(int region, int? district)
+        public async Task<List<OptometristFirmModel>> FetchAllOptometristFirms(int? region, int? district)
         {
             var result = new List<OptometristFirmModel>();
             try
@@ -328,7 +330,7 @@ namespace DVLA.Business.ReportModule
                     using (SqlCommand cmd = new SqlCommand("FetchAllOptometristFirms", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add(new SqlParameter("@Region", region));
+                        cmd.Parameters.Add(new SqlParameter("@Region", region ?? System.Data.SqlTypes.SqlInt32.Null));
                         cmd.Parameters.Add(new SqlParameter("@District", district ?? System.Data.SqlTypes.SqlInt32.Null));
 
                         await conn.OpenAsync();

@@ -52,12 +52,12 @@
                             <div class="container">
 
                                 <div class="row row-xs mg-b-10">
-                                    <div class="col-sm">
+                                    @* <div class="col-sm">
                                         <b>DVLA Invoice Number</b>
                                         <div class="col-sm-4">
                                             @Model.OldDVLAReferenceNo
                                         </div>
-                                    </div>
+                                    </div> *@
                                     <div class="col-sm">
                                         <b>Service Type</b>
                                         <div>
@@ -83,23 +83,23 @@
                                             @Model.TestType
                                         </div>
                                     </div>
-                                    <div class="col-sm">
+                                    @* <div class="col-sm">
                                         <b>Licence Number</b>
                                         <div>
                                             @Model.DriversLicence
                                         </div>
-                                    </div>
-                                    <div class="col-sm mg-t-10 mg-sm-t-0">
+                                    </div> *@
+                                    @* <div class="col-sm mg-t-10 mg-sm-t-0">
                                         <b>DVLA Reference Number</b>
                                         <div>
                                             @Model.DVLAReferenceNo
                                         </div>
-                                    </div>
+                                    </div> *@
 
 
 
                                 </div>
-                                <div class="row row-xs mg-b-10">
+                                @* <div class="row row-xs mg-b-10">
                                     @if (Model != null)
                                     {
                                         if (Model.Id != null && Model.Id != 0)
@@ -115,7 +115,7 @@
 
                                         }
                                     }
-                                </div>
+                                </div> *@
                                 <div id="DetailsOfApplicant">
                                     <ul class="nav nav-tabs" id="DetailsOfApplicantTab">
                                         <li class="nav-item">

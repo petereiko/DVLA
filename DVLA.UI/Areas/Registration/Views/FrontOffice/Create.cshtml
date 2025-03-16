@@ -1,0 +1,213 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.DataObjects.ViewModels
+@using DVLA.Data.Models.Enumerables
+@{
+    ViewBag.Title = "Eye Test Results";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model ApplicantModel
+
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2">
+                <h4 class="card-title mb-0">Eye Test Results</h4>
+            </div>
+            <div id="DivIdToPrint">
+                <div class="card form-card">
+                    <div class="card-body">
+
+                        <div class="container">
+                            <br />
+
+
+                        </div>
+                        <br />
+                        <form asp-action="Create" method="post" enctype="multipart/form-data" id="target">
+                            <div class="container">
+                                @if (Model.Errors.Any())
+                                {
+                                    <div class="alert alert-danger">@Model.Errors.FirstOrDefault()</div>
+                                }
+                            </div>
+
+
+
+                            <input type="hidden" asp-for="PassportImageUrl" />
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="Status" />
+                            <input type="hidden" asp-for="ReferenceNumber" />
+                            <input type="hidden" asp-for="OptometristFirmId" />
+
+
+                            <div class="container">
+                                <br />
+                                <div id="ServiceTypeArea">
+                                    <ul class="nav nav-tabs" id="ServiceTypeTab">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-toggle="tab">Service Type</a>
+                                        </li>
+
+                                    </ul>
+                                </div>
+                                <br />
+                                <div class="row row-xs mg-b-10">
+
+
+                                    <div class="col-sm">
+                                        Service Type
+                                        <select asp-for="ResultServiceType" class="form-control" asp-items="Html.GetEnumSelectList<ResultServiceType>()">
+                                            <option>Select Service Type</option>
+                                        </select>
+                                        @Html.ValidationMessageFor(model => model.ResultServiceType, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-sm">
+                                        <div id="LearnerType" style="display:@(Model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? "block" : "none")">
+                                            Learner Driver's Licence Type
+                                            <select asp-for="LearnerDriversLicence" class="form-control" asp-items="Html.GetEnumSelectList<LearnerDriversLicenceType>()">
+                                                
+                                            </select>
+                                            @* @Html.DropDownList("LearnerDriversLicence", EnumHelper.GetSelectList(typeof(LearnerDriversLicenceType)), "Select Type", new { @style = "width:100%;", @class = "form-control", @id = "ddlLearnerType" }) *@
+                                            @Html.ValidationMessageFor(model => model.LearnerDriversLicence, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+
+                                <div id="DetailsOfApplicant">
+                                    <ul class="nav nav-tabs" id="DetailsOfApplicantTab">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-toggle="tab">Details of Applicant</a>
+                                        </li>
+
+                                    </ul>
+                                    <br />
+                                    <div class="tab-content mb-4">
+                                        <div class="tab-pane active" id="DetailsTab">
+
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    Surname
+                                                    @Html.TextBoxFor(model => model.Surname, new { @class = "form-control", @autocomplete = "off" })
+
+                                                    @Html.ValidationMessageFor(model => model.Surname, "", new { @class = "text-danger" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    First Name
+                                                    @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @autocomplete = "off" })
+
+                                                    @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                                                </div>
+                                                <div class="col-sm mg-t-10 mg-sm-t-0">
+                                                    Other Name
+                                                    @Html.TextBoxFor(model => model.OtherName, new { @class = "form-control", @autocomplete = "off" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    Date of Birth (DD/MM/YYYY)
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control" asp-for="DOB" autocomplete="off" data-date-format="dd/mm/yyyy" />
+                                                        <div class="input-group-addon">
+                                                            <span class="glyphicon glyphicon-th"></span>
+                                                        </div>
+                                                    </div>
+                                                    @Html.ValidationMessageFor(model => model.DOB, "", new { @class = "text-danger" })
+                                                    @Html.HiddenFor(model => model.DateOfBirth)
+                                                </div>
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    Digital/Residential Address
+
+                                                    @Html.TextAreaFor(model => model.PostalAddress, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.PostalAddress, "", new { @class = "text-danger" })
+
+                                                </div>
+
+                                            </div>
+                                            <div class="row row-xs mg-b-10">
+
+                                                <div class="col-sm">
+                                                    Contact Number
+                                                    @Html.TextBoxFor(model => model.ContactNumber, new { @class = "form-control", @autocomplete = "off" })
+                                                    @Html.ValidationMessageFor(model => model.ContactNumber, "", new { @class = "text-danger" })
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    Tax Identification Number (TIN)
+                                                    @Html.TextBoxFor(model => model.TaxIdentificationNumber, new { @class = "form-control", @autocomplete = "off" })
+                                                    @*@Html.ValidationMessageFor(model => model.TaxIdentificationNumber, "", new { @class = "text-danger" })*@
+
+                                                </div>
+                                                <div class="col-sm">
+                                                    Email (if applicable)
+                                                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @autocomplete = "off" })
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12 mb-2">
+                                    <div class="row">
+                                        <div class="col-lg-6 text-left">
+                                            <a href="@Url.Action("Index","FrontOffice")" class="btn btn-secondary">Back to Application List</a>
+
+
+                                        </div>
+                                        <div class="col-lg-6 text-right">
+
+                                                <input type="submit" id="btnSubmit" class="btn btn-primary" value="Submit" />
+
+                                           
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        $(function(){
+                 $("#DOB").datepicker({
+            dateFormat: "dd-mm-yyyy",
+        });
+        })
+
+             $("#ResultServiceType").change(function () {
+            var serviceType = $(this).val();
+            if (serviceType == 1) {
+                $("#LearnerType").css("display", "block");
+                $("#LearnerDriversLicenceType").rules("add", {
+                    required: true,
+                    messages: "Learner Drivers Licence Type is required",
+                });
+            } else {
+                $("#LearnerType").css("display", "none");
+                $("#LearnerDriversLicenceType").rules("remove", "required");
+            }
+        });
+    </script>
+}
+

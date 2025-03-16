@@ -49,24 +49,46 @@ namespace DVLA.Business.BackgroundJobModule
         [DisableConcurrentExecution(60)]
         public void SendBulkEmail()
         {
-
-            List<EmailLog> emailLogs = _context.EmailLogs.Where(x => !x.IsSent && x.RetryCount <= 5 && !string.IsNullOrEmpty(x.Recepient)).Take(10).ToList();
-            foreach (var item in emailLogs)
+            try
             {
-                bool result = _emailService.SendEmail(item.Recepient, item.Subject, item.Message);
-                if (result)
+                List<EmailLog> emailLogs = _context.EmailLogs.Where(x => !x.IsSent && x.RetryCount <= 5).Take(10).ToList();
+                foreach (var item in emailLogs)
                 {
-                    item.IsSent = true;
-                    item.ModifiedDate = DateTime.Now;
-                    _context.SaveChanges();
-                }
-                else
-                {
-                    item.RetryCount++;
-                    item.ModifiedDate = DateTime.Now;
-                    _context.SaveChanges();
+                    if (string.IsNullOrEmpty(item.Recepient))
+                    {
+                        item.RetryCount = 6;
+                        _context.SaveChanges();
+                        continue;
+                    }
+                    bool isValid = _emailService.IsValidEmail(item.Recepient);
+                    if (!isValid)
+                    {
+                        item.RetryCount = 6;
+                        _context.SaveChanges();
+                        continue;
+                    }
+
+                    bool result = _emailService.SendEmail(item.Recepient, item.Subject, item.Message);
+                    if (result)
+                    {
+                        item.IsSent = true;
+                        item.ModifiedDate = DateTime.Now;
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        item.RetryCount++;
+                        item.ModifiedDate = DateTime.Now;
+                        _context.SaveChanges();
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex.Message, ex);
+            }
+
 
         }
 
@@ -74,42 +96,56 @@ namespace DVLA.Business.BackgroundJobModule
         [DisableConcurrentExecution(60)]
         public void SendBulkSms()
         {
-
-            List<SmsLog> smsLogs = _context.SmsLogs.Where(x => !x.IsSent && x.RetryCount <= 5).Take(10).ToList();
-            foreach (var item in smsLogs)
+            try
             {
-                var result = _smsRepository.SendSmsIntegration(item.MobileNumber, item.Message).GetAwaiter().GetResult();
-                if (result.Item1)
+                List<SmsLog> smsLogs = _context.SmsLogs.Where(x => !x.IsSent && x.RetryCount <= 5).Take(10).ToList();
+                foreach (var item in smsLogs)
                 {
-                    item.IsSent = true;
-                    item.ModifiedDate = DateTime.Now;
-                    _context.SaveChanges();
-                }
-                else
-                {
-                    item.RetryCount++;
-                    item.ModifiedDate = DateTime.Now;
-                    _context.SaveChanges();
+                    var result = _smsRepository.SendSmsIntegration(item.MobileNumber, item.Message).GetAwaiter().GetResult();
+                    if (result.Item1)
+                    {
+                        item.IsSent = true;
+                        item.ModifiedDate = DateTime.Now;
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        item.RetryCount++;
+                        item.ModifiedDate = DateTime.Now;
+                        _context.SaveChanges();
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex.Message, ex);
+            }
+
+
 
         }
 
         [DisableConcurrentExecution(60)]
         public void VerifyPayments()
         {
-
-            var slotRequests = _context.SlotRequests.Where(x => x.Status == SlotRequestStatus.Pending && x.PaymentMethod == PaymentMethod.Online).Take(10);
-            int count = slotRequests.Count();
-            if (count > 0)
+            try
             {
-                foreach (var slotRequest in slotRequests)
+                var slotRequests = _context.SlotRequests.Where(x => x.Status == SlotRequestStatus.Pending && x.PaymentMethod == PaymentMethod.Online).Take(10);
+                int count = slotRequests.Count();
+                if (count > 0)
                 {
-                    _paymentService.VerifyPayment(slotRequest.ReferenceNumber);
+                    foreach (var slotRequest in slotRequests)
+                    {
+                        _paymentService.VerifyPayment(slotRequest.ReferenceNumber);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
 
-
+                _logger.LogError(ex.Message, ex);
+            }
 
         }
 
@@ -118,7 +154,15 @@ namespace DVLA.Business.BackgroundJobModule
         {
             try
             {
-                var visualAssessmentResults = _context.VisualAssessmentResults.AsNoTracking().Where(x => x.CreatedDate < DateTime.Now.AddMonths(-3)).Take(20)
+                bool runPushAssessment = Convert.ToBoolean(_configuration["AppConstants:RunPushAssessmentResult"]);
+
+                if (!runPushAssessment) { return; }
+
+                var optometristFirmUsers = _context.OptometristFirmUsers.AsNoTracking().Include(x => x.ApplicationUser);
+
+                var visualAssessmentResults = _context.VisualAssessmentResults.AsNoTracking().Include(x => x.OptometristFirm).Where(x => x.CreatedDate < DateTime.Now.AddMinutes(-5)
+                && !x.IsTransmitted && x.Status == Status.Complete && !string.IsNullOrEmpty(x.ReferenceNumber)
+                && !string.IsNullOrEmpty(x.PassportImageUrl)).Take(20)
                 .Select(x => new VisualAssessmentResultDto
                 {
                     AccessType = x.AccessType,
@@ -131,11 +175,8 @@ namespace DVLA.Business.BackgroundJobModule
                     CreatedBy = x.CreatedBy,
                     CreatedDate = x.CreatedDate,
                     DOB = x.DOB,
-                    DriversLicence = x.DriversLicence,
-                    DVLAReferenceNo = x.DVLAReferenceNo,
                     Email = x.Email,
                     FirstName = x.FirstName,
-                    FormNumber = x.FormNumber,
                     GlareTest_BCV_OD = x.GlareTest_BCV_OD,
                     GlareTest_BCV_OS = x.GlareTest_BCV_OS,
                     GlareTest_BCV_OU = x.GlareTest_BCV_OU,
@@ -143,9 +184,11 @@ namespace DVLA.Business.BackgroundJobModule
                     HX_BCV_OS = x.HX_BCV_OD,
                     HX_BCV_OU = x.HX_BCV_OD,
                     IsRegistration = x.IsRegistration,
-                    NameTitle = x.NameTitle,
                     LearnerDriversLicence = x.LearnerDriversLicence,
                     OptometristFirmId = x.OptometristFirmId,
+                    OptometristFirmName = x.OptometristFirm.BusinessName,
+                    OptometristName = x.CreatedBy,
+                    Gender = x.Gender,
                     OtherName = x.OtherName,
                     PassOrFail = x.PassOrFail,
                     PassResult = x.PassResult,
@@ -173,20 +216,31 @@ namespace DVLA.Business.BackgroundJobModule
                 {
                     using var content = new MultipartFormDataContent();
 
+                    var optometristFirmUser = optometristFirmUsers.FirstOrDefault(x => x.ApplicationUserId == item.CreatedBy);
+                    if (optometristFirmUser != null)
+                    {
+                        var user = optometristFirmUser.ApplicationUser;
+                        if (user != null)
+                        {
+                            item.OptometristName = user.FirstName + " " + user.LastName;
+                        }
+                    }
                     var json = JsonConvert.SerializeObject(item);
                     content.Add(new StringContent(json, Encoding.UTF8, "application/json"), "VisualAssessmentResult");
 
-                    if (!string.IsNullOrEmpty(item.PassportImageUrl))
+                    var filePath = Path.Combine(_hostEnvironment.WebRootPath, "Passports", item.PassportImageUrl);
+                    if (File.Exists(filePath))
                     {
-                        var filePath = Path.Combine(_hostEnvironment.WebRootPath, "Passports", item.PassportImageUrl);
-                        if (File.Exists(filePath))
-                        {
-                            var fileStream = File.OpenRead(filePath);
-                            var streamContent = new StreamContent(fileStream);
-                            streamContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-                            content.Add(streamContent, "Passport", item.PassportImageUrl);
-                        }
+                        var fileStream = File.OpenRead(filePath);
+                        var streamContent = new StreamContent(fileStream);
+                        streamContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+                        content.Add(streamContent, "Passport", item.PassportImageUrl);
                     }
+                    else
+                    {
+                        continue;
+                    }
+
                     using var client = new HttpClient();
                     var response = client.PostAsync(_configuration["AppConstants:ApiVerificationPushUrl"], content).GetAwaiter().GetResult();
                     if (response.IsSuccessStatusCode)
@@ -197,7 +251,8 @@ namespace DVLA.Business.BackgroundJobModule
                             var visualAssessmentResult = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.Id);
                             if (visualAssessmentResult != null)
                             {
-                                _context.VisualAssessmentResults.Remove(visualAssessmentResult);
+                                visualAssessmentResult.IsTransmitted = true;
+                                visualAssessmentResult.TransmittedDate = DateTime.UtcNow;
                                 _context.SaveChanges();
                             }
                         }
@@ -206,7 +261,8 @@ namespace DVLA.Business.BackgroundJobModule
                             var visualAssessmentResult = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.Id);
                             if (visualAssessmentResult != null)
                             {
-                                _context.VisualAssessmentResults.Remove(visualAssessmentResult);
+                                visualAssessmentResult.IsTransmitted = true;
+                                visualAssessmentResult.TransmittedDate = DateTime.UtcNow;
                                 _context.SaveChanges();
                             }
                         }
@@ -217,7 +273,7 @@ namespace DVLA.Business.BackgroundJobModule
             {
                 _logger.LogError(ex.Message, ex);
             }
-            
+
         }
     }
 }

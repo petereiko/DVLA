@@ -19,10 +19,11 @@ namespace DVLA.Business.EmailModule
         private readonly ILogger<EmailService> _logger;
         private readonly DVLADbContext _context;
 
-        public EmailService(IConfiguration configuration, DVLADbContext context)
+        public EmailService(IConfiguration configuration, DVLADbContext context, ILogger<EmailService> logger)
         {
             _configuration = configuration;
             _context = context;
+            _logger = logger;
         }
 
         public async Task<bool> LogEmail(EmailLogDto model)
@@ -53,6 +54,20 @@ namespace DVLA.Business.EmailModule
             return isLogged;
         }
 
+        public bool IsValidEmail(string email)
+        {
+            try
+            {
+                var mailAddress = new MailAddress(email);
+                return true;
+            }
+            catch (FormatException ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return false;
+        }
+
 
         public bool SendEmail(string email, string subject, string message)
         {
@@ -76,7 +91,7 @@ namespace DVLA.Business.EmailModule
                 IsBodyHtml = true,
             };
 
-            mailMessage.To.Add(email);
+            mailMessage.To.Add(email.Trim());
 
             try
             {
@@ -87,7 +102,6 @@ namespace DVLA.Business.EmailModule
             {
                 // Log SMTP-specific exceptions
                 _logger.LogError(smtpEx.Message, smtpEx);
-                throw new Exception("There was an issue sending the email. Please try again later.");
             }
             catch (Exception ex)
             {

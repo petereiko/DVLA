@@ -74,7 +74,7 @@ namespace DVLA.Business.SlotModule
             {
                 try
                 {
-                    SlotRequest slotRequest = context.SlotRequests.FirstOrDefault(p => p.Id == id && (p.Status == SlotRequestStatus.Pending || p.Status==SlotRequestStatus.Opened) && p.PaymentMethod==PaymentMethod.Upload);
+                    SlotRequest slotRequest = context.SlotRequests.FirstOrDefault(p => p.Id == id && (p.Status == SlotRequestStatus.Pending || p.Status == SlotRequestStatus.Opened));
                     if (slotRequest == null)
                     {
                         response.Message = "The record does not exist";
@@ -88,7 +88,7 @@ namespace DVLA.Business.SlotModule
                     //}
                     slotRequest.Status = SlotRequestStatus.Approved;
                     slotRequest.DateApproved = DateTime.Now;
-                    slotRequest.ModifiedDate= DateTime.Now;
+                    slotRequest.ModifiedDate = DateTime.Now;
                     slotRequest.ModifiedBy = UserId;
                     context.SaveChanges();
 
@@ -247,8 +247,8 @@ namespace DVLA.Business.SlotModule
                 DateApproved = model.DateApproved,
                 OptometristFirmId = model.OptometristFirmId,
                 PaymentProof = model.PaymentProof,
-                Quantity = model.Quantity,
-                AccessType = model.AccessType,
+                Quantity = Quantity,
+                AccessType = model.AccessType.GetValueOrDefault(),
                 Status = model.Status,
                 CreatedBy = UserId,
                 CreatedDate = DateTime.Now,
@@ -312,7 +312,7 @@ namespace DVLA.Business.SlotModule
             IEnumerable<SlotRequestModel> records = Enumerable.Empty<SlotRequestModel>();
             try
             {
-                var entities = _context.SlotRequests.Include(x=>x.OptometristFirm).AsNoTracking().Where(x => x.CreatedBy == applicationUserId).ToList();
+                var entities = _context.SlotRequests.Include(x => x.OptometristFirm).AsNoTracking().Where(x => x.CreatedBy == applicationUserId).ToList();
                 records = entities.Select(x => new SlotRequestModel
                 {
                     AccessType = x.AccessType,
@@ -473,30 +473,41 @@ namespace DVLA.Business.SlotModule
             return result;
         }
 
-        public async Task<IEnumerable<SlotRequestModel>> FetchSlotRequests(SlotRequestStatus? status, int? maxRows)
+        public async Task<IEnumerable<SlotRequestModel>> FetchSlotRequests(SlotRequestParameter request)
         {
 
             List<SlotRequestModel> records = new();
-            List<SlotRequest> entities = await _context.SlotRequests.AsNoTracking().Where(x => x.Status == (SlotRequestStatus)status).Include(x => x.OptometristFirm).Take(maxRows.Value).ToListAsync();
-            records = entities.Select(x => new SlotRequestModel
-                {
-                    AccessType = x.AccessType,
-                    AmountPaid = x.AmountPaid,
-                    BusinessName = x.OptometristFirm.BusinessName,
-                    DateApproved = x.DateApproved,
-                    Comment = x.Comment,
-                    DateCreated = x.CreatedDate,
-                    Id = x.Id,
-                    OptometristFirmId = x.OptometristFirmId,
-                    PaymentMethod = x.PaymentMethod,
-                    PaymentProof = x.PaymentProof,
-                    Quantity = x.Quantity,
-                    ReferenceNumber = x.ReferenceNumber,
-                    Status = x.Status,
-                    TelephoneNumber = x.OptometristFirm.TelephoneNumber
-                }).OrderByDescending(x => x.Id).ToList();
+            List<SlotRequest> entities = await _context.SlotRequests.AsNoTracking().Where(x => x.Status == (SlotRequestStatus)request.status).Include(x => x.OptometristFirm).Take(request.length).ToListAsync();
+            if (request.StartDate.HasValue)
+            {
+                request.StartDate = Utility.StartOfDay(request.StartDate.Value);
+                entities = entities.Where(x => x.CreatedDate > request.StartDate.Value).ToList();
+            }
+            if (request.EndDate.HasValue)
+            {
+                request.EndDate = Utility.EndOfDay(request.EndDate.Value);
+                entities = entities.Where(x => x.CreatedDate < request.EndDate.Value).ToList();
+            }
 
-            
+            records = entities.Select(x => new SlotRequestModel
+            {
+                AccessType = x.AccessType,
+                AmountPaid = x.AmountPaid,
+                BusinessName = x.OptometristFirm.BusinessName,
+                DateApproved = x.DateApproved,
+                Comment = x.Comment,
+                DateCreated = x.CreatedDate,
+                Id = x.Id,
+                OptometristFirmId = x.OptometristFirmId,
+                PaymentMethod = x.PaymentMethod,
+                PaymentProof = x.PaymentProof,
+                Quantity = x.Quantity,
+                ReferenceNumber = x.ReferenceNumber,
+                Status = x.Status,
+                TelephoneNumber = x.OptometristFirm.TelephoneNumber
+            }).OrderByDescending(x => x.Id).ToList();
+
+
             return records;
         }
 
@@ -663,7 +674,7 @@ namespace DVLA.Business.SlotModule
         public MessageResponse Preview(int id)
         {
             MessageResponse response = new();
-            SlotRequest slotRequest = _context.SlotRequests.FirstOrDefault(x=>x.Id==id);
+            SlotRequest slotRequest = _context.SlotRequests.FirstOrDefault(x => x.Id == id);
             if (slotRequest == null)
             {
                 response.Message = "The record does not exist";
@@ -720,43 +731,44 @@ namespace DVLA.Business.SlotModule
 
             var userData = _userService.GetUserData();
 
-            Slot slot = _context.Slots.FirstOrDefault(x => x.OptometristFirmId == model.OptometristFirmId);
-            if (slot != null)
+            Slot slot = _context.Slots.FirstOrDefault(x => x.OptometristFirmId == model.OptometristFirmId && x.AccessType == (AccessType)model.AccessType);
+            if (slot == null)
             {
-                if (model.Quantity > slot.Quantity)
-                {
-                    response.Message = "You cannot remove more than the available number of slots for this Optometrist Firm";
-                    return response;
-                }
-                slot.Quantity -= model.Quantity;
+                response.Message = "Slot does not exist";
+                return response;
+            }
 
-                SlotReductionLog log = new SlotReductionLog
-                {
-                    Comment = model.Comment.Trim(),
-                    CreatedBy = userData.Id,
-                    CreatedDate = DateTime.Now,
-                    IsActive = true,
-                    IsDeleted = false,
-                    OptometristFirmId = model.OptometristFirmId,
-                    Quantity = model.Quantity
-                };
-                _context.SlotReductionLogs.Add(log);
-                try
-                {
-                    _context.SaveChanges();
-                    response.Message = "Slot Deduction successful";
-                    response.Success = true;
-                }
-                catch (Exception ex)
-                {
-                    response.Message = "An error occurred while trying to Top Up";
-                    _logger.LogError(ex.Message, ex);
-                }
-            }
-            else
+            if (model.Quantity > slot.Quantity)
             {
-                response.Message = "You cannot perform Slot Deduction for this optometrist firm because there is no existing slot found for it.";
+                response.Message = "You cannot remove more than the available number of slots for this Optometrist Firm";
+                return response;
             }
+            slot.Quantity -= model.Quantity;
+
+            SlotReductionLog log = new SlotReductionLog
+            {
+                Comment = model.Comment.Trim(),
+                CreatedBy = userData.Id,
+                CreatedDate = DateTime.Now,
+                IsActive = true,
+                IsDeleted = false,
+                OptometristFirmId = model.OptometristFirmId,
+                Quantity = model.Quantity,
+                AccessType = (AccessType)model.AccessType
+            };
+            _context.SlotReductionLogs.Add(log);
+            try
+            {
+                _context.SaveChanges();
+                response.Message = "Slot Deduction successful";
+                response.Success = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = "An error occurred while trying to Top Up";
+                _logger.LogError(ex.Message, ex);
+            }
+
             return response;
         }
 

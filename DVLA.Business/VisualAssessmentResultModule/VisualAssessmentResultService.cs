@@ -177,7 +177,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
             _context.Dispose();
         }
 
-        public VisualAssessmentResultModel FetchAssessmentResult(string driverslicence, string dvlaReferenceNo, string vasReferenceNo)
+        public VisualAssessmentResultModel FetchAssessmentResult(string ReferenceNumber)
         {
             VisualAssessmentResultModel record = null;//_context.Database.SqlQuery<VisualAssessmentResultModel>("FetchVisualAssessmentResultWithPassport @DriversLicence, @DvlaReferenceNo, @VasReferenceNo", parameters).FirstOrDefault();
 
@@ -188,9 +188,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                     using (SqlCommand cmd = new SqlCommand("FetchVisualAssessmentResultWithPassport", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@DriversLicence", driverslicence ?? System.Data.SqlTypes.SqlString.Null);
-                        cmd.Parameters.AddWithValue("@DvlaReferenceNo", dvlaReferenceNo ?? System.Data.SqlTypes.SqlString.Null);
-                        cmd.Parameters.AddWithValue("@VasReferenceNo", vasReferenceNo ?? System.Data.SqlTypes.SqlString.Null);
+                        cmd.Parameters.AddWithValue("@ReferenceNumber", ReferenceNumber ?? System.Data.SqlTypes.SqlString.Null);
 
                         conn.Open();
                         using (var reader = cmd.ExecuteReader())
@@ -199,8 +197,8 @@ namespace DVLA.Business.VisualAssessmentResultModule
                             {
                                 record = new VisualAssessmentResultModel
                                 {
-                                    DriversLicence = !reader.IsDBNull(reader.GetOrdinal("DriversLicence")) ? reader.GetString("DriversLicence") : null,
-                                    DVLAReferenceNo = !reader.IsDBNull(reader.GetOrdinal("DVLAReferenceNo")) ? reader.GetString("DVLAReferenceNo") : null,
+                                    //DriversLicence = !reader.IsDBNull(reader.GetOrdinal("DriversLicence")) ? reader.GetString("DriversLicence") : null,
+                                    //DVLAReferenceNo = !reader.IsDBNull(reader.GetOrdinal("DVLAReferenceNo")) ? reader.GetString("DVLAReferenceNo") : null,
                                     Email = !reader.IsDBNull(reader.GetOrdinal("Email")) ? reader.GetString("Email") : null,
                                     AccreditationNumber = !reader.IsDBNull(reader.GetOrdinal("AccreditationNumber")) ? reader.GetString("AccreditationNumber") : null,
                                     ReferenceNumber = !reader.IsDBNull(reader.GetOrdinal("ReferenceNumber")) ? reader.GetString("ReferenceNumber") : null,
@@ -210,7 +208,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                     BusinessAddress = !reader.IsDBNull(reader.GetOrdinal("BusinessAddress")) ? reader.GetString("BusinessAddress") : null,
                                     BusinessName = !reader.IsDBNull(reader.GetOrdinal("BusinessName")) ? reader.GetString("BusinessName") : null,
                                     Id = !reader.IsDBNull(reader.GetOrdinal("Id")) ? reader.GetInt64("Id") : 0,
-                                    CreatedByFullName = !reader.IsDBNull(reader.GetOrdinal("Fullname")) ? reader.GetString("Fullname") : null,
+                                    //CreatedByFullName = !reader.IsDBNull(reader.GetOrdinal("Fullname")) ? reader.GetString("Fullname") : null,
                                     BCV_OD = !reader.IsDBNull(reader.GetOrdinal("BCV_OD")) ? reader.GetString("BCV_OD") : null,
                                     BCV_OS = !reader.IsDBNull(reader.GetOrdinal("BCV_OS")) ? reader.GetString("BCV_OS") : null,
                                     BCV_OU = !reader.IsDBNull(reader.GetOrdinal("BCV_OU")) ? reader.GetString("BCV_OU") : null,
@@ -222,13 +220,13 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                     ContactPhoneNumber = !reader.IsDBNull(reader.GetOrdinal("ContactPhoneNumber")) ? reader.GetString("ContactPhoneNumber") : null,
                                     ContrastSensitivity_BCV = !reader.IsDBNull(reader.GetOrdinal("ContrastSensitivity_BCV")) ? reader.GetString("ContrastSensitivity_BCV") : null,
                                     CreatedBy = !reader.IsDBNull(reader.GetOrdinal("CreatedBy")) ? reader.GetString("CreatedBy") : null,
-                                    CreatedByUsername = !reader.IsDBNull(reader.GetOrdinal("CreatedByUsername")) ? reader.GetString("CreatedByUsername") : null,
+                                    //CreatedByUsername = !reader.IsDBNull(reader.GetOrdinal("CreatedByUsername")) ? reader.GetString("CreatedByUsername") : null,
                                     DateCreated = reader.GetDateTime("CreatedDate"),
                                     DigitalAddress = !reader.IsDBNull(reader.GetOrdinal("DigitalAddress")) ? reader.GetString("DigitalAddress") : null,
                                     DistrictName = !reader.IsDBNull(reader.GetOrdinal("DistrictName")) ? reader.GetString("DistrictName") : null,
                                     DOB = !reader.IsDBNull(reader.GetOrdinal("DOB")) ? reader.GetDateTime("DOB") : (DateTime?)null,
                                     FirstName = !reader.IsDBNull(reader.GetOrdinal("FirstName")) ? reader.GetString("FirstName") : null,
-                                    FormNumber = !reader.IsDBNull(reader.GetOrdinal("FormNumber")) ? reader.GetString("FormNumber") : null,
+                                    //FormNumber = !reader.IsDBNull(reader.GetOrdinal("FormNumber")) ? reader.GetString("FormNumber") : null,
                                     GlareTest_BCV_OD = !reader.IsDBNull(reader.GetOrdinal("GlareTest_BCV_OD")) ? reader.GetString("GlareTest_BCV_OD") : null,
                                     GlareTest_BCV_OS = !reader.IsDBNull(reader.GetOrdinal("GlareTest_BCV_OS")) ? reader.GetString("GlareTest_BCV_OS") : null,
                                     GlareTest_BCV_OU = !reader.IsDBNull(reader.GetOrdinal("GlareTest_BCV_OU")) ? reader.GetString("GlareTest_BCV_OU") : null,
@@ -240,8 +238,8 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                     IsSynchronized = !reader.IsDBNull(reader.GetOrdinal("IsSynchronized")) && reader.GetBoolean("IsSynchronized"),
                                     LearnerDriversLicence = !reader.IsDBNull(reader.GetOrdinal("LearnerDriversLicence")) ? (LearnerDriversLicenceType)reader.GetInt32("LearnerDriversLicence") : default,
                                     MobileNumber = !reader.IsDBNull(reader.GetOrdinal("MobileNumber")) ? reader.GetString("MobileNumber") : null,
-                                    NameTitle = !reader.IsDBNull(reader.GetOrdinal("NameTitle")) ? (NameTitle)reader.GetInt32("NameTitle") : default,
-                                    Optometrist = !reader.IsDBNull(reader.GetOrdinal("Optometrist")) ? reader.GetString("Optometrist") : null,
+                                    //NameTitle = !reader.IsDBNull(reader.GetOrdinal("NameTitle")) ? (NameTitle)reader.GetInt32("NameTitle") : default,
+                                    //Optometrist = !reader.IsDBNull(reader.GetOrdinal("Optometrist")) ? reader.GetString("Optometrist") : null,
                                     OptometristFirmId = !reader.IsDBNull(reader.GetOrdinal("OptometristFirmId")) ? reader.GetInt32("OptometristFirmId") : 0,
                                     OtherName = !reader.IsDBNull(reader.GetOrdinal("OtherName")) ? reader.GetString("OtherName") : null,
                                     PassOrFail = !reader.IsDBNull(reader.GetOrdinal("PassOrFail")) ? (PassOrFail)reader.GetInt32("PassOrFail") : default,
@@ -259,7 +257,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                     Unaided_OD = !reader.IsDBNull(reader.GetOrdinal("Unaided_OD")) ? reader.GetString("Unaided_OD") : null,
                                     Unaided_OS = !reader.IsDBNull(reader.GetOrdinal("Unaided_OS")) ? reader.GetString("Unaided_OS") : null,
                                     Unaided_OU = !reader.IsDBNull(reader.GetOrdinal("Unaided_OU")) ? reader.GetString("Unaided_OU") : null,
-                                    UpdatedByUsername = !reader.IsDBNull(reader.GetOrdinal("UpdatedByUsername")) ? reader.GetString("UpdatedByUsername") : null,
+                                    //UpdatedByUsername = !reader.IsDBNull(reader.GetOrdinal("UpdatedByUsername")) ? reader.GetString("UpdatedByUsername") : null,
                                     IsDeleted = !reader.IsDBNull(reader.GetOrdinal("IsDeleted")) && reader.GetBoolean("IsDeleted"),
                                     IsRegistration = !reader.IsDBNull(reader.GetOrdinal("IsRegistration")) && reader.GetBoolean("IsRegistration"),
                                     UpdatedBy = !reader.IsDBNull(reader.GetOrdinal("ModifiedBy")) ? reader.GetString("ModifiedBy") : null,
@@ -307,8 +305,8 @@ namespace DVLA.Business.VisualAssessmentResultModule
                             {
                                 result.Add(new VisualAssessmentResultModel
                                 {
-                                    DriversLicence = reader.GetString("DriversLicence"),
-                                    DVLAReferenceNo = reader.GetString("DVLAReferenceNo"),
+                                    //DriversLicence = reader.GetString("DriversLicence"),
+                                    //DVLAReferenceNo = reader.GetString("DVLAReferenceNo"),
                                     Email = reader.GetString("Email"),
                                     AccreditationNumber = reader.GetString("AccreditationNumber"),
                                     ReferenceNumber = reader.GetString("ReferenceNumber"),
@@ -318,7 +316,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                     BusinessAddress = reader.GetString("BusinessAddress"),
                                     BusinessName = reader.GetString("BusinessName"),
                                     Id = reader.GetInt64("Id"),
-                                    CreatedByFullName = reader.GetString("Fullname"),
+                                    //CreatedByFullName = reader.GetString("Fullname"),
                                     BCV_OD = reader.GetString("BCV_OD"),
                                     BCV_OS = reader.GetString("BCV_OS"),
                                     BCV_OU = reader.GetString("BCV_OU"),
@@ -330,13 +328,13 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                     ContactPhoneNumber = reader.GetString("ContactPhoneNumber"),
                                     ContrastSensitivity_BCV = reader.GetString("ContrastSensitivity_BCV"),
                                     CreatedBy = reader.GetString("CreatedBy"),
-                                    CreatedByUsername = reader.GetString("CreatedByUsername"),
+                                    //CreatedByUsername = reader.GetString("CreatedByUsername"),
                                     DateCreated = reader.GetDateTime("CreatedDate"),
                                     DigitalAddress = reader.GetString("DigitalAddress"),
                                     DistrictName = reader.GetString("DistrictName"),
                                     DOB = reader.GetDateTime("DOB"),
                                     FirstName = reader.GetString("FirstName"),
-                                    FormNumber = reader.GetString("FormNumber"),
+                                    //FormNumber = reader.GetString("FormNumber"),
                                     GlareTest_BCV_OD = reader.GetString("GlareTest_BCV_OD"),
                                     GlareTest_BCV_OS = reader.GetString("GlareTest_BCV_OS"),
                                     GlareTest_BCV_OU = reader.GetString("GlareTest_BCV_OU"),
@@ -348,8 +346,8 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                     IsSynchronized = reader.GetBoolean("IsSynchronized"),
                                     LearnerDriversLicence = (LearnerDriversLicenceType)reader.GetInt32("LearnerDriversLicence"),
                                     MobileNumber = reader.GetString("MobileNumber"),
-                                    NameTitle = (NameTitle)reader.GetInt32("NameTitle"),
-                                    Optometrist = reader.GetString("Optometrist"),
+                                    //NameTitle = (NameTitle)reader.GetInt32("NameTitle"),
+                                    //Optometrist = reader.GetString("Optometrist"),
                                     OptometristFirmId = reader.GetInt32("OptometristFirmId"),
                                     OtherName = reader.GetString("OtherName"),
                                     PassOrFail = (PassOrFail)reader.GetInt32("PassOrFail"),
@@ -367,7 +365,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                     Unaided_OD = reader.GetString("Unaided_OD"),
                                     Unaided_OS = reader.GetString("Unaided_OS"),
                                     Unaided_OU = reader.GetString("Unaided_OU"),
-                                    UpdatedByUsername = reader.GetString("UpdatedByUsername"),
+                                    //UpdatedByUsername = reader.GetString("UpdatedByUsername"),
                                     IsDeleted = reader.GetBoolean("IsDeleted"),
                                     IsRegistration = reader.GetBoolean("IsRegistration"),
                                     UpdatedBy = reader.GetString("ModifiedBy"),
@@ -495,6 +493,9 @@ namespace DVLA.Business.VisualAssessmentResultModule
         {
             PaginationResponseModel<List<VisualAssessmentResultItemViewModel>> result = new() { ListResult = new(),  };
             //var offset = (model.PageSize - 1) * model.PageSize;
+            model.InputModel.StartDate = Utility.StartOfDay(model.InputModel.StartDate);
+            model.InputModel.EndDate = Utility.EndOfDay(model.InputModel.EndDate);
+
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -562,8 +563,8 @@ namespace DVLA.Business.VisualAssessmentResultModule
                             {
                                 result.Add(new VisualAssessmentResultModel
                                 {
-                                    DriversLicence = reader.GetString("DriversLicence"),
-                                    DVLAReferenceNo = reader.GetString("DVLAReferenceNo"),
+                                    //DriversLicence = reader.GetString("DriversLicence"),
+                                    //DVLAReferenceNo = reader.GetString("DVLAReferenceNo"),
                                     Email = reader.GetString("Email"),
                                     AccreditationNumber = reader.GetString("AccreditationNumber"),
                                     ReferenceNumber = reader.GetString("ReferenceNumber"),
@@ -573,7 +574,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                     BusinessAddress = reader.GetString("BusinessAddress"),
                                     BusinessName = reader.GetString("BusinessName"),
                                     Id = reader.GetInt64("Id"),
-                                    CreatedByFullName = reader.GetString("Fullname")
+                                    //CreatedByFullName = reader.GetString("Fullname")
                                 });
                             }
                         }
@@ -659,7 +660,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                 {
                                     PassResult= reader.IsDBNull(reader.GetOrdinal("PassResult")) ? null : reader.GetString(reader.GetOrdinal("PassResult")),
                                     ResultServiceType = reader.IsDBNull(reader.GetOrdinal("ResultServiceType"))?null: (ResultServiceType)reader.GetInt32(reader.GetOrdinal("ResultServiceType")),
-                                    DVLAReferenceNo = reader.IsDBNull(reader.GetOrdinal("DVLAReferenceNo")) ? null : reader.GetString(reader.GetOrdinal("DVLAReferenceNo")),
+                                    //DVLAReferenceNo = reader.IsDBNull(reader.GetOrdinal("DVLAReferenceNo")) ? null : reader.GetString(reader.GetOrdinal("DVLAReferenceNo")),
                                     ReferenceNumber = reader.IsDBNull(reader.GetOrdinal("ReferenceNumber")) ? null : reader.GetString(reader.GetOrdinal("ReferenceNumber")),
                                     Id = reader.IsDBNull(reader.GetOrdinal("Id")) ? 0 : reader.GetInt64(reader.GetOrdinal("Id")),
                                     FirstName = reader.IsDBNull(reader.GetOrdinal("FirstName")) ? null : reader.GetString(reader.GetOrdinal("FirstName")),
@@ -748,11 +749,11 @@ namespace DVLA.Business.VisualAssessmentResultModule
                         CreatedBy = model.CreatedBy,
                         CreatedDate = model.CreatedDate,
                         DOB = model.DOB,
-                        DriversLicence = model.DriversLicence,
-                        DVLAReferenceNo = model.DVLAReferenceNo,
+                        //DriversLicence = model.DriversLicence,
+                        //DVLAReferenceNo = model.DVLAReferenceNo,
                         Email = model.Email,
                         FirstName = model.FirstName,
-                        FormNumber = model.FormNumber,
+                        //FormNumber = model.FormNumber,
                         GlareTest_BCV_OD = model.GlareTest_BCV_OD,
                         GlareTest_BCV_OS = model.GlareTest_BCV_OS,
                         GlareTest_BCV_OU = model.GlareTest_BCV_OU,
@@ -765,7 +766,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                         IsSynchronized = model.IsSynchronized,
                         LearnerDriversLicence = (LearnerDriversLicenceType)model.LearnerDriversLicence,
                         //NameTitle = (NameTitle)model.NameTitle,
-                        OldDVLAReferenceNo = model.OldDVLAReferenceNo,
+                        //OldDVLAReferenceNo = model.OldDVLAReferenceNo,
                         OptometristFirmId = model.OptometristFirmId,
                         OtherName = model.OtherName,
                         PassOrFail = model.PassOrFail,

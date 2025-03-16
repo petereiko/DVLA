@@ -111,13 +111,13 @@
                             <div class="tab-pane active" id="DetailsTab">
                                 <div class="row row-xs mg-b-10">
 
-                                    <div class="col-sm">
+                                    @* <div class="col-sm">
                                         Title
                                         <select asp-for="NameTitle" class="form-control" asp-items="Html.GetEnumSelectList<NameTitle>()">
                                             <option>Select Name Title</option>
                                         </select>
                                         @Html.ValidationMessageFor(model => model.NameTitle, "", new { @class = "text-danger" })
-                                    </div>
+                                    </div> *@
                                     <div class="col-sm">
                                     </div>
                                 </div>

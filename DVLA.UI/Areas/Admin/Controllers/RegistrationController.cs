@@ -71,11 +71,11 @@ namespace DVLA.UI.Areas.Admin.Controllers
                         ContactNumber = p.a.ContactNumber,
                         FirstName = p.o.BusinessAddress,
                         DOB = p.a.DOB,
-                        DriversLicence = p.a.DriversLicence,
-                        DVLAReferenceNo = p.a.DVLAReferenceNo,
+                        //DriversLicence = p.a.DriversLicence,
+                        //DVLAReferenceNo = p.a.DVLAReferenceNo,
                         Email = p.a.Email,
                         LearnerDriversLicence = p.a.LearnerDriversLicence,
-                        NameTitle = p.a.NameTitle,
+                        //NameTitle = p.a.NameTitle,
                         OtherName = p.a.OtherName,
                         Fullname = p.a.Surname + " " + p.a.FirstName + " " + p.a.OtherName,
                         CreatedBy = p.o.CreatedBy,
@@ -83,10 +83,10 @@ namespace DVLA.UI.Areas.Admin.Controllers
                         OptometristFirmId = p.o.Id,
                         //PassportImageUrl = p.a.PassportImageUrl,
                         PostalAddress = p.a.PostalAddress,
-                        FormNumber = p.a.FormNumber,
+                        //FormNumber = p.a.FormNumber,
                         Surname = p.a.Surname,
                         TaxIdentificationNumber = p.a.TaxIdentificationNumber,
-                        InvoiceNumber = p.a.OldDVLAReferenceNo,
+                        //InvoiceNumber = p.a.OldDVLAReferenceNo,
                         Id = p.a.Id,
                         IsActive = p.o.IsActive,
                         IsDeleted = p.o.IsDeleted,
@@ -118,10 +118,10 @@ namespace DVLA.UI.Areas.Admin.Controllers
 
                 var model = new ApplicantModel();
                 model.Id = applicant.Id;
-                model.NameTitle = applicant.NameTitle;             
+                //model.NameTitle = applicant.NameTitle;             
                 model.Surname = applicant.Surname;
-                model.DriversLicence = applicant.DriversLicence;
-                model.DVLAReferenceNo = applicant.DVLAReferenceNo;
+                //model.DriversLicence = applicant.DriversLicence;
+                //model.DVLAReferenceNo = applicant.DVLAReferenceNo;
                 model.FirstName = applicant.FirstName;
                 model.OtherName = applicant.OtherName;
                 model.DOB = (DateTime)applicant.DOB;
@@ -134,9 +134,9 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 model.PassportImageUrl = applicant.PassportImageUrl;
                 model.Status = applicant.Status;
                 model.OptometristFirmId = applicant.OptometristFirmId;
-                model.FormNumber = applicant.FormNumber;
+                //model.FormNumber = applicant.FormNumber;
                 model.TestType = (TestType)applicant.TestType;
-                model.InvoiceNumber = applicant.OldDVLAReferenceNo;
+                //model.InvoiceNumber = applicant.OldDVLAReferenceNo;
                 model.IsActive = applicant.IsActive;
                 model.CreatedBy = applicant.CreatedBy;
                 model.IsDeleted = applicant.IsDeleted;
@@ -183,10 +183,10 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 }
 
 
-                if (model.NameTitle == null)
-                {
-                    ModelState.AddModelError("NameTitle", "Please select name title");
-                }
+                //if (model.NameTitle == null)
+                //{
+                //    ModelState.AddModelError("NameTitle", "Please select name title");
+                //}
 
                 if (string.IsNullOrEmpty(model.Surname))
                 {
@@ -238,10 +238,10 @@ namespace DVLA.UI.Areas.Admin.Controllers
 
 
 
-                applicant.NameTitle = model.NameTitle;
+                //applicant.NameTitle = model.NameTitle;
                 applicant.Surname = model.Surname;
-                applicant.DriversLicence = model.DriversLicence;
-                applicant.DVLAReferenceNo = model.DVLAReferenceNo;
+                //applicant.DriversLicence = model.DriversLicence;
+                //applicant.DVLAReferenceNo = model.DVLAReferenceNo;
                 applicant.FirstName = model.FirstName;
                 applicant.OtherName = model.OtherName;
                 applicant.DOB = (DateTime)model.DOB;
@@ -254,7 +254,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 applicant.PassportImageUrl = model.PassportImageUrl;
                 applicant.Status = model.Status;
                 applicant.TestType = (TestType)model.TestType;
-                applicant.OldDVLAReferenceNo = model.InvoiceNumber;
+                //applicant.OldDVLAReferenceNo = model.InvoiceNumber;
                 applicant.IsActive = model.IsActive;
                 applicant.CreatedBy = model.CreatedBy;
                 applicant.IsDeleted = model.IsDeleted;

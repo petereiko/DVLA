@@ -88,17 +88,17 @@ namespace DVLA.UI.Components
                         ContactPhoneNumber = result.OptometristFirm.ContactPhoneNumber,
                         ContrastSensitivity_BCV = result.ContrastSensitivity_BCV,
                         CreatedBy = result.CreatedBy,
-                        CreatedByFullName = optometrist.FirstName + " " + optometrist.LastName,
-                        CreatedByUsername = optometrist.UserName,
+                        //CreatedByFullName = optometrist.FirstName + " " + optometrist.LastName,
+                        //CreatedByUsername = optometrist.UserName,
                         DateCreated = result.CreatedDate,
                         DigitalAddress = result.OptometristFirm.DigitalAddress,
                         DistrictName = result.OptometristFirm.District?.Name,
                         DOB = result.DOB,
-                        DriversLicence = result.DriversLicence,
-                        DVLAReferenceNo = result.DVLAReferenceNo,
+                        //DriversLicence = result.DriversLicence,
+                        //DVLAReferenceNo = result.DVLAReferenceNo,
                         Email = result.Email,
                         FirstName = result.FirstName,
-                        FormNumber = result.FormNumber,
+                        //FormNumber = result.FormNumber,
                         GlareTest_BCV_OD = result.GlareTest_BCV_OD,
                         GlareTest_BCV_OS = result.GlareTest_BCV_OS,
                         GlareTest_BCV_OU = result.GlareTest_BCV_OU,
@@ -112,8 +112,8 @@ namespace DVLA.UI.Components
                         IsSynchronized = result.IsSynchronized,
                         LearnerDriversLicence = result.LearnerDriversLicence,
                         MobileNumber = result.ContactNumber,
-                        NameTitle = result.NameTitle,
-                        Optometrist = optometrist.FullName,
+                        //NameTitle = result.NameTitle,
+                        //Optometrist = optometrist.FullName,
                         OptometristFirmId = result.OptometristFirmId,
                         OtherName = result.OtherName,
                         PassOrFail = result.PassOrFail,
@@ -137,7 +137,7 @@ namespace DVLA.UI.Components
                         Unaided_OU = result.Unaided_OU,
                         UpdatedBy = result.ModifiedBy,
                         UserName = optometrist.UserName,
-                        UpdatedByUsername = optometrist.UserName
+                        //UpdatedByUsername = optometrist.UserName
                     };
                     //var assessmentItem = _visualAssessmentResultRepository.FetchAssessmentResult(result.DriversLicence, result.DVLAReferenceNo, result.ReferenceNumber);
                     if (model != null)

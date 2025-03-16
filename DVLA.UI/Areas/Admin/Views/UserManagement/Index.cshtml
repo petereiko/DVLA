@@ -13,6 +13,12 @@
             @* <div class="mb-2">
             <h4 class="card-title mb-0">File export</h4>
             </div> *@
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+
             <p class="card-subtitle mb-3">
                 <a asp-action="Create" class="btn btn-primary">Create New @ViewData["Title"].ToString()</a>
             </p>
@@ -22,9 +28,9 @@
                         <!-- start row -->
                         <tr>
                             <th>Name</th>
-                            <th>Role</th>
+                            <th>Optometrist Firm</th>
                             <th>Email</th>
-                            <th>Phone</th>
+                            <th>Role</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -35,10 +41,10 @@
                         {
                             <!-- start row -->
                             <tr>
-                                <td>@item.FirstName @item.LastName</td>
-                                <td>@string.Join(",",item.Roles.Select(x=>x.Name).ToList())</td>
+                                <td>@item.LastName @item.FirstName</td>
+                                <td>@item.BusinessName</td>
                                 <td>@item.Email</td>
-                                <td>@item.MobileNumber</td>
+                                <td>@string.Join(",",item.Roles.Select(x=>x.Name).ToList())</td>
                                 <td>
                                     @if (item.IsActive)
                                     {

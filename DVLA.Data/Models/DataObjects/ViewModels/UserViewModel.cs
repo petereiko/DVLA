@@ -10,6 +10,7 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
 {
     public class UserViewModel
     {
+        public string BusinessName { get; set; }
         public string RoleId { get; set; }
         public bool IsDeleted { get; set; }
         public string Id { get; set; }

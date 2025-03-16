@@ -36,23 +36,32 @@ namespace DVLA.UI.Areas.Admin.Controllers
             currentUserId = userService.GetUserData().Id;
         }
         // GET: Admin/SlotManagement
-        public async Task<ActionResult> SlotRequest(int? status=1)
+        public ActionResult SlotRequest(int? status=1)
         {
-            IEnumerable<SlotRequestModel> slots = await _slotRepository.FetchSlotRequests((SlotRequestStatus)status.Value, 50);
+            //IEnumerable<SlotRequestModel> slots = await _slotRepository.FetchSlotRequests((SlotRequestStatus)status.Value, 50);
             AdminSlotRequestViewModel model = new()
             {
-                Slots = slots,
+                //Slots = slots,
                 parameter = new() { length = 50, status = 1 }
             };
             _auditRepo.AddAudit(Activities.VIEW_SLOT_REQUEST, "View Slot Request");
             return View(model);
         }
+
+        [HttpPost]
+        public async Task<PartialViewResult> GetSlotItems(SlotRequestParameter model)
+        {
+            IEnumerable<SlotRequestModel> slots = await _slotRepository.FetchSlotRequests(model);
+            return PartialView("~/Views/Partials/_SlotItems.cshtml", slots);
+        }
+
+
         [HttpPost]
         public async Task<IActionResult> SlotRequest(SlotRequestParameter parameter, int? status)
         {
             if (!status.HasValue) return View("SlotRequest");
-            IEnumerable<SlotRequestModel> slotRequests = parameter == null ? await _slotRepository.FetchSlotRequests((SlotRequestStatus)status.Value, null)
-                : await _slotRepository.FetchSlotRequests((SlotRequestStatus)status.Value, parameter.length);
+            IEnumerable<SlotRequestModel> slotRequests = parameter == null ? await _slotRepository.FetchSlotRequests(parameter)
+                : await _slotRepository.FetchSlotRequests(parameter);
             parameter = parameter == null ? new SlotRequestParameter { status = status.Value } : new SlotRequestParameter { status = status.Value, length = parameter.length };
             AdminSlotRequestViewModel model = new AdminSlotRequestViewModel
             {
@@ -81,7 +90,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
         [HttpPost]
         public ActionResult SlotDeduction([FromBody]SlotDeductionModel model)
         {
-            var response = _slotRepository.SlotDeduction(model);
+            MessageResponse response = _slotRepository.SlotDeduction(model);
             return Json(response);
         }
 
@@ -273,42 +282,45 @@ namespace DVLA.UI.Areas.Admin.Controllers
         [HttpPost]
         public ActionResult SlotUsageStatistics(SlotUsageViewModel model) 
         {
-            var temp = model.EndDate;
-            model.EndDate = model.EndDate.HasValue ? model.EndDate.Value.AddHours(23).AddMinutes(59).AddSeconds(59) : DateTime.Now.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
             IEnumerable<SlotUsageModel> slotUsages = _slotUsageRepository.FetchOptometristSlotUsage(model.StartDate, model.EndDate, model.AccessType);
             model.SlotUsages = slotUsages;
-            model.EndDate = temp;
+
+            model.TotalAccessPurchase = slotUsages.Sum(x => x.TotalSlotPurchased);
+            model.TotalBalance = slotUsages.Sum(x => x.Balance);
+            model.TotalAccessUsed = slotUsages.Sum(x => x.TotalSlotUsed);
+
+
             return View(model);
         }
 
-        public ActionResult TestAnalysis()
-        {
-            TestAnalysisViewModel model = new();
-            string[] startDateArry = model.StartDate.Split("-");
-            DateTime StartDate = Convert.ToDateTime($"{startDateArry[2]}-{startDateArry[1]}-{startDateArry[0]}");
-            string[] endDateArry = model.EndDate.Split("-");
-            DateTime EndDate = Convert.ToDateTime($"{endDateArry[2]}-{endDateArry[1]}-{endDateArry[0]}");
-            List<TestAnalysisModel> slotUsages = _slotUsageRepository.FetchTestAnalysis(model.OptometristFirmId, StartDate, EndDate).ToList();
-            model.OptometristFirms = _slotRepository.GetOptometristFirms();
-            model.StartDate = StartDate.ToString("dd-MM-yyyy");
-            model.EndDate = EndDate.ToString("dd-MM-yyyy");
-            model.SlotUsages = slotUsages;
-            return View(model);
-        }
+        //public ActionResult TestAnalysis()
+        //{
+        //    TestAnalysisViewModel model = new();
+        //    string[] startDateArry = model.StartDate.Split("-");
+        //    DateTime StartDate = Convert.ToDateTime($"{startDateArry[2]}-{startDateArry[1]}-{startDateArry[0]}");
+        //    string[] endDateArry = model.EndDate.Split("-");
+        //    DateTime EndDate = Convert.ToDateTime($"{endDateArry[2]}-{endDateArry[1]}-{endDateArry[0]}");
+        //    List<TestAnalysisModel> slotUsages = _slotUsageRepository.FetchTestAnalysis(model.OptometristFirmId, StartDate, EndDate).ToList();
+        //    model.OptometristFirms = _slotRepository.GetOptometristFirms();
+        //    model.StartDate = StartDate.ToString("dd-MM-yyyy");
+        //    model.EndDate = EndDate.ToString("dd-MM-yyyy");
+        //    model.SlotUsages = slotUsages;
+        //    return View(model);
+        //}
 
 
-        [HttpPost]
-        public ActionResult TestAnalysis(TestAnalysisViewModel model)
-        {
-            List<TestAnalysisModel> slotUsages = new List<TestAnalysisModel>();
-            model.OptometristFirms = _slotRepository.GetOptometristFirms();
-            string[] startDateArry = model.StartDate.Split("-");
-            DateTime StartDate = Convert.ToDateTime($"{startDateArry[2]}-{startDateArry[1]}-{startDateArry[0]}");
-            string[] endDateArry = model.EndDate.Split("-");
-            DateTime EndDate = Convert.ToDateTime($"{endDateArry[2]}-{endDateArry[1]}-{endDateArry[0]}");
-            slotUsages = _slotUsageRepository.FetchTestAnalysis(model.OptometristFirmId, StartDate, EndDate).ToList();
-            model.SlotUsages = slotUsages;
-            return View(model);
-        }
+        //[HttpPost]
+        //public ActionResult TestAnalysis(TestAnalysisViewModel model)
+        //{
+        //    List<TestAnalysisModel> slotUsages = new List<TestAnalysisModel>();
+        //    model.OptometristFirms = _slotRepository.GetOptometristFirms();
+        //    string[] startDateArry = model.StartDate.Split("-");
+        //    DateTime StartDate = Convert.ToDateTime($"{startDateArry[2]}-{startDateArry[1]}-{startDateArry[0]}");
+        //    string[] endDateArry = model.EndDate.Split("-");
+        //    DateTime EndDate = Convert.ToDateTime($"{endDateArry[2]}-{endDateArry[1]}-{endDateArry[0]}");
+        //    slotUsages = _slotUsageRepository.FetchTestAnalysis(model.OptometristFirmId, StartDate, EndDate).ToList();
+        //    model.SlotUsages = slotUsages;
+        //    return View(model);
+        //}
     }
 }

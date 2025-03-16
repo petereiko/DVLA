@@ -1,10 +1,13 @@
 ﻿@using DVLA.DATA.Domains
 @using DVLA.Data.Models.DataObjects.DTOs
 @using DVLA.Data.Models.Enumerables
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration _config;
 @model ApplicantModel
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_GeneralLayout.cshtml";
+    int passportMaxSize = Convert.ToInt32(_config["AppConstants:PassportMaxSize"]);
 }
 
 
@@ -51,7 +54,7 @@
 
                                         </div>
                                         <div class="col-sm-4">
-                                            Upload Image
+                                            Upload Image <strong style="color:red">(Max Passport Size @passportMaxSize KB)</strong>
                                             <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
                                                 <input type="file" asp-for="Image" class="form-control" accept="image/jpeg" />
                                                 @Html.ValidationMessageFor(m => m.Image, "", new { @class = "text-danger" })
@@ -63,7 +66,7 @@
 
 
                                 </div>
-
+                                <br />
                                 <input type="hidden" asp-for="PassportImageUrl"/>
                                 <div class="row">
                                     <div class="col-md-4">
@@ -80,12 +83,12 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    @* <div class="col-md-4">
                                         <div class="form-floating mb-3">
                                             <input type="text" class="form-control" asp-for="InvoiceNumber" placeholder="Enter DVLA Invoice Number" required>
                                             <label for="InvoiceNumber">DVLA Invoice Number</label>
                                         </div>
-                                    </div>
+                                    </div> *@
                                     <div class="col-md-4">
                                         <div class="form-floating mb-3">
                                             <select asp-for="ResultServiceType" class="form-control" required asp-items="@Html.GetEnumSelectList<ResultServiceType>()">
@@ -111,18 +114,18 @@
                                             <label for="TestType">Test Type</label>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    @* <div class="col-md-4">
                                         <div class="form-floating mb-3">
                                             <input type="text" class="form-control" asp-for="DriversLicence" placeholder="Enter Driver's License Number" required>
                                             <label for="DriversLicence">Driver's License</label>
                                         </div>
-                                    </div>
-                                    <div class="col-md-4">
+                                    </div> *@
+                                    @* <div class="col-md-4">
                                         <div class="form-floating mb-3">
                                             <input type="text" class="form-control" asp-for="DVLAReferenceNo" placeholder="Enter DVLA Reference No" required>
                                             <label for="DVLAReferenceNo">DVLA Reference No</label>
                                         </div>
-                                    </div>
+                                    </div> *@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-3">
@@ -151,7 +154,15 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-12">
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <select asp-for="Gender" class="form-control" required asp-items="@Html.GetEnumSelectList<Gender>()">
+                                            <option value="">--Select Gender--</option>
+                                            </select>
+                                            <label for="Gender">Gender</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
                                         <div class="form-floating mb-3">
                                             <textarea asp-for="PostalAddress" placeholder="Enter Digital/Postal Address" required class="form-control"></textarea>
                                             <label for="PostalAddress">Digital/Residential Address</label>
@@ -217,6 +228,8 @@
 
         $(function () {
 
+            
+
             document.getElementById('Image').addEventListener('change', function (event) {
                 debugger
                 const file = event.target.files[0];
@@ -274,7 +287,7 @@
             let isSubmitted = false;
 
             $("input[name = 'SubmitResult']").click(function () {
-
+                $('#Gender').rules('add', { required: true, messages: "Gender is required" });
                 if (!isSubmitted) {
 
                     $('#Action').val('2')
@@ -383,7 +396,7 @@
 
         }
 
-        document.getElementById('image').onchange = function (e) {
+        document.getElementById('Image').onchange = function (e) {
 
             const size =
                 (this.files[0].size / 1024 / 1024).toFixed(2);

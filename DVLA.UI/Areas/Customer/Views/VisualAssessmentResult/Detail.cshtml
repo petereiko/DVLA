@@ -24,103 +24,89 @@
 }
 @model VisualAssessmentResultModel
 
+<style>
+    hr {
+        border: 1px solid black
+    }
+</style>
 
 
 <div class="datatables">
-    <!-- start File export -->
     <div class="card">
         <div class="card-body">
-
-            <div class="row">
-                <div class="col-md-12" style="text-align:right">
-                    <button class="btn btn-primary btn-sm right" id="btn-print">Print</button>
-                    @* <div><button type="button" id="printreceipt" onclick="PrintSection()" class="btn btn-sm btn-primary pull-right">Print</button></div> *@
-                </div>
-            </div>
-
-            <div id="DivIdToPrint">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="row">
-                            <div class="col-md-8">
+            <p style="padding-right:80px; text-align:right">
+                <button id="btn-print" class="btn btn-success btn-sm">Print</button>
+            </p>
+            <center>
+                <div id="DivIdToPrint" style="background-image: url('/logos/Dvlalogo_reportwatermark.png') !important; background-repeat:no-repeat;background-size: contain;background-position: center">
+                    <table style="width:85%">
+                        <tr>
+                            <td style="width:20%">
+                                <img src="@Model.PassportImageUrl" style="width:80%" />
+                            </td>
+                            <td style="padding:10px; text-transform:uppercase; vertical-align:text-top; font-size:15pt">
+                                <div>@Model.Surname @Model.FirstName @Model.OtherName</div>
+                                <div>@Model.TestDate.GetValueOrDefault().ToString("dd/MM/yyyy")</div>
+                                <div>@Model.ContactNumber</div>
+                            </td>
+                            <td style="vertical-align:text-top; text-align:right">
+                                <img src="~/logos/ODDVLAFullcolor.png" width="70" />
+                                <img src="~/logos/GOA.png" width="100" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <hr />
+                            </td>
+                            <td style="text-align:left; font-size:15pt"><strong>OP NO: @Model.ReferenceNumber</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="width:25%">
                                 <table>
                                     <tr>
-                                        <td style="padding-right:20px">
-                                            <img src="@Model.PassportImageUrl" style="width:150px; height:150px" />
-                                        </td>
-                                        <td valign="top" style="font-size:12pt; padding:5px; color:#2cabe3;">
-                                            <div class="col-12" style="text-transform:uppercase">@Model.Surname @Model.FirstName @Model.OtherName</div>
-                                            <div class="col-12">@Model.DOB.GetValueOrDefault().ToString("dd/MM/yyyy")</div>
-                                            <div class="col-12">@Model.MobileNumber</div>
-                                        </td>
+                                        <td>Result:</td>
+                                        <td style="padding:5px"><strong>@Model.PassOrFail</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td style="padding:5px"><strong>@Model.ResultConclusion</strong></td>
                                     </tr>
                                 </table>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="col-md-4" style="font-family:'Yu Gothic UI'; font-weight:bold; font-size:12pt">
-                        <div style="float:right">OP NO: @Model.ReferenceNumber</div>
-                    </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Test Facility Details:</td>
+                            <td colspan="2" style="text-transform:uppercase"><strong>@Model.BusinessAddress</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Authenticated By:</td>
+                            <td colspan="2" style="text-transform:uppercase"><strong>@ViewBag.Optometrist</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Service Type:</td>
+                            <td style="text-transform:uppercase"><strong>@(EnumHelper<ResultServiceType>.GetDisplayValue(Model.ResultServiceType.GetValueOrDefault()))</strong></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"><hr /></td>
+                        </tr>
+                        <tr>
+                            <td>SIGN AND STAMP</td>
+                            <td colspan="2" style="text-align:right">
+                                Test Date: @Model.TestDate.GetValueOrDefault().ToString("dd/MM/yyyy")
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"><hr /></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                Disclaimer: Passing this eye exam does not guarantee the applicant a driver's license. The issuance of the license is the sole prerogative of the DVLA.
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-                <hr />
-                <div class="row">
-                    <div class="col-md-8">
-                        <table style="font-size:14pt">
-                            <tr>
-                                <td style="padding-right:20px;">Results:</td>
-                                <td>
-                                    @result
-                                </td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td>
-                                    @Model.ResultConclusion
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="col-md-4">
-                        <table>
-                            <tr>
-                                <td style="padding-right:30px">Test Facility Details:</td>
-                                <td><b>@Model.BusinessName</b></td>
-                            </tr>
-                            <tr>
-                                <td style="padding-right:30px">Authenticated By:</td>
-                                <td><b>@Model.Optometrist</b></td>
-                            </tr>
-                            <tr>
-                                <td style="padding-right:30px">Service Type:</td>
-                                <td><b>@resultServiceType</b></td>
-                            </tr>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-                <hr />
-                <div class="row">
-                    <div class="col-md-8"></div>
-                    <div class="col-md-4">
-                        SIGN AND STAMP
-                    </div>
-                </div>
-                <hr />
-                <div class="row">
-                    <div class="col-12">
-                        Disclaimer: Passing this eye exam does not guarantee the applicant a driver's license. The issuance of the license is the sole prerogative of the DVLA.
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12" style="text-align:right">
-                    @* <a href="@action" class="btn btn-sm btn-info pull-right">Close</a> *@
-                    <button onclick="history.back()" class="btn btn-sm btn-danger pull-right">Back</button>
-                </div>
-            </div>
-
+            </center>
         </div>
     </div>
 </div>
@@ -142,7 +128,7 @@
                 newWindow.document.write(section);
                 newWindow.print();
                 newWindow.document.close(); // Close the document to render the content
-                
+
             })
         });
 

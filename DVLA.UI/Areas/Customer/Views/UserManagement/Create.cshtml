@@ -50,32 +50,14 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
-                                <input type="text" class="form-control" asp-for="MobileNumber" placeholder="Enter Additional Phone here" required />
+                                <input type="text" class="form-control" asp-for="MobileNumber" placeholder="Enter Additional Phone here" />
                                 <label for="Phone">Additional Phone</label>
                             </div>
                         </div>
-                       @*  <div class="col-md-6">
-                            <div class="form-floating mb-3">
-                                <select asp-for="DefaultRole" class="form-control" required>
-                                    <option value="">Select User Role</option>
-                                    @foreach (ApplicationRole item in (List<ApplicationRole>)ViewBag.Roles)
-                                    {
-                                        <option value="@item.Name">@item.Name</option>
-                                    }
-                                </select>
-                                <label for="DefaultRole">DefaultRole</label>
-                            </div>
-                        </div> *@
                         <div class="col-md-6" id="OptometristArea">
                             <div class="form-floating mb-3">
                                 <input type="text" class="form-control" id="OptometristFirmName" asp-for="@Model.OptometristFirmName" readonly disabled/>
                                 <label for="OptometristFirmName">Optometrist Firm</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" asp-for="PIN" placeholder="Enter PIN" />
-                                <label for="PIN">Personal Identification Number</label>
                             </div>
                         </div>
                         <div class="col-12">

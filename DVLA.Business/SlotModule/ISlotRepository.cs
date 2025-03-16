@@ -24,7 +24,7 @@ namespace DVLA.Business.SlotModule
         IEnumerable<SlotPriceModel> GetSlotPrices();
         MessageResponse UpdateSlotPrice(SlotPriceModel model, int id);
         OptometristFirmModel GetOptometristFirmByApplicationUserID(string applicationUserID);
-        Task<IEnumerable<SlotRequestModel>> FetchSlotRequests(SlotRequestStatus? status, int? maxRows);
+        Task<IEnumerable<SlotRequestModel>> FetchSlotRequests(SlotRequestParameter request);
         Task<SlotRequestModel> FetchSlotRequestById(int id, int status);
         MessageResponse ApproveSlotRequest(int id);
         MessageResponse RejectSlotRequest(RejectSlotRequestModel model);

@@ -34,7 +34,7 @@
 
             <div class="position-relative z-index-0">
                 <div class="row">
-                    <div class="col-xl-7 col-xxl-8 d-none d-xl-block" style="background-image:url(/5153829.jpg)">
+                    @* <div class="col-xl-7 col-xxl-8 d-none d-xl-block" style="background-image:url(/5153829.jpg)">
                         <div class="d-none d-xl-flex align-items-center justify-content-center h-100">
                             <center>
                                 <div class="container">
@@ -51,14 +51,14 @@
 
 
                         </div>
-                    </div>
-                    <div id="auth-area" style="background-image:url(/5153829.jpg)" class="col-xl-5 col-xxl-4">
+                    </div> *@
+                    <div id="auth-area" style="width:100% !important" class="col-xl-12" >
                         <div  class="authentication-login min-vh-100 bg-body row justify-content-center">
-                            <div class="col-12">
-                                 <a href="#" class="text-nowrap logo-img d-flex align-items-center gap-2 px-4 py-3 w-100" style="font-size:17pt">
-                                    <b class="logo-icon">
+                            <div class="col-12" style="text-align:center; padding:20px;">
+                                 <a href="#" class="text-nowrap logo-img align-items-center gap-2 px-4 py-3 w-100" style="font-size:17pt">
+                                    <strong>
                                         @_configuration["AppConstants:AppShortName"] - @ViewBag.Title
-                                    </b>
+                                    </strong>
                                 </a>
                             </div>
                             <div style="opacity:0.8" class="auth-max-width col-sm-8 col-md-6 col-xl-7 px-4">
@@ -243,7 +243,7 @@
     <script src="~/bootstrapdemos.wrappixel.com/materialpro/dist/assets/js/forms/sweet-alert.init.js"></script>
 
 
-    @if (TempData["SuccessMessage"] != null)
+    @* @if (TempData["SuccessMessage"] != null)
     {
         <script>
             Swal.fire({
@@ -254,7 +254,7 @@
         </script>
 
         TempData["SuccessMessage"] = null;
-    }
+    } *@
 
     @if (TempData["ErrorMessage"] != null)
     {

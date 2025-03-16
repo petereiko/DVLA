@@ -53,20 +53,9 @@
 
                                     }
 
-                                    <!--Result Search-->
-                                    @if (User.IsInRole(EnumHelper.GetEnumDescription(Role.Verifier)))
-                                    {
-                                        <li class="sidebar-item">
-                                            <a asp-action="Index" asp-controller="ResultVerification" asp-area="User" class="sidebar-link">
-                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
-                                                <span class="hide-menu">Verify Result</span>
-                                            </a>
-                                        </li>
-                                    }
-
                                     
                                     <!--Report-->
-                                    @if (User.IsInRole(EnumHelper.GetEnumDescription(Role.Administrator)))
+                                    @* @if (User.IsInRole(EnumHelper.GetEnumDescription(Role.Administrator)))
                                     {
                                         <li class="sidebar-item">
                                             <a class="sidebar-link" asp-action="Index" asp-controller="Report" asp-area="Admin">
@@ -74,7 +63,7 @@
                                                 <span class="hide-menu">Report Generation</span>
                                             </a>
                                         </li>
-                                    }
+                                    } *@
                                 </ul>
                             </div>
                         </div>

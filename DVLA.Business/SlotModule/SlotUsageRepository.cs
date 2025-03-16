@@ -174,10 +174,12 @@ namespace DVLA.Business.SlotModule
 
         public List<SlotUsageModel> FetchOptometristSlotUsage(DateTime? StartDate, DateTime? EndDate, AccessType? accessType, int? optometristFirmId = null)
         {
-            if (EndDate.HasValue) EndDate = EndDate.Value.AddHours(23);
             int? accType = null;
             if (accessType.HasValue) accType = (int)accessType.Value;
             if (accessType == 0) accType = null;
+
+            StartDate = StartDate == null ? StartDate : Utility.StartOfDay(StartDate.Value);
+            EndDate = EndDate == null ? EndDate : Utility.EndOfDay(EndDate.Value);
 
             List<SlotUsageModel> result = new();
             try

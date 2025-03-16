@@ -8,31 +8,33 @@ namespace DVLA.DATA.Domains
 
     public partial class VisualAssessmentResult : BaseObjectInt64
     {
+        //FormNumber, NameTitle, DriversLicense, DVLAReferenceNo, OldDVLAReferenceNo
+
 
         public int OptometristFirmId { get; set; }
         public virtual OptometristFirm OptometristFirm { get; set; }
        
         [StringLength(50)]
         public string ReferenceNumber { get; set; }
-        [StringLength(50)]
-        public string FormNumber { get; set; }
+        //[StringLength(50)]
+        //public string FormNumber { get; set; }
         public ResultServiceType? ResultServiceType { get; set; }
         public TestType TestType { get; set; }
 
-        public NameTitle? NameTitle { get; set; }
+        //public NameTitle? NameTitle { get; set; }
         public PassOrFail? PassOrFail { get; set; }
 
         [StringLength(50)]
         public string Surname { get; set; }
 
-        [StringLength(50)]
-        public string DriversLicence { get; set; }
+        //[StringLength(50)]
+        //public string DriversLicence { get; set; }
 
-        [StringLength(50)]
-        public string DVLAReferenceNo { get; set; }
+        //[StringLength(50)]
+        //public string DVLAReferenceNo { get; set; }
 
-        [StringLength(50)]
-        public string OldDVLAReferenceNo { get; set; }
+        //[StringLength(50)]
+        //public string OldDVLAReferenceNo { get; set; }
 
         [StringLength(50)]
         public string FirstName { get; set; }
@@ -104,5 +106,6 @@ namespace DVLA.DATA.Domains
         public PassResult? PassResult { get; set; }
         public bool IsTransmitted { get; set; }
         public DateTime TransmittedDate { get; set; }
+        public Gender? Gender { get; set; }
     }
 }

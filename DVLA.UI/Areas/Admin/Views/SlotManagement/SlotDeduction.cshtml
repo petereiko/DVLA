@@ -1,6 +1,7 @@
 ﻿@using DVLA.Data
 @using DVLA.Data.Models.DataObjects.UtilityObjects
 @using DVLA.Data.Models.DataObjects.ViewModels
+@using DVLA.Data.Models.Enumerables
 @model SlotDeductionViewModel
 @{
     ViewData["Title"] = "Slot Deduction";
@@ -29,37 +30,6 @@
                                     </div>
                                 }
 
-                                @*
-                                <div class="form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
-                                <div mat-input-field id="email-mat-input-field" class="mat-input-field form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
-                                Optometrist Firm
-                                <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
-                                @Html.DropDownListFor(m => m.FormData.OptometristFirmId, new SelectList(Model.OptometristFirms, "ID", "BusinessName"), "-Select Optometrist Firm-", new { @class = "form-control", type = "number" })
-                                @Html.ValidationMessageFor(m => m.FormData.OptometristFirmId, "", new { @class = "text-danger" })
-                                </div>
-                                </div>
-                                </div>
-                                <br />
-                                <div class="form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
-                                <div mat-input-field id="email-mat-input-field" class="mat-input-field form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
-                                Quantity
-                                <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
-                                @Html.TextBoxFor(m => m.FormData.Quantity, new { @class = "form-control", type = "number" })
-                                @Html.ValidationMessageFor(m => m.FormData.Quantity, "", new { @class = "text-danger" })
-                                </div>
-                                </div>
-                                </div>
-                                <br />
-                                <div class="form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
-                                <div mat-input-field id="email-mat-input-field" class="mat-input-field form-group" style="margin-bottom:0px !important; padding-bottom:0px !important;">
-                                Comment
-                                <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
-                                @Html.TextAreaFor(m => m.FormData.Comment, new { @class = "form-control" })
-                                @Html.ValidationMessageFor(m => m.FormData.Comment, "", new { @class = "text-danger" })
-                                </div>
-                                </div>
-                                </div> *@
-
                                 <form>
                                     
                                     <div class="row">
@@ -77,7 +47,15 @@
                                                 <label for="FormData_Quantity">Quantity</label>
                                             </div>
                                         </div>
-                                        <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="form-floating mb-3">
+                                                <select asp-for="AccessType" class="form-control" asp-items="@Html.GetEnumSelectList<AccessType>()">
+                                                    <option value="">--Select Slot Type--</option>
+                                                </select>
+                                                <label for="AccessType">Slot Type</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
                                             <div class="form-floating mb-3">
                                                 <textarea asp-for="FormData.Comment" placeholder="Enter Comment..." required class="form-control"></textarea>
                                                 <label for="FormData_Comment">Comment</label>
@@ -115,10 +93,12 @@
             let optometristFirmId = $('#FormData_OptometristFirmId').val();
             let quantity = $('#FormData_Quantity').val();
             let comment = $('#FormData_Comment').val();
+            let accessType= $('#AccessType').val();
             let obj = {
                 OptometristFirmId: optometristFirmId,
                 Quantity: quantity,
-                Comment: comment
+                Comment: comment,
+                AccessType:accessType
             };
             if (obj.OptometristFirmId == '') {
                 Swal.fire({
@@ -140,6 +120,14 @@
                 Swal.fire({
                     title: 'Warning',
                     text: 'Enter a comment',
+                    icon: 'warning'
+                });
+                return;
+            }
+            if (obj.AccessType.trim() == '') {
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Select Access Type',
                     icon: 'warning'
                 });
                 return;
@@ -166,12 +154,14 @@
                         contentType: 'application/json; charset=utf-8',
                         data: JSON.stringify(obj),
                         success: function (response) {
-                            if (response.status) {
+                            if (response.success) {
                                 ClearForm();
                                 Swal.fire({
                                     title: 'Success!',
                                     text: response.message,
                                     icon: 'success'
+                                }).then((result)=>{
+                                    location.reload()
                                 });
                             }
                             else {
@@ -181,10 +171,6 @@
                                     icon: 'error'
                                 });
                             }
-
-                            //setTimeout(function () {
-                            //    location.reload();
-                            //}, 2000);
                         },
                         error: function (err) {
                             console.log(err);

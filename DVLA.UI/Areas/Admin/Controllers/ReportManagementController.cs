@@ -37,10 +37,11 @@ namespace DVLA.UI.Areas.Admin.Controllers
         private readonly ILogger<ReportManagementController> _logger;
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _environment;
+        private readonly IUserService _userService;
 
 
         public ReportManagementController(IAuditRepo AuditRepo, IRepositoryQuery<OptometristFirm> optometristFirmQuery, IRepositoryQuery<Region> regionQuery,
-            IReportRepository reportRepository, IVisualAssessmentResultRepository assessmentResultRepository, IRepositoryQuery<VisualAssessmentResult> applicantQuery, ILogger<ReportManagementController> logger, IConfiguration configuration, IWebHostEnvironment environment)
+            IReportRepository reportRepository, IVisualAssessmentResultRepository assessmentResultRepository, IRepositoryQuery<VisualAssessmentResult> applicantQuery, ILogger<ReportManagementController> logger, IConfiguration configuration, IWebHostEnvironment environment, IUserService userService)
         {
             _AuditRepo = AuditRepo;
             _regionQuery = regionQuery;
@@ -51,6 +52,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
             _logger = logger;
             _configuration = configuration;
             _environment = environment;
+            _userService = userService;
         }
 
         // GET: Admin/ReportManagement
@@ -124,12 +126,13 @@ namespace DVLA.UI.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult BiodataUpdate(int page=1)
         {
-
+            var userData = _userService.GetUserData();
+            
             TempData["Action"] = Url.Action("BiodataUpdate", "ReportManagement", new { area = "Admin" });
 
             PaginationRequestModel<ClientSearchRequest> request = new()
             {
-                InputModel = new() { OptometristFirmId = null, Search = "" },
+                InputModel = new() { OptometristFirmId = userData.OptometristFirmId, Search = "" },
                 PageIndex = page
             };
 
@@ -160,9 +163,9 @@ namespace DVLA.UI.Areas.Admin.Controllers
         }
 
 
-        public ActionResult VisualAssessmentDetails(string driverslicence, string dvlaReferenceNo, string vasReferenceNo)
+        public ActionResult VisualAssessmentDetails(string vasReferenceNo)
         {
-            var assessment = _assessmentResultRepository.FetchAssessmentResult(driverslicence, dvlaReferenceNo, vasReferenceNo);
+            var assessment = _assessmentResultRepository.FetchAssessmentResult(vasReferenceNo);
             if (assessment != null)
             {
                 if (!string.IsNullOrEmpty(assessment.PassportImageUrl) && assessment.PassportImageUrl.Contains(".png"))
@@ -192,10 +195,10 @@ namespace DVLA.UI.Areas.Admin.Controllers
 
                 var model = new ApplicantModel();
                 model.Id = applicant.Id;
-                model.NameTitle = applicant.NameTitle;
+                //model.NameTitle = applicant.NameTitle;
                 model.Surname = applicant.Surname;
-                model.DriversLicence = applicant.DriversLicence;
-                model.DVLAReferenceNo = applicant.DVLAReferenceNo;
+                //model.DriversLicence = applicant.DriversLicence;
+                //model.DVLAReferenceNo = applicant.DVLAReferenceNo;
                 model.FirstName = applicant.FirstName;
                 model.OtherName = applicant.OtherName;
                 model.DOB = (DateTime)applicant.DOB;
@@ -208,9 +211,9 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 model.PassportImageUrl = applicant.PassportImageUrl;
                 model.Status = applicant.Status;
                 model.OptometristFirmId = applicant.OptometristFirmId;
-                model.FormNumber = applicant.FormNumber;
+                //model.FormNumber = applicant.FormNumber;
                 model.TestType = (TestType)applicant.TestType;
-                model.InvoiceNumber = applicant.OldDVLAReferenceNo;
+                //model.InvoiceNumber = applicant.OldDVLAReferenceNo;
                 model.IsActive = applicant.IsActive;
                 model.CreatedBy = applicant.CreatedBy;
                 model.IsDeleted = applicant.IsDeleted;
@@ -271,12 +274,6 @@ namespace DVLA.UI.Areas.Admin.Controllers
                             ModelState.AddModelError("LearnerDriversLicence", "Please select learner licence type");
                         }
                     }
-                }
-
-
-                if (model.NameTitle == null)
-                {
-                    ModelState.AddModelError("NameTitle", "Please select name title");
                 }
 
                 if (string.IsNullOrEmpty(model.Surname))
@@ -346,10 +343,10 @@ namespace DVLA.UI.Areas.Admin.Controllers
 
                 string passFile = applicant.PassportImageUrl;
 
-                applicant.NameTitle = model.NameTitle;
+                //applicant.NameTitle = model.NameTitle;
                 applicant.Surname = model.Surname;
-                applicant.DriversLicence = model.DriversLicence;
-                applicant.DVLAReferenceNo = model.DVLAReferenceNo;
+                //applicant.DriversLicence = model.DriversLicence;
+                //applicant.DVLAReferenceNo = model.DVLAReferenceNo;
                 applicant.FirstName = model.FirstName;
                 applicant.OtherName = model.OtherName;
                 applicant.DOB = (DateTime)model.DOB;
@@ -362,7 +359,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 applicant.PassportImageUrl = model.PassportImageUrl;
                 //applicant.Status = model.Status;
                 applicant.TestType = (TestType)model.TestType;
-                applicant.OldDVLAReferenceNo = model.InvoiceNumber;
+                //applicant.OldDVLAReferenceNo = model.InvoiceNumber;
                 //applicant.IsActive = model.IsActive;
                 //applicant.CreatedBy = model.CreatedBy;
                 //applicant.IsDeleted = model.IsDeleted;
@@ -412,6 +409,8 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 Id = x.Id
             }).ToList();
             model.OptometristFirms = optometristFirms;
+            model.SearchParameter.StartDate = model.SearchParameter.StartDate == null ? Utility.StartOfDay(DateTime.UtcNow) : Utility.StartOfDay(model.SearchParameter.StartDate.Value);
+            model.SearchParameter.EndDate = model.SearchParameter.EndDate == null ? Utility.EndOfDay(DateTime.UtcNow) : Utility.EndOfDay(model.SearchParameter.EndDate.Value);
             IEnumerable<SlotReductionModel> slotReductions = await _reportRepository.FetchSlotReductionLogs(model.SearchParameter);
             model.SlotReductions = slotReductions;
             return View(model);

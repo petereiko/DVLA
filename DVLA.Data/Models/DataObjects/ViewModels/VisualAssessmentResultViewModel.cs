@@ -13,21 +13,25 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
     {
         public VisualAssessmentResultViewModel()
         {
-            PassportImageUrl = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Vw8AAoEBfymqrywAAAAASUVORK5CYII=";
+            //PassportImageUrl = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Vw8AAoEBfymqrywAAAAASUVORK5CYII=";
             Status = Enumerables.Status.InProgress;
         }
-        public long? Id { get; set; }
+
+        [Required(ErrorMessage ="Gender is required")]
+        public Gender? Gender { get; set; }
+        public string PassportUploadType { get; set; }
+        public long Id { get; set; }
         public long OptometristFirmId { get; set; }
         public string ReferenceNumber { get; set; }
-        public string FormNumber { get; set; }
+        //public string FormNumber { get; set; }
         public ResultServiceType? ResultServiceType { get; set; }
         public LearnerDriversLicenceType? LearnerDriversLicence { get; set; }
-        public NameTitle? NameTitle { get; set; }
+        //public NameTitle? NameTitle { get; set; }
         public string Surname { get; set; }
-        public string DriversLicence { get; set; }
-        public string DVLAReferenceNo { get; set; }
-        public byte TestType { get; set; }
-        public string OldDVLAReferenceNo { get; set; }
+        //public string DriversLicence { get; set; }
+        //public string DVLAReferenceNo { get; set; }
+        public TestType TestType { get; set; }
+        //public string OldDVLAReferenceNo { get; set; }
         public string FirstName { get; set; }
         public string OtherName { get; set; }
         //[DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]

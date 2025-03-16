@@ -29,6 +29,14 @@
                                         <label for="EndDate">End Date</label>
                                     </div>
                                 </div>
+                                <div class="col-md-3" id="OptometristArea">
+                                    <div class="form-floating mb-3">
+                                        <select asp-for="AccessType" class="form-control" asp-items="@Html.GetEnumSelectList<AccessType>()">
+                                            <option value="">--All Access Type--</option>
+                                        </select>
+                                        <label for="AccessType">Access Type</label>
+                                    </div>
+                                </div>
                                 <div class="col-3">
                                     <div class="d-md-flex align-items-center">
 
@@ -43,9 +51,9 @@
                         </form>
 
                         <br />
-                        <div>Total Balance: <b>@Model.SlotUsages.Sum(x => x.Balance)</b></div>
-                        <div>Total Access Purchased: <b>@Model.SlotUsages.Sum(x => x.TotalSlotPurchased)</b></div>
-                        <div>Total Access Used: <b>@Model.SlotUsages.Sum(x => x.TotalSlotUsed)</b></div>
+                        <div>Total Balance: <strong>@Model.TotalBalance</strong></div>
+                        <div>Total Access Purchased: <strong>@Model.TotalAccessPurchase</strong></div>
+                        <div>Total Access Used: <strong>@Model.TotalAccessUsed</strong></div>
 
                         <div class="table-responsive">
                             <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">

@@ -1,4 +1,5 @@
 ﻿using DVLA.Data.Models.DataObjects.DTOs;
+using DVLA.Data.Models.DataObjects.UtilityObjects;
 using DVLA.Data.Models.DataObjects.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace DVLA.Business.UserModule
         //List<UserViewModel> GetOptometristFirmUsers(int OptometristFirmId);
 
         UserViewModel GetUserDetails(string Id);
+        Task<MessageResponse> UpdateAsync(UserViewModel model);
 
-        bool Update(UserViewModel model, string updatedBy, out string responseMessage);
     }
 }

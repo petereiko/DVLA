@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DVLA.Data.Models.Enumerables;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +12,6 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public int OptometristFirmId { get; set; }
         public int Quantity { get; set; }
         public string Comment { get; set; }
+        public int AccessType { get; set; }
     }
 }

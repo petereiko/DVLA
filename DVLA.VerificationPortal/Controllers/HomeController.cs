@@ -1,5 +1,7 @@
 using DVLA.VerificationPortal.Application.Interfaces;
 using DVLA.VerificationPortal.Models;
+using DVLA.VerificationPortal.Shared;
+using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -32,10 +34,18 @@ namespace DVLA.VerificationPortal.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> Details(int id)
+        public async Task<ActionResult> Details(string key)
         {
+            int id = Utility.DecryptUrlID(key);
             var result = await _searchService.GetResultAsync(id);
             return View(result);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> VerifyResult(string token)
+        {
+            MessageResponse response = await _searchService.VerifyResult(token);
+            return Json(response);
         }
 
         public IActionResult Privacy()

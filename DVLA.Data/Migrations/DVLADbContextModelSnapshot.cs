@@ -43,26 +43,11 @@ namespace DVLA.Data.Migrations
                     b.Property<DateTime?>("DOB")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("DVLAReferenceNo")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("DriversLicence")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("Email")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("FirstName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("FormNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("InvoiceNumber")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -83,12 +68,6 @@ namespace DVLA.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("NameTitle")
-                        .HasColumnType("int");
-
-                    b.Property<string>("OldDVLAReferenceNo")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("OptometristFirmId")
                         .HasColumnType("int");
@@ -1495,14 +1474,6 @@ namespace DVLA.Data.Migrations
                     b.Property<DateTime?>("DOB")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("DVLAReferenceNo")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("DriversLicence")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("Email")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -1511,9 +1482,8 @@ namespace DVLA.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("FormNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int?>("Gender")
+                        .HasColumnType("int");
 
                     b.Property<string>("GlareTest_BCV_OD")
                         .HasColumnType("nvarchar(max)");
@@ -1545,6 +1515,9 @@ namespace DVLA.Data.Migrations
                     b.Property<bool?>("IsSynchronized")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsTransmitted")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("LearnerDriversLicence")
                         .HasColumnType("int");
 
@@ -1553,13 +1526,6 @@ namespace DVLA.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("NameTitle")
-                        .HasColumnType("int");
-
-                    b.Property<string>("OldDVLAReferenceNo")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("OptometristFirmId")
                         .HasColumnType("int");
@@ -1618,6 +1584,9 @@ namespace DVLA.Data.Migrations
 
                     b.Property<byte>("TestType")
                         .HasColumnType("tinyint");
+
+                    b.Property<DateTime>("TransmittedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Unaided_OD")
                         .HasColumnType("nvarchar(max)");
@@ -2072,6 +2041,43 @@ namespace DVLA.Data.Migrations
                     b.ToTable("PaystackVerifications");
                 });
 
+            modelBuilder.Entity("DVLA.Data.Models.Domains.VisualAssessmentTransmission", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Data")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsTransmitted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RecordCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TransmittedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VisualAssessmentTransmissions");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -2247,7 +2253,7 @@ namespace DVLA.Data.Migrations
             modelBuilder.Entity("DVLA.DATA.Domains.OptometristFirm", b =>
                 {
                     b.HasOne("DVLA.DATA.Domains.District", "District")
-                        .WithMany()
+                        .WithMany("OptometristFirms")
                         .HasForeignKey("DistrictId");
 
                     b.HasOne("DVLA.DATA.Domains.Region", "Region")
@@ -2406,6 +2412,11 @@ namespace DVLA.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("DVLA.DATA.Domains.District", b =>
+                {
+                    b.Navigation("OptometristFirms");
                 });
 
             modelBuilder.Entity("DVLA.DATA.Domains.EmailLog", b =>

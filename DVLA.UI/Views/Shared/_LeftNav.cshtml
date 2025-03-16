@@ -120,6 +120,16 @@
                                         </li>
                                     }
 
+                                    @if (User.IsInRole(AppRoles.FRONTOFFICER))
+                                    {
+                                        <li class="sidebar-item">
+                                            <a asp-action="Index" asp-controller="FrontOffice" asp-area="Registration" class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                                <span class="hide-menu">Eye Test Result</span>
+                                            </a>
+                                        </li>
+                                    }
+
                                     <!--Access Management-->
                                     @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.SLOTMANAGER))
                                     {
@@ -185,12 +195,12 @@
                                     <!--Report-->
                                     @if (User.IsInRole(AppRoles.SYSTEMADMIN))
                                     {
-                                        <li class="sidebar-item">
+                                        @* <li class="sidebar-item">
                                             <a class="sidebar-link" asp-action="TestAnalysis" asp-controller="SlotManagement" asp-area="Admin">
                                                 <iconify-icon icon="solar:cart-large-2-linear" class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Test Analysis</span>
                                             </a>
-                                        </li>
+                                        </li> *@
                                         <li class="sidebar-item">
                                             <a asp-action="SlotUsageStatistics" asp-controller="SlotManagement" asp-area="Admin" class="sidebar-link sublink">
                                                 <div class="round-16 d-flex align-items-center justify-content-center">
@@ -199,22 +209,22 @@
                                                 <span class="hide-menu">Slot Statistics</span>
                                             </a>
                                         </li>
-                                        <li class="sidebar-item">
+                                        @* <li class="sidebar-item">
                                             <a asp-action="ApplicantSearch" asp-controller="ReportManagement" asp-area="Admin" class="sidebar-link sublink">
                                                 <div class="round-16 d-flex align-items-center justify-content-center">
                                                     <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                 </div>
                                                 <span class="hide-menu">Applicant Search</span>
                                             </a>
-                                        </li>
-                                        <li class="sidebar-item">
+                                        </li> *@
+                                        @* <li class="sidebar-item">
                                             <a asp-action="BiodataUpdate" asp-controller="ReportManagement" asp-area="Admin" class="sidebar-link sublink">
                                                 <div class="round-16 d-flex align-items-center justify-content-center">
                                                     <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                 </div>
                                                 <span class="hide-menu">Biodata Update</span>
                                             </a>
-                                        </li>
+                                        </li> *@
                                         <li class="sidebar-item">
                                             <a asp-action="Index" asp-controller="AuditManagement" asp-area="Admin" class="sidebar-link sublink">
                                                 <div class="round-16 d-flex align-items-center justify-content-center">
@@ -265,12 +275,12 @@
                                     <span class="hide-menu">Synchronization Report</span>
                                     </a>
                                     </li> *@
-                                        <li class="sidebar-item">
+                                       @*  <li class="sidebar-item">
                                             <a asp-action="ApplicantSearch" asp-controller="ReportManagement" asp-area="Customer" class="sidebar-link">
                                                 <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Applicant Search</span>
                                             </a>
-                                        </li>
+                                        </li> *@
 
                                         <li class="sidebar-item">
                                             <a asp-action="BiodataUpdate" asp-controller="ReportManagement" asp-area="Customer" class="sidebar-link">

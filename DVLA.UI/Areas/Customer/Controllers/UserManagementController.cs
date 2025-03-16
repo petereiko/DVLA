@@ -106,11 +106,6 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     model.Errors.Add(ModelState.Values.SelectMany(x => x.Errors).FirstOrDefault()?.ErrorMessage);
                     return View(model);
                 }
-                if (string.IsNullOrEmpty(model.PIN))
-                {
-                    model.Errors.Add("PIN is required");
-                    return View(model);
-                }
 
                 var emailAddress = await _userManager.FindByEmailAsync(model.Email);
 
@@ -125,11 +120,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
                 using (transaction)
                 {
-                    var applicationUser = await _context.ApplicationUsers.AsNoTracking().FirstOrDefaultAsync(x => x.Pin == model.PIN.Trim());
-                    if(applicationUser != null) 
+                    ApplicationUser applicationUser = await _context.ApplicationUsers.AsNoTracking().FirstOrDefaultAsync(x => x.Email == model.Email);
+                    if (applicationUser != null)
                     {
-                        await transaction.RollbackAsync();
-                        model.Errors.Add("PIN is in use");
+                        model.Errors.Add("A User with this email already exist");
                         return View(model);
                     }
                     applicationUser = new ApplicationUser()
@@ -148,7 +142,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         DefaultRole = AppRoles.FRONTOFFICER,
                         IsDeleted = false,
                         PhoneNumber = model.Phone,
-                        Pin = model.PIN
+                        Pin = null
                     };
 
                     var pwd = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 6);
@@ -168,11 +162,11 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
                         var userId = applicationUser.Id;
 
-                        foreach (var item in model.Roles)
-                        {
-                            await _userManager.AddToRoleAsync(applicationUser, item.Name);
-                        }
-                        
+                        //foreach (var item in model.Roles)
+                        //{
+                        //    await _userManager.AddToRoleAsync(applicationUser, item.Name);
+                        //}
+                        await _userManager.AddToRoleAsync(applicationUser, AppRoles.FRONTOFFICER);
 
                         var code = await _userManager.GeneratePasswordResetTokenAsync(applicationUser);
 
@@ -222,7 +216,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
         }
 
         [HttpPost]
-        public ActionResult Update(UserViewModel model)
+        public async Task<ActionResult> Update(UserViewModel model)
         {
             if (string.IsNullOrEmpty(User.Identity.Name))
             {
@@ -238,10 +232,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     return View(model);
                 }
                 string responseMessage = "";
-                bool result = _userRepository.Update(model, currentUserId, out responseMessage);
-                if (result)
+                var result = await _userRepository.UpdateAsync(model);
+                if (result.Success)
                 {
-                    TempData["SuccessMessage"] = responseMessage;
+                    TempData["SuccessMessage"] = result.Message;
                     _AuditRepo.AddAudit(Activities.UPDATE_USER, "Update User Details");
                     return RedirectToAction("Index");
                 }

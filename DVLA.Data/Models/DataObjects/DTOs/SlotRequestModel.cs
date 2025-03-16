@@ -16,10 +16,10 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public string BusinessName { get; set; }
         public string TelephoneNumber { get; set; }
 
-        [Required(ErrorMessage = "Please retype Amount Paid to automatically compute the corresponding number of slots")]
-        public int Quantity { get; set; }
+        //[Required(ErrorMessage = "Please retype Amount Paid to automatically compute the corresponding number of slots")]
+        public int? Quantity { get; set; }
         [Required]
-        public AccessType AccessType { get; set; } = 0;
+        public AccessType? AccessType { get; set; } = 0;
         public string PaymentProof { get; set; }
         //[Required(ErrorMessage = "Upload Payment Evidence in .jpg or .pdf format")]
         public IFormFile PostedFile { get; set; }
