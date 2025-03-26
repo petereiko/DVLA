@@ -64,16 +64,6 @@
                                         </select>
                                         @Html.ValidationMessageFor(model => model.ResultServiceType, "", new { @class = "text-danger" })
                                     </div>
-                                    <div class="col-sm">
-                                        <div id="LearnerType" style="display:@(Model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? "block" : "none")">
-                                            Learner Driver's Licence Type
-                                            <select asp-for="LearnerDriversLicence" class="form-control" asp-items="Html.GetEnumSelectList<LearnerDriversLicenceType>()">
-                                                
-                                            </select>
-                                            @* @Html.DropDownList("LearnerDriversLicence", EnumHelper.GetSelectList(typeof(LearnerDriversLicenceType)), "Select Type", new { @style = "width:100%;", @class = "form-control", @id = "ddlLearnerType" }) *@
-                                            @Html.ValidationMessageFor(model => model.LearnerDriversLicence, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
                                 </div>
                                 <br />
 
@@ -129,6 +119,15 @@
                                                     @Html.ValidationMessageFor(model => model.PostalAddress, "", new { @class = "text-danger" })
 
                                                 </div>
+                                                <div class="col-sm">
+                                                    Gender
+
+                                                    <select asp-for="Gender" class="form-control" required asp-items="@Html.GetEnumSelectList<Gender>()">
+                                                        <option value="">--Select Gender--</option>
+                                                    </select>
+                                                    @Html.ValidationMessageFor(model => model.Gender, "", new { @class = "text-danger" })
+
+                                                </div>
 
                                             </div>
                                             <div class="row row-xs mg-b-10">
@@ -140,10 +139,11 @@
 
                                                 </div>
                                                 <div class="col-sm">
-                                                    Tax Identification Number (TIN)
-                                                    @Html.TextBoxFor(model => model.TaxIdentificationNumber, new { @class = "form-control", @autocomplete = "off" })
-                                                    @*@Html.ValidationMessageFor(model => model.TaxIdentificationNumber, "", new { @class = "text-danger" })*@
-
+                                                    Nationality
+                                                    <select asp-for="Nationality" class="form-control" asp-items="@((List<SelectListItem>)ViewBag.Countries)">
+                                                        <option value="">--Select Nationality--</option>
+                                                    </select>
+                                                    @Html.ValidationMessageFor(model => model.Nationality, "", new { @class = "text-danger" })
                                                 </div>
                                                 <div class="col-sm">
                                                     Email (if applicable)

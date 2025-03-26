@@ -105,7 +105,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 IsFirstLogin = u.IsFirstLogin,
                 EmailConfirmed = u.EmailConfirmed,
                 Id = u.Id,
-                PhoneNumber = u.PhoneNumber,
+                CentreName = u.PhoneNumber,
                 IsActive = u.IsActive
             }).ToList();
         }
@@ -213,7 +213,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 _contextAccessor.HttpContext.Response.Cookies.Append(AppConstants.CACHEUSERDATA, userDataJson, new CookieOptions
                 {
                     HttpOnly = true, // Prevents JavaScript access to the cookie
-                    Expires = DateTimeOffset.UtcNow.AddDays(30) // Set an expiration
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(5) // Set an expiration
                 });
                 await _signInManager.SignInAsync(user, model.RememberMe);
 
@@ -302,7 +302,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                     Id = Guid.NewGuid().ToString(),
                     UserName = model.Email,
                     IsActive = true,
-                    PhoneNumber = model.PhoneNumber,
+                    CentreName = model.CentreName,
                     Email = model.Email,
                     EmailConfirmed = false,
                     CreatedDate = DateTime.UtcNow,

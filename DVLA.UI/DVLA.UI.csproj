@@ -43,7 +43,6 @@
     <Folder Include="Areas\Registration\Models\" />
     <Folder Include="Connected Services\" />
     <Folder Include="Views\EmailTemplate\" />
-    <Folder Include="wwwroot\AppFile\" />
     <Folder Include="wwwroot\Passports\" />
   </ItemGroup>
 

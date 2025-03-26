@@ -84,7 +84,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
     });
 
 
@@ -96,7 +96,7 @@ builder.Services.AddScoped<SignInManager<ApplicationUser>>();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(25); // Set session duration
+    options.IdleTimeout = TimeSpan.FromMinutes(5); // Set session duration
     options.Cookie.HttpOnly = false; // Make the cookie HTTP only
     options.Cookie.IsEssential = true; // Make the cookie essential
 });
@@ -199,7 +199,7 @@ app.MapHub<NotificationHub>("/notification");
 
 RecurringJob.AddOrUpdate<BackgroundJobService>("SendBulkEmail", service => service.SendBulkEmail(), "*/2 * * * *");
 RecurringJob.AddOrUpdate<BackgroundJobService>("VerifyTransfers", service => service.VerifyPayments(), "*/1 * * * *");
-RecurringJob.AddOrUpdate<BackgroundJobService>("PushVisualAssessmentResult", service => service.PushVisualAssessmentResult(), "*/5 * * * *");//Every 1 minute
+RecurringJob.AddOrUpdate<BackgroundJobService>("PushVisualAssessmentResult", service => service.PushVisualAssessmentResult(), "*/2 * * * *");//Every 1 minute
 
 
 //Create a scope to resolve scoped services

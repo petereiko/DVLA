@@ -408,7 +408,7 @@ namespace DVLA.Business.UserModule
                 }
             }
 
-            var signInResult = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, true);
+            var signInResult = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
 
             if (signInResult.Succeeded)
             {
@@ -443,10 +443,11 @@ namespace DVLA.Business.UserModule
 
                 _contextAccessor.HttpContext.Response.Cookies.Append(AppConstants.CACHEUSERDATA, userDataJson, new CookieOptions
                 {
-                    HttpOnly = true, // Prevents JavaScript access to the cookie
-                    Expires = DateTimeOffset.UtcNow.AddDays(30) // Set an expiration
+                    HttpOnly = true, // Prevents JavaScript access to the cookie 
+                     
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(5)// Set an expiration
                 });
-                await _signInManager.SignInAsync(user, model.RememberMe);
+                await _signInManager.SignInAsync(user, false);
 
                 response.Result = userData;
                 response.Success = true;
@@ -497,9 +498,9 @@ namespace DVLA.Business.UserModule
                 _contextAccessor.HttpContext.Response.Cookies.Append(AppConstants.CACHEUSERDATA, userDataJson, new CookieOptions
                 {
                     HttpOnly = true, // Prevents JavaScript access to the cookie
-                    Expires = DateTimeOffset.UtcNow.AddDays(30) // Set an expiration
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(5) // Set an expiration
                 });
-                await _signInManager.SignInAsync(user, model.RememberMe);
+                await _signInManager.SignInAsync(user, false);
 
                 response.Result = userData;
                 response.Success = true;

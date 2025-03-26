@@ -23,25 +23,19 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
         public long Id { get; set; }
         public long OptometristFirmId { get; set; }
         public string ReferenceNumber { get; set; }
-        //public string FormNumber { get; set; }
         public ResultServiceType? ResultServiceType { get; set; }
-        public LearnerDriversLicenceType? LearnerDriversLicence { get; set; }
-        //public NameTitle? NameTitle { get; set; }
         public string Surname { get; set; }
-        //public string DriversLicence { get; set; }
-        //public string DVLAReferenceNo { get; set; }
         public TestType TestType { get; set; }
-        //public string OldDVLAReferenceNo { get; set; }
         public string FirstName { get; set; }
         public string OtherName { get; set; }
-        //[DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
+
         [DataType(DataType.Date)]
         public DateTime? DOB { get; set; }
         public PassOrFail? PassOrFail { get; set; }
         public PassResult? PassResult { get; set; }
         public string PostalAddress { get; set; }
         public string ContactNumber { get; set; }
-        public string TaxIdentificationNumber { get; set; }
+        public string Nationality { get; set; }
         public string Email { get; set; }
         public string Unaided_OD { get; set; }
         public string Unaided_OS { get; set; }

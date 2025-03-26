@@ -1,4 +1,5 @@
 ﻿using DVLA.Data.Models.DataObjects.DTOs;
+using DVLA.Data.Models.DataObjects.ViewModels;
 using DVLA.Data.Models.Enumerables;
 using System;
 using System.Collections.Generic;
@@ -31,5 +32,10 @@ namespace DVLA.Business.SlotModule
 
         List<SlotUsageModel> FetchSlotUsage(DateTime? StartDate, DateTime? EndDate, AccessType? accessType);
         List<SlotUsageModel> FetchOptometristSlotUsage(DateTime? StartDate, DateTime? EndDate, AccessType? accessType, int? optometrist = null);
+
+
+        Task<SlotStatisticsViewModel> SlotPurchasedAsync(SlotStatisticsViewModel model);
+        Task<SlotStatisticsViewModel> SlotUsedAsync(SlotStatisticsViewModel model);
+        Task<SlotStatisticsViewModel> SlotBalanceAsync(SlotStatisticsViewModel model);
     }
 }

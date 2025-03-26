@@ -66,10 +66,10 @@
                         <tr>
                             <th>Practice Name</th>
                             <th>Slot Balance</th>
-                            <th>Business Tel.</th>
+                            @* <th>Business Tel.</th> *@
                             <th>Accreditation #</th>
                             <th>Region</th>
-                            <th>Town</th>
+                            @* <th>Town</th> *@
                             <th>Digital Addr.</th>
                             <th></th>
                         </tr>
@@ -82,10 +82,10 @@
                             <tr>
                                 <td>@item.BusinessName</td>
                                 <td>@item.SlotBalance</td>
-                                <td>@item.ContactPhoneNumber</td>
+                                @* <td>@item.ContactPhoneNumber</td> *@
                                 <td>@item.AccreditationNumber</td>
                                 <td>@item.RegionName</td>
-                                <td>@item.Town</td>
+                                @* <td>@item.Town</td> *@
                                 <td>@item.DigitalAddress</td>
                                 <td>
                                     <div class="btn-group">
@@ -94,7 +94,7 @@
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(0px, 40.8px, 0px);">
                                             <li>
-                                                <a asp-action="Update" asp-route-token="@Utility.Encrypt(item.Id.ToString())" class="dropdown-item">Update</a>
+                                                <a asp-action="Update" asp-route-id="@item.Id" class="dropdown-item">Update</a>
                                             </li>
                                             <li>
                                                 <a asp-action="ChangeOptometristFirmStatus" asp-route-Id="@item.Id" class="dropdown-item">Deactivate</a>

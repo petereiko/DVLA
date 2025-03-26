@@ -126,12 +126,15 @@ namespace DVLA.UI.Areas.Admin.Controllers
                         model.Errors.Add("User with the email already exist");
                         return View(model);
                     }
-                    applicationUser = await _context.ApplicationUsers.AsNoTracking().FirstOrDefaultAsync(x => x.Pin.Trim().ToLower() == model.PIN.ToLower().Trim());
-                    if (applicationUser != null)
+                    if (model.Roles.Any(x => x.IsChecked && x.Name.Contains(AppRoles.OPTOMETRIST)))
                     {
-                        scope.Rollback();
-                        model.Errors.Add("User with the Pin already exist");
-                        return View(model);
+                        applicationUser = await _context.ApplicationUsers.AsNoTracking().FirstOrDefaultAsync(x => x.Pin.Trim().ToLower() == model.PIN.ToLower().Trim());
+                        if (applicationUser != null)
+                        {
+                            scope.Rollback();
+                            model.Errors.Add("User with the Pin already exist");
+                            return View(model);
+                        }
                     }
                     applicationUser = new ()
                     {

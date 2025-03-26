@@ -7,16 +7,11 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     string token = Context.Request.Query["token"];
 
-    string result = Model.PassOrFail.ToString();
+    string result = Model.PassOrFail == null ? "" : Model.PassOrFail.ToString();
     string resultServiceType = "";
-    string learnerType = "";
     if (Model.ResultServiceType.HasValue)
     {
         resultServiceType = EnumHelper<ResultServiceType>.GetDisplayValue(Model.ResultServiceType.Value);
-    }
-    if (Model.LearnerDriversLicence.HasValue)
-    {
-        learnerType = EnumHelper<LearnerDriversLicenceType>.GetDisplayValue(Model.LearnerDriversLicence.Value);
     }
 
     string action = TempData["Action"] == null ? "#" : TempData["Action"].ToString();
@@ -38,7 +33,7 @@
                 <button id="btn-print" class="btn btn-success btn-sm">Print</button>
             </p>
             <center>
-                <div id="DivIdToPrint" style="background-image: url('/logos/Dvlalogo_reportwatermark.png') !important; background-repeat:no-repeat;background-size: contain;background-position: center">
+                <div id="DivIdToPrint" style="background-image: url('/logos/Dvlalogo_reportwatermark.png') !important; background-repeat:no-repeat !important;background-size: contain !important;background-position: center !important">
                     <table style="width:85%">
                         <tr>
                             <td style="width:20%">
@@ -46,7 +41,7 @@
                             </td>
                             <td style="padding:10px; text-transform:uppercase; vertical-align:text-top; font-size:15pt">
                                 <div>@Model.Surname @Model.FirstName @Model.OtherName</div>
-                                <div>@Model.TestDate.GetValueOrDefault().ToString("dd/MM/yyyy")</div>
+                                <div>@Model.DOB.GetValueOrDefault().ToString("dd/MM/yyyy")</div>
                                 <div>@Model.ContactNumber</div>
                             </td>
                             <td style="vertical-align:text-top; text-align:right">
@@ -77,7 +72,7 @@
                         </tr>
                         <tr>
                             <td>Test Facility Details:</td>
-                            <td colspan="2" style="text-transform:uppercase"><strong>@Model.BusinessAddress</strong></td>
+                            <td colspan="2" style="text-transform:uppercase"><strong>@Model.BusinessName</strong></td>
                         </tr>
                         <tr>
                             <td>Authenticated By:</td>
@@ -114,6 +109,8 @@
 
 
 @section scripts {
+          <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
     <script>
 
         $(function () {

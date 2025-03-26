@@ -255,12 +255,12 @@ namespace DVLA.Business.UserModule
                     var userRoleQuery = _context.ApplicationUserRoles.Where(u => u.UserId == model.Id);
 
                     IList<string> roles = _userManager.GetRolesAsync(userDetails).GetAwaiter().GetResult();
-                    if (roles.Contains(AppRoles.SYSTEMADMIN))
-                    {
-                        scope.Rollback();
-                        result.Message = "You cannot update your record";
-                        return result;
-                    }
+                    //if (roles.Contains(AppRoles.SYSTEMADMIN))
+                    //{
+                    //    scope.Rollback();
+                    //    result.Message = "You cannot update your record";
+                    //    return result;
+                    //}
 
                     //Detect if there are role changes
                     if (model.Roles.Count(x => x.IsChecked) != userRoleQuery.Count() && !model.Roles.Select(x => x.Id).SequenceEqual(userRoleQuery.Select(x => x.RoleId)))
@@ -318,8 +318,7 @@ namespace DVLA.Business.UserModule
 
                     }
 
-
-                    result.Message = "Record saved successfully";
+                        result.Message = "Record saved successfully";
                     result.Success = true;
                     scope.Commit();
 

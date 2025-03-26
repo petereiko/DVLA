@@ -57,10 +57,11 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
 
             if (!ModelState.IsValid)
             {
+                model.Errors.Add(ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage).FirstOrDefault());
                 return View(model);
             }
 
-            ApplicationUserDto userDto = await _userService.GetUserByEmailAsync(model.Email);
+            ApplicationUserDto userDto = await _userService.GetUserByEmailAsync(model.Email!);
 
             if (userDto != null)
             {

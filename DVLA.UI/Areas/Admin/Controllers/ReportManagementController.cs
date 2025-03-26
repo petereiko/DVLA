@@ -204,10 +204,9 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 model.DOB = (DateTime)applicant.DOB;
                 model.PostalAddress = applicant.PostalAddress;
                 model.ContactNumber = applicant.ContactNumber;
-                model.TaxIdentificationNumber = applicant.TaxIdentificationNumber;
+                model.Nationality = applicant.Nationality;
                 model.Email = applicant.Email;
                 model.ResultServiceType = applicant.ResultServiceType;
-                model.LearnerDriversLicence = applicant.LearnerDriversLicence;
                 model.PassportImageUrl = applicant.PassportImageUrl;
                 model.Status = applicant.Status;
                 model.OptometristFirmId = applicant.OptometristFirmId;
@@ -263,17 +262,6 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 if (model.ResultServiceType == null)
                 {
                     ModelState.AddModelError("ResultServiceType", "Please select service type");
-                }
-
-                if (model.ResultServiceType != null)
-                {
-                    if (model.ResultServiceType == ResultServiceType.LearnerDriversLicence)
-                    {
-                        if (model.LearnerDriversLicence == null)
-                        {
-                            ModelState.AddModelError("LearnerDriversLicence", "Please select learner licence type");
-                        }
-                    }
                 }
 
                 if (string.IsNullOrEmpty(model.Surname))
@@ -352,10 +340,9 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 applicant.DOB = (DateTime)model.DOB;
                 applicant.PostalAddress = model.PostalAddress;
                 applicant.ContactNumber = model.ContactNumber;
-                applicant.TaxIdentificationNumber = model.TaxIdentificationNumber;
+                applicant.Nationality = model.Nationality;
                 applicant.Email = model.Email;
                 applicant.ResultServiceType = model.ResultServiceType;
-                applicant.LearnerDriversLicence = model.LearnerDriversLicence;
                 applicant.PassportImageUrl = model.PassportImageUrl;
                 //applicant.Status = model.Status;
                 applicant.TestType = (TestType)model.TestType;

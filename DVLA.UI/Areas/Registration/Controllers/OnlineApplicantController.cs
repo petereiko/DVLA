@@ -1,4 +1,5 @@
-﻿using DVLA.Business.NotificationModule;
+﻿using DVLA.Business.LocationModule;
+using DVLA.Business.NotificationModule;
 using DVLA.Business.ReportModule;
 using DVLA.Business.Repository;
 using DVLA.Business.UserModule;
@@ -41,12 +42,13 @@ namespace DVLA.UI.Areas.Registration.Controllers
         private readonly IRepositoryQuery<District> _districtQuery;
         private readonly ILogger<OnlineApplicantController> _logger;
         private readonly IWebHostEnvironment _environment;
+        private readonly ILocationService _locationService;
         private readonly HttpClient client;
 
         // GET: OnlineApplicant/Applicant
         public OnlineApplicantController(/*IAuditRepo AuditRepo,*/ IRepositoryQuery<VisualAssessmentResult> applicantQuery, IRepositoryQuery<Region> regionQuery,
             INotificationRepository notificationRepository, IReportRepository reportRepository, ISmsRepository smsRepository, IVisualAssessmentResultRepository visualAssessmentResultRepository,
-            IRepositoryQuery<OptometristFirm> optometristFirmQuery, IRepositoryQuery<District> districtQuery, ILogger<OnlineApplicantController> logger, IWebHostEnvironment environment)
+            IRepositoryQuery<OptometristFirm> optometristFirmQuery, IRepositoryQuery<District> districtQuery, ILogger<OnlineApplicantController> logger, IWebHostEnvironment environment, ILocationService locationService)
         {
             //_AuditRepo = AuditRepo;
             _visualAssessmentResultQuery = applicantQuery;
@@ -60,6 +62,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
             client = new HttpClient();
             _logger = logger;
             _environment = environment;
+            _locationService = locationService;
         }
 
         // GET: Admin/Optometrist
@@ -67,7 +70,9 @@ namespace DVLA.UI.Areas.Registration.Controllers
         [HttpGet]
         public ActionResult Create()
         {
-           
+            var countries = _locationService.GetCountries();
+
+            ViewBag.Countries = countries;
             ViewBag.OptometristFirms = _optometristFirmQuery.GetAll().Where(x => x.IsActive).OrderBy(p => p.BusinessName).ToList();
             return View(new ApplicantModel());
         }
@@ -77,8 +82,11 @@ namespace DVLA.UI.Areas.Registration.Controllers
         {
             try
             {
-               
-               ViewBag.OptometristFirms = _optometristFirmQuery.GetAll().Where(x => x.IsActive).OrderBy(p => p.BusinessName).ToList();
+                var countries = _locationService.GetCountries();
+
+                ViewBag.Countries = countries;
+
+                ViewBag.OptometristFirms = _optometristFirmQuery.GetAll().Where(x => x.IsActive).OrderBy(p => p.BusinessName).ToList();
 
                 string[] dob = model.DateOfBirth != null ? model.DateOfBirth.Split('-') : null;
                 model.DOB = dob != null ? new DateTime(Convert.ToInt32(dob[0]), Convert.ToInt32(dob[1]), Convert.ToInt32(dob[2])) : model.DOB;
@@ -89,27 +97,6 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 {
                     ModelState.AddModelError("ResultServiceType", "Please select service type");
                 }
-
-                if (model.ResultServiceType != null)
-                {
-                    if (model.ResultServiceType == ResultServiceType.LearnerDriversLicence)
-                    {
-                        if (model.LearnerDriversLicence == null)
-                        {
-                            ModelState.AddModelError("LearnerDriversLicence", "Please select learner licence type");
-                        }
-                    }
-                }
-
-                //if (string.IsNullOrEmpty(model.PassportImageUrl) && (model.Image==null || model.Image.Length==0))
-                //{
-                //    ModelState.AddModelError("PassportImageUrl", "Please capture/upload passport");
-                //}
-
-                //if (model.NameTitle == null)
-                //{
-                //    ModelState.AddModelError("NameTitle", "Please select name title");
-                //}
 
                 if (string.IsNullOrEmpty(model.Surname))
                 {
@@ -208,36 +195,30 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 string formNumber = _visualAssessmentResultRepository.GenerateFormNo();
 
                 var applicant = new VisualAssessmentResult()
-                    {
-                        CreatedDate = DateTime.Now,
-                        Id = model.Id,
-                        //NameTitle = model.NameTitle,
-                        Surname = model.Surname,
-                        Gender=model.Gender,
-                        //DriversLicence = model.DriversLicence,
-                        //DVLAReferenceNo = model.DVLAReferenceNo,
-                        //OldDVLAReferenceNo = model.InvoiceNumber,
-                        LearnerDriversLicence = model.LearnerDriversLicence,
-                        OptometristFirmId = model.OptometristFirmId,
-                        ResultServiceType = model.ResultServiceType,
+                {
+                    CreatedDate = DateTime.Now,
+                    Id = model.Id,
+                    //NameTitle = model.NameTitle,
+                    Surname = model.Surname,
+                    Gender = model.Gender,
+                    OptometristFirmId = model.OptometristFirmId,
+                    ResultServiceType = model.ResultServiceType,
                     AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
-                        PassportImageUrl = model.PassportImageUrl,
-                        TestType = model.TestType,
-                        Status = Status.InProgress,
-                        FirstName = model.FirstName,
-                        OtherName = model.OtherName,
-                        DOB = (DateTime)model.DOB,                       
-                        PostalAddress = model.PostalAddress,
-                        ContactNumber = model.ContactNumber,
-                        //FormNumber = formNumber,
-                        TaxIdentificationNumber = model.TaxIdentificationNumber,
-                        Email = model.Email,
-                        IsRegistration = true,
-                        CreatedBy = null
-                    };
+                    PassportImageUrl = model.PassportImageUrl,
+                    TestType = model.TestType,
+                    Status = Status.InProgress,
+                    FirstName = model.FirstName,
+                    OtherName = model.OtherName,
+                    DOB = (DateTime)model.DOB,
+                    PostalAddress = model.PostalAddress,
+                    ContactNumber = model.ContactNumber,
+                    Nationality = model.Nationality,
+                    Email = model.Email,
+                    IsRegistration = true,
+                    CreatedBy = null
+                };
 
-                    if (model.LearnerDriversLicence != null) model.LearnerDriversLicence = model.LearnerDriversLicence;
-                    _visualAssessmentResultQuery.Add(applicant);
+                _visualAssessmentResultQuery.Add(applicant);
 
 
 
@@ -288,10 +269,9 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 model.DOB = (DateTime)applicant.DOB;
                 model.PostalAddress = applicant.PostalAddress;
                 model.ContactNumber = applicant.ContactNumber;
-                model.TaxIdentificationNumber = applicant.TaxIdentificationNumber;
+                model.TaxIdentificationNumber = applicant.Nationality;
                 model.Email = applicant.Email;
                 model.ResultServiceType = Enum.GetName(typeof(ResultServiceType), applicant.ResultServiceType);
-                model.LearnerDriversLicence = applicant.LearnerDriversLicence != null ? Enum.GetName(typeof(LearnerDriversLicenceType), applicant.LearnerDriversLicence) : "";
                 model.PassportImageUrl = applicant.PassportImageUrl;
                 model.Status = applicant.Status;
                 model.OptometristFirmId = applicant.OptometristFirmId;

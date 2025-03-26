@@ -71,22 +71,15 @@ namespace DVLA.UI.Areas.Admin.Controllers
                         ContactNumber = p.a.ContactNumber,
                         FirstName = p.o.BusinessAddress,
                         DOB = p.a.DOB,
-                        //DriversLicence = p.a.DriversLicence,
-                        //DVLAReferenceNo = p.a.DVLAReferenceNo,
                         Email = p.a.Email,
-                        LearnerDriversLicence = p.a.LearnerDriversLicence,
-                        //NameTitle = p.a.NameTitle,
                         OtherName = p.a.OtherName,
                         Fullname = p.a.Surname + " " + p.a.FirstName + " " + p.a.OtherName,
                         CreatedBy = p.o.CreatedBy,
                         Optometrist = p.o.BusinessName,
                         OptometristFirmId = p.o.Id,
-                        //PassportImageUrl = p.a.PassportImageUrl,
                         PostalAddress = p.a.PostalAddress,
-                        //FormNumber = p.a.FormNumber,
                         Surname = p.a.Surname,
-                        TaxIdentificationNumber = p.a.TaxIdentificationNumber,
-                        //InvoiceNumber = p.a.OldDVLAReferenceNo,
+                        Nationality = p.a.Nationality,
                         Id = p.a.Id,
                         IsActive = p.o.IsActive,
                         IsDeleted = p.o.IsDeleted,
@@ -118,25 +111,19 @@ namespace DVLA.UI.Areas.Admin.Controllers
 
                 var model = new ApplicantModel();
                 model.Id = applicant.Id;
-                //model.NameTitle = applicant.NameTitle;             
                 model.Surname = applicant.Surname;
-                //model.DriversLicence = applicant.DriversLicence;
-                //model.DVLAReferenceNo = applicant.DVLAReferenceNo;
                 model.FirstName = applicant.FirstName;
                 model.OtherName = applicant.OtherName;
                 model.DOB = (DateTime)applicant.DOB;
                 model.PostalAddress = applicant.PostalAddress;
                 model.ContactNumber = applicant.ContactNumber;
-                model.TaxIdentificationNumber = applicant.TaxIdentificationNumber;
+                model.Nationality = applicant.Nationality;
                 model.Email = applicant.Email;
                 model.ResultServiceType = applicant.ResultServiceType;
-                model.LearnerDriversLicence = applicant.LearnerDriversLicence;
                 model.PassportImageUrl = applicant.PassportImageUrl;
                 model.Status = applicant.Status;
                 model.OptometristFirmId = applicant.OptometristFirmId;
-                //model.FormNumber = applicant.FormNumber;
                 model.TestType = (TestType)applicant.TestType;
-                //model.InvoiceNumber = applicant.OldDVLAReferenceNo;
                 model.IsActive = applicant.IsActive;
                 model.CreatedBy = applicant.CreatedBy;
                 model.IsDeleted = applicant.IsDeleted;
@@ -170,24 +157,6 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 {
                     ModelState.AddModelError("ResultServiceType", "Please select service type");
                 }
-
-                if (model.ResultServiceType != null)
-                {
-                    if (model.ResultServiceType == ResultServiceType.LearnerDriversLicence)
-                    {
-                        if (model.LearnerDriversLicence == null)
-                        {
-                            ModelState.AddModelError("LearnerDriversLicence", "Please select learner licence type");
-                        }
-                    }
-                }
-
-
-                //if (model.NameTitle == null)
-                //{
-                //    ModelState.AddModelError("NameTitle", "Please select name title");
-                //}
-
                 if (string.IsNullOrEmpty(model.Surname))
                 {
                     ModelState.AddModelError("Surname", "Please enter surname");
@@ -218,7 +187,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                     ModelState.AddModelError("ContactNumber", "Please enter contact number");
                 }
 
-                if (string.IsNullOrEmpty(model.TaxIdentificationNumber))
+                if (string.IsNullOrEmpty(model.Nationality))
                 {
                     ModelState.AddModelError("TaxIdentificationNumber", "Please enter tax identification number");
                 }
@@ -247,10 +216,9 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 applicant.DOB = (DateTime)model.DOB;
                 applicant.PostalAddress = model.PostalAddress;
                 applicant.ContactNumber = model.ContactNumber;
-                applicant.TaxIdentificationNumber = model.TaxIdentificationNumber;
+                applicant.Nationality = model.Nationality;
                 applicant.Email = model.Email;
                 applicant.ResultServiceType = model.ResultServiceType;
-                applicant.LearnerDriversLicence = model.LearnerDriversLicence;
                 applicant.PassportImageUrl = model.PassportImageUrl;
                 applicant.Status = model.Status;
                 applicant.TestType = (TestType)model.TestType;

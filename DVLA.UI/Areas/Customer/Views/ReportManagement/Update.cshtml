@@ -85,16 +85,6 @@
 @*                             @Html.DropDownList("ResultServiceType", EnumHelper.GetSelectList(typeof(ResultServiceType)), "Select Service Type", new { @style = "width:100%;", @class = "form-control", @id = "ddlServiceType" })
  *@                            @Html.ValidationMessageFor(model => model.ResultServiceType, "", new { @class = "text-danger" })
                         </div>
-                        <div class="col-sm-4">
-                            <div id="LearnerType" style="display:@(Model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? "block" : "none")">
-                                Learner Driver's Licence Type
-                                <select asp-for="LearnerDriversLicence" class="form-control" asp-items="Html.GetEnumSelectList<LearnerDriversLicenceType>()">
-                                    <option>Select Service Type</option>
-                                </select>
-                                @* @Html.DropDownList("LearnerDriversLicence", EnumHelper.GetSelectList(typeof(LearnerDriversLicenceType)), "Select Type", new { @style = "width:100%;", @class = "form-control", @id = "ddlLearnerType" }) *@
-                                @Html.ValidationMessageFor(model => model.LearnerDriversLicence, "", new { @class = "text-danger" })
-                            </div>
-                        </div>
                         
                     </div>
                     <br/>
@@ -178,8 +168,8 @@
                                     </div>
                                     <div class="col-sm">
                                         Tax Identification Number (TIN)
-                                        @Html.TextBoxFor(model => model.TaxIdentificationNumber, new { @class = "form-control", @placeholder = "Tax Identification Number", @autocomplete = "off" })
-                                        @Html.ValidationMessageFor(model => model.TaxIdentificationNumber, "", new { @class = "text-danger" })
+                                        @Html.TextBoxFor(model => model.Nationality, new { @class = "form-control", @placeholder = "Tax Identification Number", @autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.Nationality, "", new { @class = "text-danger" })
 
                                     </div>
                                     <div class="col-sm">

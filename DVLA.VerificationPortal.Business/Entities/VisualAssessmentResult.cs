@@ -17,6 +17,7 @@ namespace DVLA.VerificationPortal.Domain.Entities
         public string? OptometristFirmName { get; set; }
         public string? OptometristName { get; set; }
         public Gender? Gender { get; set; }
+        public string? Nationality { get; set; }
 
         [StringLength(50)]
         public string? ReferenceNumber { get; set; }
@@ -27,9 +28,6 @@ namespace DVLA.VerificationPortal.Domain.Entities
 
         [StringLength(50)]
         public string? Surname { get; set; }
-
-        //[StringLength(50)]
-        //public string? OldDVLAReferenceNo { get; set; }
 
         [StringLength(50)]
         public string? FirstName { get; set; }
@@ -85,14 +83,10 @@ namespace DVLA.VerificationPortal.Domain.Entities
         //[StringLength(500)]
         public string? ResultConclusion { get; set; }
 
-        //public bool? IsSynchronized { get; set; }
-        //public bool? IsGHDriveSynchronized { get; set; }
-
         public DateTime? TestDate { get; set; }
 
         public string? PassportImageUrl { get; set; }
         public Status? Status { get; set; }
-        public LearnerDriversLicenceType? LearnerDriversLicence { get; set; }
         public bool? IsRegistration { get; set; }
         public AccessType? AccessType { get; set; }
         public PassResult? PassResult { get; set; }
@@ -105,8 +99,5 @@ namespace DVLA.VerificationPortal.Domain.Entities
 
         public bool IsVerified { get; set; }
         public DateTime? VerifiedDate { get; set; }
-        //public string ModifiedBy { get; set; }
-        //public bool IsActive { get; set; } = true;
-        //public bool IsDeleted { get; set; } = false;
     }
 }

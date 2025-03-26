@@ -31,13 +31,6 @@
                                                 <span class="hide-menu">Dashboard</span>
                                             </a>
                                         }
-                                        @* else if(!User.IsInRole(AppRoles.OPTOMETRIST))
-                                        {
-                                        <a asp-action="Index" asp-controller="Dashboard" asp-area="Customer" class="sidebar-link">
-                                        <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
-                                        <span class="hide-menu">Dashboard</span>
-                                        </a>
-                                        } *@
                                     </li>
 
                                     <!--Setups-->
@@ -193,38 +186,45 @@
                                     }
 
                                     <!--Report-->
-                                    @if (User.IsInRole(AppRoles.SYSTEMADMIN))
+                                    @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.FACILITYOWNER) || User.IsInRole(AppRoles.FINANCE))
                                     {
-                                        @* <li class="sidebar-item">
-                                            <a class="sidebar-link" asp-action="TestAnalysis" asp-controller="SlotManagement" asp-area="Admin">
-                                                <iconify-icon icon="solar:cart-large-2-linear" class="aside-icon"></iconify-icon>
-                                                <span class="hide-menu">Test Analysis</span>
-                                            </a>
-                                        </li> *@
                                         <li class="sidebar-item">
-                                            <a asp-action="SlotUsageStatistics" asp-controller="SlotManagement" asp-area="Admin" class="sidebar-link sublink">
-                                                <div class="round-16 d-flex align-items-center justify-content-center">
-                                                    <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
-                                                </div>
+                                            <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                                <iconify-icon icon="solar:sidebar-code-linear" class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Slot Statistics</span>
                                             </a>
+                                            <ul aria-expanded="false" class="collapse first-level">
+                                                <li class="sidebar-item">
+                                                    <a asp-action="SlotPurchased" asp-controller="SlotManagement" asp-area="Admin" class="sidebar-link sublink">
+                                                        <div class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                        </div>
+                                                        <span class="hide-menu">Slot Purchased</span>
+                                                    </a>
+                                                </li>
+                                                <li class="sidebar-item">
+                                                    <a asp-action="SlotUsed" asp-controller="SlotManagement" asp-area="Admin" class="sidebar-link sublink">
+                                                        <div class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                        </div>
+                                                        <span class="hide-menu">Slot Used</span>
+                                                    </a>
+                                                </li>
+                                                <li class="sidebar-item">
+                                                    <a asp-action="SlotBalance" asp-controller="SlotManagement" asp-area="Admin" class="sidebar-link sublink">
+                                                        <div class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                        </div>
+                                                        <span class="hide-menu">Slot Balance</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </li>
-                                        @* <li class="sidebar-item">
-                                            <a asp-action="ApplicantSearch" asp-controller="ReportManagement" asp-area="Admin" class="sidebar-link sublink">
-                                                <div class="round-16 d-flex align-items-center justify-content-center">
-                                                    <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
-                                                </div>
-                                                <span class="hide-menu">Applicant Search</span>
-                                            </a>
-                                        </li> *@
-                                        @* <li class="sidebar-item">
-                                            <a asp-action="BiodataUpdate" asp-controller="ReportManagement" asp-area="Admin" class="sidebar-link sublink">
-                                                <div class="round-16 d-flex align-items-center justify-content-center">
-                                                    <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
-                                                </div>
-                                                <span class="hide-menu">Biodata Update</span>
-                                            </a>
-                                        </li> *@
+                                    }
+
+
+                                    @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.FACILITYOWNER) || User.IsInRole(AppRoles.FINANCE))
+                                    {
                                         <li class="sidebar-item">
                                             <a asp-action="Index" asp-controller="AuditManagement" asp-area="Admin" class="sidebar-link sublink">
                                                 <div class="round-16 d-flex align-items-center justify-content-center">
@@ -263,25 +263,6 @@
                                                 <span class="hide-menu">Slot History</span>
                                             </a>
                                         </li>
-                                        <li class="sidebar-item">
-                                            <a asp-action="SlotUsageStatistics" asp-controller="Slot" asp-area="Customer" class="sidebar-link">
-                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
-                                                <span class="hide-menu">Slot Statistics</span>
-                                            </a>
-                                        </li>
-                                        @* <li class="sidebar-item">
-                                    <a asp-action="Index" asp-controller="ReportManagement" asp-area="Customer" class="sidebar-link">
-                                    <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
-                                    <span class="hide-menu">Synchronization Report</span>
-                                    </a>
-                                    </li> *@
-                                       @*  <li class="sidebar-item">
-                                            <a asp-action="ApplicantSearch" asp-controller="ReportManagement" asp-area="Customer" class="sidebar-link">
-                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
-                                                <span class="hide-menu">Applicant Search</span>
-                                            </a>
-                                        </li> *@
-
                                         <li class="sidebar-item">
                                             <a asp-action="BiodataUpdate" asp-controller="ReportManagement" asp-area="Customer" class="sidebar-link">
                                                 <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>

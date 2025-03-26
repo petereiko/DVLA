@@ -25,7 +25,6 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public string ReferenceNumber { get; set; }
         //public string FormNumber { get; set; }
         public ResultServiceType? ResultServiceType { get; set; }
-        public LearnerDriversLicenceType? LearnerDriversLicence { get; set; }
         //public NameTitle? NameTitle { get; set; }
         public TestType TestType { get; set; }
         public string Surname { get; set; }
@@ -39,7 +38,7 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public string DateOfBirth { get; set; }
         public string PostalAddress { get; set; }
         public string ContactNumber { get; set; }
-        public string TaxIdentificationNumber { get; set; }
+        public string Nationality { get; set; }
         public string Email { get; set; }
         //public string InvoiceNumber { get; set; }
         public string PassportImageUrl { get; set; }

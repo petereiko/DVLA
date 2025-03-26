@@ -54,10 +54,9 @@ namespace DVLA.Business.ApplicantModule
                 model.DOB = (DateTime)applicant.DOB;
                 model.PostalAddress = applicant.PostalAddress;
                 model.ContactNumber = applicant.ContactNumber;
-                model.TaxIdentificationNumber = applicant.TaxIdentificationNumber;
+                model.Nationality = applicant.TaxIdentificationNumber;
                 model.Email = applicant.Email;
                 model.ResultServiceType = applicant.ResultServiceType;
-                model.LearnerDriversLicence = applicant.LearnerDriversLicence;
                 model.PassportImageUrl = applicant.PassportImageUrl;
                 model.Status = applicant.Status;
                 model.OptometristFirmId = applicant.OptometristFirmId;
@@ -106,25 +105,6 @@ namespace DVLA.Business.ApplicantModule
                     response.Message = "Please select service type";
                     return response;
                 }
-
-                if (model.ResultServiceType != null)
-                {
-                    if (model.ResultServiceType == ResultServiceType.LearnerDriversLicence)
-                    {
-                        if (model.LearnerDriversLicence == null)
-                        {
-                            response.Message = "Please select learner licence type";
-                            return response;
-                        }
-                    }
-                }
-
-
-                //if (model.NameTitle == null)
-                //{
-                //    response.Message = "Please select name title";
-                //    return response;
-                //}
 
                 if (string.IsNullOrEmpty(model.Surname))
                 {
@@ -186,26 +166,17 @@ namespace DVLA.Business.ApplicantModule
 
                 string passFile = applicant.PassportImageUrl;
 
-                //applicant.NameTitle = model.NameTitle;
                 applicant.Surname = model.Surname;
-                //applicant.DriversLicence = model.DriversLicence;
-                //applicant.DVLAReferenceNo = model.DVLAReferenceNo;
                 applicant.FirstName = model.FirstName;
                 applicant.OtherName = model.OtherName;
                 applicant.DOB = (DateTime)model.DOB;
                 applicant.PostalAddress = model.PostalAddress;
                 applicant.ContactNumber = model.ContactNumber;
-                applicant.TaxIdentificationNumber = model.TaxIdentificationNumber;
+                applicant.TaxIdentificationNumber = model.Nationality;
                 applicant.Email = model.Email;
                 applicant.ResultServiceType = model.ResultServiceType;
-                applicant.LearnerDriversLicence = model.LearnerDriversLicence;
                 applicant.PassportImageUrl = model.PassportImageUrl;
-                //applicant.Status = model.Status;
                 applicant.TestType = (TestType)model.TestType;
-                //applicant.OldDVLAReferenceNo = model.InvoiceNumber;
-                //applicant.IsActive = model.IsActive;
-                //applicant.CreatedBy = model.CreatedBy;
-                //applicant.IsDeleted = model.IsDeleted;
                 applicant.ModifiedBy = userData.Id;
 
                 _context.SaveChanges();

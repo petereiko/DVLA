@@ -11,19 +11,29 @@ namespace DVLA.VerificationPortal.Controllers.APIs
     public class SynchronizationController : ControllerBase
     {
         private readonly ISearchResultService _searchService;
+        private readonly ILogger<SynchronizationController> _logger;
 
-        public SynchronizationController(ISearchResultService searchService)
+        public SynchronizationController(ISearchResultService searchService, ILogger<SynchronizationController> logger)
         {
             _searchService = searchService;
+            _logger = logger;
         }
 
         [HttpPost("push-visual-assessment")]
         public async Task<IActionResult> PushVisualAssessmentResults()
         {
+            _logger.LogInformation("Synchronization Endpoint started");
             MessageResponse result = await _searchService.Push();
+            _logger.LogInformation("Synchronization Endpoint ended");
             if (result.Success)
                 return Ok(result);
             return BadRequest(result.Message);
+        }
+
+        [HttpGet("test")]
+        public IActionResult GetTest()
+        {
+            return Ok("Working");
         }
 
         

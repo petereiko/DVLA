@@ -37,6 +37,7 @@
                                 <div class="col-sm-4" style="padding:0px">
                                     <video id="video" autoplay style="height: 200px;clip-path: inset(0px 20px 0px 20px); border:1px solid black"></video>
                                     <button onclick="Capture()" style="margin-left:20px" id="capture" class="btn btn-primary">Capture</button>
+                                    @Html.ValidationMessageFor(model => model.PassportImageUrl, "", new { @class = "text-danger" })
                                 </div>
                                 <div class="col-sm-4" style="padding:0px">
                                     <canvas id="canvas" width="200" height="200" />
@@ -51,8 +52,8 @@
 
                             </div>
                         </div>
-                        <br/>
-                        <form asp-action="Create" method="post" enctype="multipart/form-data" id="target">
+                        <br />
+                        <form method="post" id="target" asp-action="Create" enctype="multipart/form-data" asp-controller="VisualAssessmentResult" asp-area="Customer" asp-route-token="@ViewBag.Token">
                             <div class="container">
                                 @if (Model.Errors.Any())
                                 {
@@ -65,7 +66,7 @@
                                         <label>Upload Image <strong style="color:red">(Max Passport Size @passportMaxSize KB)</strong></label>
                                         <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
                                             @Html.TextBoxFor(m => m.Image, new { @class = "form-control", type = "file", accept = "image/jpeg" })
-                                            @Html.ValidationMessageFor(m => m.Image, "", new { @class = "text-danger" })
+                                            @Html.ValidationMessageFor(model => model.Image, "", new { @class = "text-danger" })
                                         </div>
                                     </div>
                                     <div class="col-sm-4">
@@ -111,41 +112,12 @@
                                         </select>
                                         @Html.ValidationMessageFor(model => model.ResultServiceType, "", new { @class = "text-danger" })
                                     </div>
-                                    <div class="col-sm">
-                                        <div id="LearnerType" style="display:@(Model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? "block" : "none")">
-                                            Learner Driver's Licence Type
-                                            <select asp-for="LearnerDriversLicence" class="form-control" asp-items="Html.GetEnumSelectList<LearnerDriversLicenceType>()">
-                                                <option>Select Type</option>
-                                            </select>
-                                            @* @Html.DropDownList("LearnerDriversLicence", EnumHelper.GetSelectList(typeof(LearnerDriversLicenceType)), "Select Type", new { @style = "width:100%;", @class = "form-control", @id = "ddlLearnerType" }) *@
-                                            @Html.ValidationMessageFor(model => model.LearnerDriversLicence, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
                                 </div>
-                                @* <div class="row row-xs mg-b-10">
-                                <div class="col-sm">
-                                Test Type
-                                <select asp-for="TestType" class="form-control" asp-items="Html.GetEnumSelectList<TestType>()">
-                                </select>
-                                @Html.ValidationMessageFor(model => model.TestType, "", new { @class = "text-danger" })
-                                </div>
-                                <div class="col-sm">
-                                Licence Number
-                                @Html.TextBoxFor(model => model.DriversLicence, new { @class = "form-control", @autocomplete = "off" })
-                                @Html.ValidationMessageFor(model => model.DriversLicence, "", new { @class = "text-danger" })
-                                </div>
-                                <div class="col-sm mg-t-10 mg-sm-t-0">
-                                DVLA Reference Number
-                                @Html.TextBoxFor(model => model.DVLAReferenceNo, new { @class = "form-control", @autocomplete = "off" })
-                                @Html.ValidationMessageFor(model => model.DVLAReferenceNo, "", new { @class = "text-danger" })
-                                </div>
-
-                                </div> *@
                                 <br />
                                 <div class="row row-xs mg-b-10">
                                     @if (Model != null)
                                     {
-                                        if (Model.Id != null && Model.Id != 0)
+                                        if (Model.Id > 0 && !string.IsNullOrEmpty(Model.ReferenceNumber))
                                         {
                                             <div class="col-sm mg-t-10 mg-sm-t-0">
                                                 Reference Number
@@ -212,6 +184,7 @@
                                                         <select asp-for="Gender" class="form-control" required asp-items="@Html.GetEnumSelectList<Gender>()">
                                                             <option value="">--Select Gender--</option>
                                                         </select>
+                                                        @Html.ValidationMessageFor(model => model.Gender, "", new { @class = "text-danger" })
                                                     </div>
                                                 </div>
 
@@ -233,9 +206,11 @@
 
                                                 </div>
                                                 <div class="col-sm">
-                                                    Tax Identification Number (TIN)
-                                                    @Html.TextBoxFor(model => model.TaxIdentificationNumber, new { @class = "form-control", @autocomplete = "off" })
-                                                    @*@Html.ValidationMessageFor(model => model.TaxIdentificationNumber, "", new { @class = "text-danger" })*@
+                                                    Nationality
+                                                    <select asp-for="Nationality" class="form-control" asp-items="@((List<SelectListItem>)ViewBag.Countries)">
+                                                        <option value="">--Select Nationality--</option>
+                                                    </select>
+                                                    @Html.ValidationMessageFor(model => model.Nationality, "", new { @class = "text-danger" })
 
                                                 </div>
                                                 <div class="col-sm">
@@ -451,6 +426,8 @@
                                                     <select onchange="ChangeResultConclusion(this)" asp-for="ResultConclusion" asp-items="(SelectList)ViewBag.ResultConclusions" style="width:100%;" class="form-control">
                                                         <option value="">--Select Conclusion--</option>
                                                     </select>
+                                                    @Html.ValidationMessageFor(model => model.ResultConclusion, "", new { @class = "text-danger" })
+
                                                     @* @Html.DropDownListFor(model => model.ResultConclusion, (SelectList)ViewBag.ResultConclusions, "", new { @style = "width:100%;", @class = "form-control" }) *@
                                                 </div>
 
@@ -472,8 +449,8 @@
 
                                                 </div>
                                                 <div class="col-sm">
-                                                    <select asp-for="PassResult" asp-items="EnumExtensions.GetEnumSelectListWithDescriptions<PassResult>()" style="display:none" class="form-control">
-                                                        @* <option>Select Pass Type</option> *@
+                                                    <select asp-for="PassResult" style="display:none" asp-items="EnumExtensions.GetEnumSelectListWithDescriptions<PassResult>()" class="form-control">
+                                                        <option value="">Select Pass Result</option>
                                                     </select>
                                                     @Html.ValidationMessageFor(model => model.PassResult, "", new { @class = "text-danger" })
 
@@ -493,7 +470,10 @@
                                             </div>
                                             <div class="col-lg-6 text-right">
 
-                                                @if (Model == null)
+                                                <input type="submit" id="btnSave" class="btn btn-primary" value="Save & Continue" />
+                                                <input type="submit" id="btnSubmit" class="btn btn-primary" value="Finalize & Submit" />
+
+                                                @* @if (Model == null)
                                                 {
 
                                                     <input type="submit" id="btnSave" class="btn btn-primary" value="Save & Continue" />
@@ -508,11 +488,11 @@
                                                         <input type="submit" id="btnSave" class="btn btn-primary" value="Save & Continue Later" />
                                                         <input type="submit" id="btnSubmit" class="btn btn-primary" value="Finalize & Submit" />
                                                     }
-                                                    else
+                                                    else if(Model.Status==Status.Complete)
                                                     {
                                                         <button onclick="printDiv()" type="button" class="btn btn-primary">Print Result</button>
                                                     }
-                                                }
+                                                } *@
                                             </div>
                                         </div>
                                     </div>

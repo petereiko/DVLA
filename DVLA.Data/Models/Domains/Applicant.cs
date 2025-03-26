@@ -57,9 +57,6 @@ namespace DVLA.DATA.Domains
         public string Email { get; set; }
         public string PassportImageUrl { get; set; }
         public Status? Status { get; set; }
-        public LearnerDriversLicenceType? LearnerDriversLicence { get; set; }
-        //public string OldDVLAReferenceNo { get; set; }
-        //public string FormNumber { get; set; }
         public bool IsRegistration { get; set; }
     }
 }

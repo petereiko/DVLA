@@ -5,14 +5,9 @@
 @{
     string result = Model.PassOrFail.ToString();
     string resultServiceType = "";
-    string learnerType = "";
     if (Model.ResultServiceType.HasValue)
     {
         resultServiceType = EnumHelper<ResultServiceType>.GetDisplayValue(Model.ResultServiceType.Value);
-    }
-    if (Model.LearnerDriversLicence.HasValue)
-    {
-        learnerType = EnumHelper<LearnerDriversLicenceType>.GetDisplayValue(Model.LearnerDriversLicence.Value);
     }
 }
 

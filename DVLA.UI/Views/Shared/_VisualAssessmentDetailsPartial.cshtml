@@ -27,10 +27,6 @@
         {
             resultServiceType = EnumHelper<ResultServiceType>.GetDisplayValue(Model.ResultServiceType.Value);
         }
-        if (Model.LearnerDriversLicence.HasValue)
-        {
-            learnerType = EnumHelper<LearnerDriversLicenceType>.GetDisplayValue(Model.LearnerDriversLicence.Value);
-        }
 
         if (Model.DOB.HasValue)
         {
@@ -112,13 +108,6 @@
                     <div><b>@resultServiceType</b></div>
                 </div>
 
-                <div class="col-md-6">
-                    <div style="display:@(Model.LearnerDriversLicence.HasValue ? "block" : "none")">
-                        <div><b><u>Learner Driver’s licence Type</u></b></div>
-                        <div><b>@learnerType</b></div>
-                    </div>
-
-                </div>
                 <div class="col-md-1">
                 </div>
             </div>

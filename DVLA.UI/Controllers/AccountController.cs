@@ -42,15 +42,6 @@ namespace DVLA.UI.Controllers
                 model.Errors.Add(ModelState.Values.SelectMany(x => x.Errors).FirstOrDefault()?.ErrorMessage);
                 return View(model);
             }
-            //try
-            //{
-            //    HttpContext.Session.Remove(AppConstants.CACHEUSERDATA);
-            //}
-            //catch (System.Exception ex)
-            //{
-            //    _logger.LogError(ex.Message, ex);
-            //}
-            
 
             UserViewModel userModel = await _userService.GetUserByEmail(model.Email);
             if (userModel == null)

@@ -13,5 +13,6 @@ namespace DVLA.VerificationPortal.Infrastructure.Database.Entities
         public DateTime CreatedDate { get; set; }
         public bool IsFirstLogin { get; set; }
         public DateTime? LastLoginDate { get; set; }
+        public string? CentreName { get; set; }
     }
 }

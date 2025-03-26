@@ -13,6 +13,7 @@ using DVLA.Data.Models.Enumerables;
 using DVLA.DATA.Domains;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -37,6 +38,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
         private readonly IPaymentService _paymentService;
         private readonly IUserService _userService;
         private readonly IRepositoryQuery<OptometristFirmUser> _optometristUserQuery;
+        
         public SlotController(ISlotRepository slotRepository, ISlotUsageRepository slotUsageRepository,
             IOptometristService optometristRepository, IAuditRepo auditRepo, IUserService userService, IPaymentService paymentService, IRepositoryQuery<OptometristFirmUser> optometristUserQuery)
         {
@@ -195,8 +197,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
         public ActionResult SlotUsageStatistics(SlotUsageViewModel model)
         {
             var temp = model.EndDate;
-            var optometristUser = _optometristUserQuery.Filter(x => x.ApplicationUserId == currentUserId).FirstOrDefault();
-            int OptometristFirmId = optometristUser == null ? 0 : optometristUser.OptometristFirmId;
+            int? OptometristFirmId = _userService.GetUserData().OptometristFirmId; //optometristUser == null ? 0 : optometristUser.OptometristFirmId;
             model.EndDate = model.EndDate.HasValue ? model.EndDate.Value.AddHours(23).AddMinutes(59).AddSeconds(59) : DateTime.Now.AddHours(23).AddMinutes(59).AddSeconds(59);
             IEnumerable<SlotUsageModel> slotUsages = _slotUsageRepository.FetchOptometristSlotUsage(model.StartDate, model.EndDate, model.AccessType, OptometristFirmId);
             model.SlotUsages = slotUsages;

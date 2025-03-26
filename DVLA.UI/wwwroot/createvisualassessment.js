@@ -21,11 +21,46 @@ document.getElementById("Image").addEventListener("change", function (event) {
     }
 });
 
+function load() {
+
+    $('#PassResultId').empty();
+
+    var id = $('#PassOrFail').val();
+    var appId = $('#Id').val();
+    if (appId != null) {
+        if (id == 2 || id == null || id == '') {
+            $('#PassResultId').empty()
+            $('#PassResultId').hide()
+            return false;
+        }
+        $('#PassResultId').show()
+        $.ajax({
+            type: "POST",
+            url: "/VisualAssessmentResult/GetPassResult",
+            datatype: "Json",
+            data: { passOrFail: id },
+            success: function (data) {
+                debugger;
+
+                $('#PassResultId').append('<option value="">Select pass type</option>');
+                $.each(data, function (index, value) {
+                    $('#PassResultId').append('<option value="' + value.value + '">' + value.text + '</option>');
+                });
+                var passOrFail = $('#PassOrFail').val();
+                $('#PassResultId').val(passOrFail);
+            }
+        });
+    }
+
+
+}
+
 function ChangeResultConclusion(e) {
+    debugger;
     if (e.value == "Fit to drive" || e.value == "Fit to drive with glasses") {
         $("#PassOrFail").val("1");
         $("#PassResult").show();
-        load();
+        //load();
     } else if ((e.value = "Not fit to drive")) {
         $("#PassOrFail").val("2");
         $("#PassResult").hide();
@@ -68,6 +103,7 @@ function Capture() {
     photo.style.display = "block";
 
     document.getElementById("PassportUploadType").value = "WebCam";
+    
 
     //video.style.display = "none";
 }
@@ -154,19 +190,19 @@ $(function () {
         $("#PassResult").show();
     });
 
-    $("#ResultServiceType").change(function () {
-        var serviceType = $(this).val();
-        if (serviceType == 1) {
-            $("#LearnerType").css("display", "block");
-            $("#LearnerDriversLicenceType").rules("add", {
-                required: true,
-                messages: "Learner Drivers Licence Type is required",
-            });
-        } else {
-            $("#LearnerType").css("display", "none");
-            $("#LearnerDriversLicenceType").rules("remove", "required");
-        }
-    });
+    //$("#ResultServiceType").change(function () {
+    //    var serviceType = $(this).val();
+    //    if (serviceType == 1) {
+    //        $("#LearnerType").css("display", "block");
+    //        $("#LearnerDriversLicenceType").rules("add", {
+    //            required: true,
+    //            messages: "Learner Drivers Licence Type is required",
+    //        });
+    //    } else {
+    //        $("#LearnerType").css("display", "none");
+    //        $("#LearnerDriversLicenceType").rules("remove", "required");
+    //    }
+    //});
 
     let isSubmitted = false;
 

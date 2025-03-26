@@ -25,6 +25,8 @@ namespace DVLA.UI.Controllers
         private readonly IUserService _userService;
         private readonly IRepositoryQuery<OptometristFirm> _optometristRepository;
         private readonly IRepositoryQuery<OptometristFirmUser> _optometristUserRepository;
+        private readonly IRepositoryQuery<VisualAssessmentResult> _visualAssessmentResultQuery;
+        private readonly IRepositoryQuery<Slot> _slotQuery;
 
 
         private static readonly Random rand = new Random();
@@ -33,7 +35,7 @@ namespace DVLA.UI.Controllers
             return string.Format("rgba({0},{1},{2},{1})", rand.Next(80, 256), rand.Next(80, 256), rand.Next(80, 256));
         }
 
-        public DashboardController(IAnalyticRepository analyticRepository, ISlotUsageRepository slotUsageRepository, IAuditRepo auditRepo, IUserService userService, IRepositoryQuery<OptometristFirm> optometristRepository, IRepositoryQuery<OptometristFirmUser> optometristUserRepository)
+        public DashboardController(IAnalyticRepository analyticRepository, ISlotUsageRepository slotUsageRepository, IAuditRepo auditRepo, IUserService userService, IRepositoryQuery<OptometristFirm> optometristRepository, IRepositoryQuery<OptometristFirmUser> optometristUserRepository, IRepositoryQuery<VisualAssessmentResult> visualAssessmentResultQuery, IRepositoryQuery<Slot> slotQuery)
         {
             _AuditRepo = auditRepo;
             _analyticRepository = analyticRepository;
@@ -41,12 +43,39 @@ namespace DVLA.UI.Controllers
             _userService = userService;
             _optometristRepository = optometristRepository;
             _optometristUserRepository = optometristUserRepository;
+            _visualAssessmentResultQuery = visualAssessmentResultQuery;
+            _slotQuery = slotQuery;
         }
 
         public ActionResult Index()
         {
             bool isSysAdmin = User.IsInRole(AppRoles.SYSTEMADMIN);
-            SlotUsageBarModel model = isSysAdmin ? _slotUsageRepository.FetchSlotUsageBar(null) : _slotUsageRepository.FetchSlotUsageBar(_userService.GetUserData().OptometristFirmId);
+            bool isFinanceOfficer = User.IsInRole(AppRoles.FINANCE);
+
+            SlotUsageBarModel model = new SlotUsageBarModel();
+            if (isSysAdmin || isFinanceOfficer)
+            {
+                model = new SlotUsageBarModel
+                {
+                    LearnerUsedSlot = _visualAssessmentResultQuery.Filter(x => x.Status == Status.Complete && x.ResultServiceType == ResultServiceType.LearnerDriversLicence).Count(),
+                    LearnUnusedSlot = _slotQuery.Filter(x => x.AccessType == AccessType.LearnerDriversLicence).Sum(x => x.Quantity),
+                    OtherUsedSlot = _visualAssessmentResultQuery.Filter(x => x.Status == Status.Complete && x.ResultServiceType != ResultServiceType.LearnerDriversLicence).Count(),
+                    OtherUnusedSlot = _slotQuery.Filter(x => x.AccessType != AccessType.LearnerDriversLicence).Sum(x => x.Quantity)
+                };
+            }
+            else
+            {
+                int? optometristFirmId = _userService.GetUserData().OptometristFirmId;
+                model = new SlotUsageBarModel
+                {
+                    LearnerUsedSlot = _visualAssessmentResultQuery.Filter(x => x.Status == Status.Complete && x.ResultServiceType == ResultServiceType.LearnerDriversLicence && x.OptometristFirmId ==optometristFirmId).Count(),
+                    LearnUnusedSlot = _slotQuery.Filter(x => x.AccessType == AccessType.LearnerDriversLicence && x.OptometristFirmId == optometristFirmId).Sum(x => x.Quantity),
+                    OtherUsedSlot = _visualAssessmentResultQuery.Filter(x => x.Status == Status.Complete && x.ResultServiceType != ResultServiceType.LearnerDriversLicence && x.OptometristFirmId == optometristFirmId).Count(),
+                    OtherUnusedSlot = _slotQuery.Filter(x => x.AccessType != AccessType.LearnerDriversLicence && x.OptometristFirmId == optometristFirmId).Sum(x => x.Quantity)
+                };
+            }
+
+            //SlotUsageBarModel model = isSysAdmin ? _slotUsageRepository.FetchSlotUsageBar(null) : _slotUsageRepository.FetchSlotUsageBar(_userService.GetUserData().OptometristFirmId);
             return View(model);
         }
 

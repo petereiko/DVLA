@@ -51,7 +51,7 @@ namespace DVLA.DATA.Domains
         public string ContactNumber { get; set; }
 
         [StringLength(50)]
-        public string TaxIdentificationNumber { get; set; }
+        public string Nationality { get; set; }
 
         [StringLength(50)]
         public string Email { get; set; }
@@ -100,12 +100,14 @@ namespace DVLA.DATA.Domains
 
         public string PassportImageUrl { get; set; }
         public Status? Status { get; set; }
-        public LearnerDriversLicenceType? LearnerDriversLicence { get; set; }
+        //public LearnerDriversLicenceType? LearnerDriversLicence { get; set; }
         public bool? IsRegistration { get; set; }
         public AccessType? AccessType { get; set; }
         public PassResult? PassResult { get; set; }
         public bool IsTransmitted { get; set; }
         public DateTime TransmittedDate { get; set; }
         public Gender? Gender { get; set; }
+        public string TransmissionError { get; set; }
+        public bool HasTransmissionError { get; set; }
     }
 }

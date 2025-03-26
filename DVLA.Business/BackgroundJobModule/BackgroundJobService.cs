@@ -162,7 +162,7 @@ namespace DVLA.Business.BackgroundJobModule
 
                 var visualAssessmentResults = _context.VisualAssessmentResults.AsNoTracking().Include(x => x.OptometristFirm).Where(x => x.CreatedDate < DateTime.Now.AddMinutes(-5)
                 && !x.IsTransmitted && x.Status == Status.Complete && !string.IsNullOrEmpty(x.ReferenceNumber)
-                && !string.IsNullOrEmpty(x.PassportImageUrl)).Take(20)
+                && !string.IsNullOrEmpty(x.PassportImageUrl) && !x.HasTransmissionError && string.IsNullOrEmpty(x.TransmissionError)).Take(50)
                 .Select(x => new VisualAssessmentResultDto
                 {
                     AccessType = x.AccessType,
@@ -184,7 +184,6 @@ namespace DVLA.Business.BackgroundJobModule
                     HX_BCV_OS = x.HX_BCV_OD,
                     HX_BCV_OU = x.HX_BCV_OD,
                     IsRegistration = x.IsRegistration,
-                    LearnerDriversLicence = x.LearnerDriversLicence,
                     OptometristFirmId = x.OptometristFirmId,
                     OptometristFirmName = x.OptometristFirm.BusinessName,
                     OptometristName = x.CreatedBy,
@@ -201,7 +200,7 @@ namespace DVLA.Business.BackgroundJobModule
                     SingleImage_BCV_OU = x.SingleImage_BCV_OU,
                     Status = x.Status,
                     Surname = x.Surname,
-                    TaxIdentificationNumber = x.TaxIdentificationNumber,
+                    Nationality = x.Nationality,
                     TestDate = x.TestDate,
                     TestType = x.TestType,
                     TransmittedDate = DateTime.UtcNow,
@@ -238,6 +237,13 @@ namespace DVLA.Business.BackgroundJobModule
                     }
                     else
                     {
+                        VisualAssessmentResult visualAssessmentResult = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.Id);
+                        if (visualAssessmentResult != null)
+                        {
+                            visualAssessmentResult.HasTransmissionError = true;
+                            visualAssessmentResult.TransmissionError = "Passport File not found";
+                            _context.SaveChanges();
+                        }
                         continue;
                     }
 

@@ -148,8 +148,9 @@ namespace DVLA.Business.VisualAssessmentResultModule
                 int applicantCount = _context.VisualAssessmentResults.Count();
                 string countString = applicantCount.ToString().PadLeft(4, '0');
                 var accrdArry = optometristFirm.AccreditationNumber.Split('/');
-                string serial = accrdArry[2];
+                string serial = accrdArry[1];
                 result = $"DS{serial}{DateTime.Now.ToString("yy")}{optometristFirm.Region.PrefixName}{countString}";
+                //DS2022  25ASH0915
 
                 while (_context.VisualAssessmentResults.Any(x => x.ReferenceNumber == result))
                 {
@@ -236,7 +237,6 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                     IsActive = !reader.IsDBNull(reader.GetOrdinal("IsActive")) && reader.GetBoolean("IsActive"),
                                     IsGHDriveSynchronized = !reader.IsDBNull(reader.GetOrdinal("IsGHDriveSynchronized")) && reader.GetBoolean("IsGHDriveSynchronized"),
                                     IsSynchronized = !reader.IsDBNull(reader.GetOrdinal("IsSynchronized")) && reader.GetBoolean("IsSynchronized"),
-                                    LearnerDriversLicence = !reader.IsDBNull(reader.GetOrdinal("LearnerDriversLicence")) ? (LearnerDriversLicenceType)reader.GetInt32("LearnerDriversLicence") : default,
                                     MobileNumber = !reader.IsDBNull(reader.GetOrdinal("MobileNumber")) ? reader.GetString("MobileNumber") : null,
                                     //NameTitle = !reader.IsDBNull(reader.GetOrdinal("NameTitle")) ? (NameTitle)reader.GetInt32("NameTitle") : default,
                                     //Optometrist = !reader.IsDBNull(reader.GetOrdinal("Optometrist")) ? reader.GetString("Optometrist") : null,
@@ -344,7 +344,6 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                     IsActive = reader.GetBoolean("IsActive"),
                                     IsGHDriveSynchronized = reader.GetBoolean("IsGHDriveSynchronized"),
                                     IsSynchronized = reader.GetBoolean("IsSynchronized"),
-                                    LearnerDriversLicence = (LearnerDriversLicenceType)reader.GetInt32("LearnerDriversLicence"),
                                     MobileNumber = reader.GetString("MobileNumber"),
                                     //NameTitle = (NameTitle)reader.GetInt32("NameTitle"),
                                     //Optometrist = reader.GetString("Optometrist"),
@@ -764,7 +763,6 @@ namespace DVLA.Business.VisualAssessmentResultModule
                         IsDeleted = model.IsDeleted,
                         IsRegistration = model.IsRegistration,
                         IsSynchronized = model.IsSynchronized,
-                        LearnerDriversLicence = (LearnerDriversLicenceType)model.LearnerDriversLicence,
                         //NameTitle = (NameTitle)model.NameTitle,
                         //OldDVLAReferenceNo = model.OldDVLAReferenceNo,
                         OptometristFirmId = model.OptometristFirmId,
@@ -780,7 +778,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                         SingleImage_BCV_OU = model.SingleImage_BCV_OU,
                         Status = model.Status,
                         Surname = model.Surname,
-                        TaxIdentificationNumber = model.TaxIdentificationNumber,
+                        Nationality = model.TaxIdentificationNumber,
                         TestDate = model.TestDate,
                         Unaided_OD = model.Unaided_OD,
                         Unaided_OS = model.Unaided_OS,

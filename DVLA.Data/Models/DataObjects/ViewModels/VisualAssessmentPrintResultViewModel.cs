@@ -64,6 +64,5 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
         public string ActionType { get; set; }
         public IFormFile Image { get; set; }
         public string DateOfBirth { get; set; }
-        public string LearnerDriversLicence { get; set; }
     }
 }

@@ -16,6 +16,7 @@ namespace DVLA.VerificationPortal.Shared.DTOs
         public Gender? Gender { get; set; }
         public string OptometristFirmName { get; set; }
         public string OptometristName { get; set; }
+        public string Nationality { get; set; }
         public string? ReferenceNumber { get; set; }
 
         //public string? FormNumber { get; set; }
@@ -76,7 +77,6 @@ namespace DVLA.VerificationPortal.Shared.DTOs
 
         public string? PassportImageUrl { get; set; }
         public Status? Status { get; set; }
-        public LearnerDriversLicenceType? LearnerDriversLicence { get; set; }
         public bool? IsRegistration { get; set; }
         public AccessType? AccessType { get; set; }
         public PassResult? PassResult { get; set; }

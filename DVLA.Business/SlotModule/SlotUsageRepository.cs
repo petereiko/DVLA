@@ -220,6 +220,140 @@ namespace DVLA.Business.SlotModule
             return result;
         }
 
+
+        public async Task<SlotStatisticsViewModel> SlotPurchasedAsync(SlotStatisticsViewModel model)
+        {
+            int? accType = null;
+            if (model.SlotStatisticsFilter.AccessType.HasValue) accType = (int)model.SlotStatisticsFilter.AccessType.Value;
+            if (model.SlotStatisticsFilter.AccessType == 0) accType = null;
+
+            model.SlotStatisticsFilter.StartDate = model.SlotStatisticsFilter.StartDate == null ? model.SlotStatisticsFilter.StartDate : Utility.StartOfDay(model.SlotStatisticsFilter.StartDate.Value);
+            model.SlotStatisticsFilter.EndDate = model.SlotStatisticsFilter.EndDate == null ? model.SlotStatisticsFilter.EndDate : Utility.EndOfDay(model.SlotStatisticsFilter.EndDate.Value);
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand("FetchSlotPurchased", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@AccessType", accType ?? System.Data.SqlTypes.SqlInt32.Null);
+                        cmd.Parameters.AddWithValue("@OptometristFirmId", model.OptometristFirmId ?? System.Data.SqlTypes.SqlInt32.Null);
+                        cmd.Parameters.AddWithValue("@StartDate", model.SlotStatisticsFilter.StartDate ?? System.Data.SqlTypes.SqlDateTime.Null);
+                        cmd.Parameters.AddWithValue("@EndDate", model.SlotStatisticsFilter.EndDate ?? System.Data.SqlTypes.SqlDateTime.Null);
+
+                        conn.Open();
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                model.Items.Add(new SlotStatisticsItemViewModel
+                                {
+                                    AccessType = !reader.IsDBNull(reader.GetOrdinal("AccessType")) ? reader.GetString("AccessType") : null,
+                                    OptometristFirmName = !reader.IsDBNull(reader.GetOrdinal("BusinessName")) ? reader.GetString("BusinessName") : null,
+                                    Quantity = reader.IsDBNull(reader.GetOrdinal("Quantity"))?0: reader.GetInt32("Quantity"),
+                                });
+                            }
+                        }
+                    }
+                }
+                model.TotalQuantity = model.Items.Sum(x => x.Quantity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+
+            }
+            return model;
+        }
+
+        public async Task<SlotStatisticsViewModel> SlotUsedAsync(SlotStatisticsViewModel model)
+        {
+            int? accType = null;
+            if (model.SlotStatisticsFilter.AccessType.HasValue) accType = (int)model.SlotStatisticsFilter.AccessType.Value;
+            if (model.SlotStatisticsFilter.AccessType == 0) accType = null;
+            model.SlotStatisticsFilter.StartDate = model.SlotStatisticsFilter.StartDate == null ? model.SlotStatisticsFilter.StartDate : Utility.StartOfDay(model.SlotStatisticsFilter.StartDate.Value);
+            model.SlotStatisticsFilter.EndDate = model.SlotStatisticsFilter.EndDate == null ? model.SlotStatisticsFilter.EndDate : Utility.EndOfDay(model.SlotStatisticsFilter.EndDate.Value);
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand("FetchUsedSlot", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@AccessType", accType ?? System.Data.SqlTypes.SqlInt32.Null);
+                        cmd.Parameters.AddWithValue("@OptometristFirmId", model.OptometristFirmId ?? System.Data.SqlTypes.SqlInt32.Null);
+                        cmd.Parameters.AddWithValue("@StartDate", model.SlotStatisticsFilter.StartDate ?? System.Data.SqlTypes.SqlDateTime.Null);
+                        cmd.Parameters.AddWithValue("@EndDate", model.SlotStatisticsFilter.EndDate ?? System.Data.SqlTypes.SqlDateTime.Null);
+
+                        conn.Open();
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                model.Items.Add(new SlotStatisticsItemViewModel
+                                {
+                                    AccessType = !reader.IsDBNull(reader.GetOrdinal("AccessType")) ? reader.GetString("AccessType") : null,
+                                    OptometristFirmName = !reader.IsDBNull(reader.GetOrdinal("BusinessName")) ? reader.GetString("BusinessName") : null,
+                                    Quantity = reader.IsDBNull(reader.GetOrdinal("Quantity")) ? 0 : reader.GetInt32("Quantity"),
+                                });
+                            }
+                        }
+                    }
+                }
+                model.TotalQuantity = model.Items.Sum(x => x.Quantity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+
+            }
+            return model;
+        }
+
+        public async Task<SlotStatisticsViewModel> SlotBalanceAsync(SlotStatisticsViewModel model)
+        {
+            int? accType = null;
+            if (model.SlotStatisticsFilter.AccessType.HasValue) accType = (int)model.SlotStatisticsFilter.AccessType.Value;
+            if (model.SlotStatisticsFilter.AccessType == 0) accType = null;
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand("FetchSlotBalance", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@AccessType", accType ?? System.Data.SqlTypes.SqlInt32.Null);
+                        cmd.Parameters.AddWithValue("@OptometristFirmId", model.OptometristFirmId ?? System.Data.SqlTypes.SqlInt32.Null);
+
+                        conn.Open();
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                model.Items.Add(new SlotStatisticsItemViewModel
+                                {
+                                    AccessType = !reader.IsDBNull(reader.GetOrdinal("AccessType")) ? reader.GetString("AccessType") : null,
+                                    OptometristFirmName = !reader.IsDBNull(reader.GetOrdinal("BusinessName")) ? reader.GetString("BusinessName") : null,
+                                    Quantity = reader.IsDBNull(reader.GetOrdinal("Quantity")) ? 0 : reader.GetInt32("Quantity"),
+                                });
+                            }
+                        }
+                    }
+                }
+                model.TotalQuantity = model.Items.Sum(x => x.Quantity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+
+            }
+            return model;
+        }
+
+
         public SlotUsageBarModel FetchSlotUsageBar(int? optometristFirmId = null)
         {
 

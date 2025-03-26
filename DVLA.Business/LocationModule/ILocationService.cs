@@ -11,6 +11,7 @@ namespace DVLA.Business.LocationModule
     {
         Task<List<SelectListItem>> GetAllRegions();
         Task<List<SelectListItem>> GetAllDistricts();
+        List<SelectListItem> GetCountries();
         Task<List<SelectListItem>> GetDistrictsByRegion(int regionId);
         Task<List<SelectListItem>> GetDistrictsByRegionWithFacilities(int regionId);
     }

@@ -300,7 +300,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                             OptometristFirm optomestristFirm = context.OptometristFirms.OrderByDescending(x => x.Id).FirstOrDefault();
                             if (optomestristFirm == null)
                             {
-                                model.AccreditationNumber = $"OPT/DVLA/0000/{DateTime.Now.ToString("yy")}";
+                                model.AccreditationNumber = $"DVLA/0000/{DateTime.Now.ToString("yy")}";
                             }
                             else
                             {
@@ -411,7 +411,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public ActionResult Update(string token)
+        public ActionResult Update(int id)
         {
             try
             {
@@ -426,13 +426,10 @@ namespace DVLA.UI.Areas.Admin.Controllers
                     Value = x.Id.ToString()
                 }).ToList();
 
-                // Convert Base64 string to byte array
-                byte[] byteArray = Convert.FromBase64String(token);
 
                 // Convert byte array back to original string
-                string idString = System.Text.Encoding.UTF8.GetString(byteArray);
 
-                int optometristId = Convert.ToInt32(idString);//Convert.ToInt32(Utility.Decrypt(token));
+                int optometristId = id;//Convert.ToInt32(Utility.Decrypt(token));
                 OptometristFirm optometrist = _optometristQuery.Filter(x => x.Id == optometristId).FirstOrDefault();
                 var optometristUser = _optometristUserQuery.Filter(u => u.OptometristFirmId == optometristId).FirstOrDefault();
                 var region = _regionQuery.Filter(r => r.Id == optometrist.RegionId).FirstOrDefault();
@@ -529,7 +526,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 optomestrist.IsActive = true;
                 optomestrist.IsDeleted = false;
                 optomestrist.MobileNumber = model.MobileNumber;
-                optomestrist.RegistrationNumber = model.RegistrationNumber;
+                //optomestrist.RegistrationNumber = model.RegistrationNumber;
                 optomestrist.Town = model.Town;
                 optomestrist.TelephoneNumber = model.TelephoneNumber;
 

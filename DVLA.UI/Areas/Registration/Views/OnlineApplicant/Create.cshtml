@@ -83,26 +83,13 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    @* <div class="col-md-4">
-                                        <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" asp-for="InvoiceNumber" placeholder="Enter DVLA Invoice Number" required>
-                                            <label for="InvoiceNumber">DVLA Invoice Number</label>
-                                        </div>
-                                    </div> *@
+                                    
                                     <div class="col-md-4">
                                         <div class="form-floating mb-3">
                                             <select asp-for="ResultServiceType" class="form-control" required asp-items="@Html.GetEnumSelectList<ResultServiceType>()">
                                                 <option value="">Select Test Type</option>
                                             </select>
                                             <label for="ResultServiceType">Service Type</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4" id="LearnerType" style="display:none">
-                                        <div class="form-floating mb-3">
-                                            <select asp-for="LearnerDriversLicence" class="form-control" required asp-items="@Html.GetEnumSelectList<LearnerDriversLicenceType>()">
-                                                <option value="">Select Test Type</option>
-                                            </select>
-                                            <label for="ResultServiceType">Learners Driver's License Type</label>
                                         </div>
                                     </div>
                                 </div>
@@ -178,8 +165,11 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" asp-for="TaxIdentificationNumber" placeholder="Enter Tax Identification Number" required>
-                                            <label for="TaxIdentificationNumber">Tax Identification Number(TIN)</label>
+                                            Nationality
+                                            <select asp-for="Nationality" class="form-control" asp-items="@((List<SelectListItem>)ViewBag.Countries)">
+                                                <option value="">--Select Nationality--</option>
+                                            </select>
+                                            @Html.ValidationMessageFor(model => model.Nationality, "", new { @class = "text-danger" })
                                         </div>
                                     </div>
                                     <div class="col-md-4">

@@ -16,8 +16,6 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public long OptometristFirmId { get; set; }
         public string ReferenceNumber { get; set; }
         public ResultServiceType? ResultServiceType { get; set; }
-        public LearnerDriversLicenceType? LearnerDriversLicence { get; set; }
-        //public NameTitle? NameTitle { get; set; }
         public PassOrFail? PassOrFail { get; set; }
         public PassResult? PassResult { get; set; }
         public string Surname { get; set; }
