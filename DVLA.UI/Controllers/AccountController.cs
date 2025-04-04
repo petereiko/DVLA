@@ -139,7 +139,8 @@ namespace DVLA.UI.Controllers
             var authProperties = new AuthenticationProperties
             {
                 IsPersistent = rememberMe,
-                AllowRefresh = true
+                AllowRefresh = true,
+                ExpiresUtc = DateTimeOffset.Now.AddMinutes(15)
             };
             await _signInManager.SignInWithClaimsAsync(user, authProperties, claims);
 
