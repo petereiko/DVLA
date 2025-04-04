@@ -60,13 +60,16 @@ function ChangeResultConclusion(e) {
     if (e.value == "Fit to drive" || e.value == "Fit to drive with glasses") {
         $("#PassOrFail").val("1");
         $("#PassResult").show();
+        $('#PassOrFailInt').val(1);
         //load();
     } else if ((e.value = "Not fit to drive")) {
         $("#PassOrFail").val("2");
         $("#PassResult").hide();
+        $('#PassOrFailInt').val(2);
     } else {
         $("#PassOrFail").val("");
         $("#PassResult").hide();
+        $('#PassOrFailInt').val("");
     }
 }
 

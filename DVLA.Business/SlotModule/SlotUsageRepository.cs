@@ -28,23 +28,24 @@ namespace DVLA.Business.SlotModule
         private readonly string _connectionString;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserService _userService;
-        public SlotUsageRepository(DVLADbContext context, ILogger<SlotUsageRepository> logger, IConfiguration configuration, UserManager<ApplicationUser> userManager, IUserService userService)
+        private readonly IAuthUser _authUser;
+        public SlotUsageRepository(DVLADbContext context, ILogger<SlotUsageRepository> logger, IConfiguration configuration, UserManager<ApplicationUser> userManager, IUserService userService, IAuthUser authUser)
         {
             _context = context;
             _logger = logger;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
             _userManager = userManager;
             _userService = userService;
+            _authUser = authUser;
         }
 
         public async Task<long[]> GetTotalSlots()
         {
             long[] result = new long[2];
-            UserViewModel userModel = _userService.GetUserData();
-            ApplicationUser applicationUser = await _userManager.FindByIdAsync(userModel.Id);
+            ApplicationUser applicationUser = await _userManager.FindByIdAsync(_authUser.UserId);
             bool isSysAdmin = await _userManager.IsInRoleAsync(applicationUser, AppRoles.SYSTEMADMIN);
 
-            SlotUsageBarModel bar = isSysAdmin? FetchSlotUsageBar(null): FetchSlotUsageBar(userModel.OptometristFirmId);
+            SlotUsageBarModel bar = isSysAdmin? FetchSlotUsageBar(null): FetchSlotUsageBar(_authUser.OptometristFirmId);
             
             result = new long[] { bar.LearnUnusedSlot, bar.OtherUnusedSlot };
             return result;

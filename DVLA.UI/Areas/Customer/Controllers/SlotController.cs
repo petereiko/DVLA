@@ -34,28 +34,28 @@ namespace DVLA.UI.Areas.Customer.Controllers
         private readonly ISlotUsageRepository _slotUsageRepository;
         private readonly IOptometristService _optometristRepository;
         private readonly IAuditRepo _auditRepo;
-        private readonly string currentUserId;
         private readonly IPaymentService _paymentService;
         private readonly IUserService _userService;
         private readonly IRepositoryQuery<OptometristFirmUser> _optometristUserQuery;
-        
+        private readonly IAuthUser _authUser;
+
         public SlotController(ISlotRepository slotRepository, ISlotUsageRepository slotUsageRepository,
-            IOptometristService optometristRepository, IAuditRepo auditRepo, IUserService userService, IPaymentService paymentService, IRepositoryQuery<OptometristFirmUser> optometristUserQuery)
+            IOptometristService optometristRepository, IAuditRepo auditRepo, IUserService userService, IPaymentService paymentService, IRepositoryQuery<OptometristFirmUser> optometristUserQuery, IAuthUser authUser)
         {
             _slotRepository = slotRepository;
             _slotUsageRepository = slotUsageRepository;
             _auditRepo = auditRepo;
             _optometristRepository = optometristRepository;
-            currentUserId = userService.GetUserData().Id;
             _userService = userService;
             _paymentService = paymentService;
             _optometristUserQuery = optometristUserQuery;
+            _authUser = authUser;
         }
 
         [HttpGet]
         public ActionResult MyRequests()
         {
-            IEnumerable<SlotRequestModel> slotRequests = _slotRepository.FetchCustomerSlotRequests(currentUserId);
+            IEnumerable<SlotRequestModel> slotRequests = _slotRepository.FetchCustomerSlotRequests(_authUser.UserId);
             _auditRepo.AddAudit(Activities.VIEW_SLOT_REQUEST, "View Slot Requests");
             return View(slotRequests);
         }
@@ -77,7 +77,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 model.FormData = new SlotRequestModel { SlotPriceList = _slotRepository.AmountPerSlot() };
                 return View(model);
             }
-            var optometristUser = _optometristUserQuery.Filter(x => x.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(x => x.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             int OptometristFirmId = optometristUser == null ? 0 : optometristUser.OptometristFirmId;
             model.FormData.OptometristFirmId = OptometristFirmId;
             model.FormData.Status = SlotRequestStatus.Pending;
@@ -102,12 +102,11 @@ namespace DVLA.UI.Areas.Customer.Controllers
         [HttpPost]
         public async Task<JsonResult> ProceedToPayment([FromBody]InitiatePaymentRequest model)
         {
-            var optometristUser = _optometristUserQuery.Filter(x => x.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(x => x.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             int OptometristFirmId = optometristUser == null ? 0 : optometristUser.OptometristFirmId;
             model.OptometristFirmId = OptometristFirmId;
-            model.UserId = currentUserId;
-            var userData = _userService.GetUserData();
-            model.email = userData.Email;
+            model.UserId = _authUser.UserId;
+            model.email = _authUser.Email;
             return Json(await _paymentService.InitiatePayment(model));
         }
 
@@ -130,7 +129,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
         [HttpGet]
         public ActionResult SlotReorder()
         {
-            var optometristUser = _optometristUserQuery.Filter(x => x.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(x => x.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             int OptometristFirmId = optometristUser == null ? 0 : optometristUser.OptometristFirmId;
             List<SlotModel> slot = _slotRepository.FetchSlotReOrderLevelByOptometristfirm(OptometristFirmId).ToList();                       
             return View(slot);
@@ -197,7 +196,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
         public ActionResult SlotUsageStatistics(SlotUsageViewModel model)
         {
             var temp = model.EndDate;
-            int? OptometristFirmId = _userService.GetUserData().OptometristFirmId; //optometristUser == null ? 0 : optometristUser.OptometristFirmId;
+            int? OptometristFirmId = _authUser.OptometristFirmId; //optometristUser == null ? 0 : optometristUser.OptometristFirmId;
             model.EndDate = model.EndDate.HasValue ? model.EndDate.Value.AddHours(23).AddMinutes(59).AddSeconds(59) : DateTime.Now.AddHours(23).AddMinutes(59).AddSeconds(59);
             IEnumerable<SlotUsageModel> slotUsages = _slotUsageRepository.FetchOptometristSlotUsage(model.StartDate, model.EndDate, model.AccessType, OptometristFirmId);
             model.SlotUsages = slotUsages;

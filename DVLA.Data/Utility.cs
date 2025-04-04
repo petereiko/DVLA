@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -23,6 +25,46 @@ namespace DVLA.Data
 
             _configuration = builder.Build();
         }
+
+        public static byte[] ExportToExcel<T>(List<T> data)
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Sheet1");
+                var dataTable = ConvertToDataTable(data);
+                worksheet.Cell(1, 1).InsertTable(dataTable);
+
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    return stream.ToArray();
+                }
+            }
+        }
+
+        private static DataTable ConvertToDataTable<T>(List<T> data)
+        {
+            DataTable dataTable = new DataTable(typeof(T).Name);
+            var properties = typeof(T).GetProperties();
+
+            foreach (var prop in properties)
+            {
+                dataTable.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
+            }
+
+            foreach (var item in data)
+            {
+                var values = new object[properties.Length];
+                for (int i = 0; i < properties.Length; i++)
+                {
+                    values[i] = properties[i].GetValue(item, null);
+                }
+                dataTable.Rows.Add(values);
+            }
+
+            return dataTable;
+        }
+
 
         public static bool ValidatePassport(IFormFile passportData)
         {

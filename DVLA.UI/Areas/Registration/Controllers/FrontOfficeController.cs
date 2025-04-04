@@ -46,7 +46,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
         // GET: FrontOffice/Applicant
         public FrontOfficeController(IAuditRepo AuditRepo, IRepositoryQuery<VisualAssessmentResult> applicantQuery, IRepositoryQuery<Region> regionQuery,
             INotificationRepository notificationRepository, IUserService userService, IReportRepository reportRepository, ISmsRepository smsRepository, IVisualAssessmentResultRepository visualAssessmentResultRepository,
-            IRepositoryQuery<OptometristFirm> optometristFirmQuery, ILogger<FrontOfficeController> logger, IWebHostEnvironment environment, IRepositoryQuery<OptometristFirmUser> optometristFirmUserQuery, ILocationService locationService)
+            IRepositoryQuery<OptometristFirm> optometristFirmQuery, IAuthUser authUser, ILogger<FrontOfficeController> logger, IWebHostEnvironment environment, IRepositoryQuery<OptometristFirmUser> optometristFirmUserQuery, ILocationService locationService)
         {
             _AuditRepo = AuditRepo;
             _applicantQuery = applicantQuery;
@@ -56,7 +56,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
             _visualAssessmentResultRepository = visualAssessmentResultRepository;
             _optometristFirmQuery = optometristFirmQuery;
             _logger = logger;
-            currentUserId = userService.GetUserData().Id;
+            currentUserId = authUser.UserId;
             _environment = environment;
             _optometristFirmUserQuery = optometristFirmUserQuery;
             _locationService = locationService;

@@ -30,7 +30,8 @@ namespace DVLA.Business.UserModule
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IUserService _userService;
-        public UserRepository(DVLADbContext context, ILogger<UserRepository> logger, IConfiguration configuration, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IUserService userService)
+        private readonly IAuthUser _authUser;
+        public UserRepository(DVLADbContext context, ILogger<UserRepository> logger, IConfiguration configuration, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IUserService userService, IAuthUser authUser)
         {
             _context = context;
             _logger = logger;
@@ -39,6 +40,7 @@ namespace DVLA.Business.UserModule
             _userManager = userManager;
             _roleManager = roleManager;
             _userService = userService;
+            _authUser = authUser;
         }
 
         public void Dispose()
@@ -242,7 +244,7 @@ namespace DVLA.Business.UserModule
                     userDetails.LastName = model.LastName;
                     userDetails.MobileNumber = model.MobileNumber;
                     userDetails.UserName = model.Email;
-                    userDetails.ModifiedBy = _userService.GetUserData().Id;
+                    userDetails.ModifiedBy = _authUser.UserId;
                     userDetails.IsActive = model.IsActive;
                     userDetails.EmailConfirmed = model.IsActive;
                     //userDetails.DefaultRole = model.DefaultRole;

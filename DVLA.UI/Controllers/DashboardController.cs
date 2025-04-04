@@ -27,6 +27,7 @@ namespace DVLA.UI.Controllers
         private readonly IRepositoryQuery<OptometristFirmUser> _optometristUserRepository;
         private readonly IRepositoryQuery<VisualAssessmentResult> _visualAssessmentResultQuery;
         private readonly IRepositoryQuery<Slot> _slotQuery;
+        private readonly IAuthUser _authUser;
 
 
         private static readonly Random rand = new Random();
@@ -35,7 +36,7 @@ namespace DVLA.UI.Controllers
             return string.Format("rgba({0},{1},{2},{1})", rand.Next(80, 256), rand.Next(80, 256), rand.Next(80, 256));
         }
 
-        public DashboardController(IAnalyticRepository analyticRepository, ISlotUsageRepository slotUsageRepository, IAuditRepo auditRepo, IUserService userService, IRepositoryQuery<OptometristFirm> optometristRepository, IRepositoryQuery<OptometristFirmUser> optometristUserRepository, IRepositoryQuery<VisualAssessmentResult> visualAssessmentResultQuery, IRepositoryQuery<Slot> slotQuery)
+        public DashboardController(IAnalyticRepository analyticRepository, ISlotUsageRepository slotUsageRepository, IAuditRepo auditRepo, IUserService userService, IRepositoryQuery<OptometristFirm> optometristRepository, IRepositoryQuery<OptometristFirmUser> optometristUserRepository, IRepositoryQuery<VisualAssessmentResult> visualAssessmentResultQuery, IRepositoryQuery<Slot> slotQuery, IAuthUser authUser)
         {
             _AuditRepo = auditRepo;
             _analyticRepository = analyticRepository;
@@ -45,6 +46,7 @@ namespace DVLA.UI.Controllers
             _optometristUserRepository = optometristUserRepository;
             _visualAssessmentResultQuery = visualAssessmentResultQuery;
             _slotQuery = slotQuery;
+            _authUser = authUser;
         }
 
         public ActionResult Index()
@@ -65,7 +67,7 @@ namespace DVLA.UI.Controllers
             }
             else
             {
-                int? optometristFirmId = _userService.GetUserData().OptometristFirmId;
+                int? optometristFirmId = _authUser.OptometristFirmId;
                 model = new SlotUsageBarModel
                 {
                     LearnerUsedSlot = _visualAssessmentResultQuery.Filter(x => x.Status == Status.Complete && x.ResultServiceType == ResultServiceType.LearnerDriversLicence && x.OptometristFirmId ==optometristFirmId).Count(),
@@ -84,7 +86,7 @@ namespace DVLA.UI.Controllers
         {
             DashboardViewModel result = new();
             bool isSysAdmin = User.IsInRole(AppRoles.SYSTEMADMIN);
-            SlotUsageBarModel bar = isSysAdmin ? _slotUsageRepository.FetchSlotUsageBar(null) : _slotUsageRepository.FetchSlotUsageBar(_userService.GetUserData().OptometristFirmId);
+            SlotUsageBarModel bar = isSysAdmin ? _slotUsageRepository.FetchSlotUsageBar(null) : _slotUsageRepository.FetchSlotUsageBar(_authUser.OptometristFirmId);
             result.OtherGrantedSlotCount = bar.OtherUsedSlot + bar.OtherUnusedSlot;
             result.LearnerGrantedSlotCount = bar.LearnerUsedSlot + bar.LearnUnusedSlot;
             result.LearnerUtilizedSlotCount = bar.LearnerUsedSlot;

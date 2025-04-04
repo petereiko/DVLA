@@ -137,9 +137,10 @@ namespace DVLA.Business.VisualAssessmentResultModule
             }
         }
 
-        public string GenerateReferenceNo(int optometristFirmId)
+        public string GenerateReferenceNo(int optometristFirmId, Status status)
         {
-            string result = string.Empty;
+            string result = null;
+            if (status == Status.InProgress) return result;
             lock (transactionLock)
             {
                 //var count = GenerateSerialNumber();
@@ -734,7 +735,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
 
                     }
 
-                    string referenceNumber = GenerateReferenceNo(model.OptometristFirmId);
+                    string referenceNumber = GenerateReferenceNo(model.OptometristFirmId, (Status)model.Status);
 
                     VisualAssessmentResult visualAssessmentResult = new()
                     {

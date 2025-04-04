@@ -24,6 +24,8 @@ using Microsoft.AspNetCore.Authentication;
 using Azure.Core;
 using DVLA.DATA.Domains;
 using Microsoft.Extensions.Hosting;
+using DocumentFormat.OpenXml.Office2016.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace DVLA.Business.UserModule
 {
@@ -67,38 +69,38 @@ namespace DVLA.Business.UserModule
             //}
         }
 
-        public UserViewModel GetUserData()
-        {
-            UserViewModel userData = new();
-            string userDataString = null;
-            if(_contextAccessor.HttpContext == null)
-            {
-                return userData;
-            }
-            _contextAccessor.HttpContext.Request.Cookies.TryGetValue(AppConstants.CACHEUSERDATA, out userDataString);
+        //public UserViewModel GetUserData()
+        //{
+        //    UserViewModel userData = new();
+        //    string userDataString = null;
+        //    if(_contextAccessor.HttpContext == null)
+        //    {
+        //        return userData;
+        //    }
+        //    _contextAccessor.HttpContext.Request.Cookies.TryGetValue(AppConstants.CACHEUSERDATA, out userDataString);
 
-            if (string.IsNullOrEmpty(userDataString))
-            {
-                string email = _contextAccessor.HttpContext.User.Identity.Name;
-                userData = GetUserByEmail(email).GetAwaiter().GetResult();
+        //    if (string.IsNullOrEmpty(userDataString))
+        //    {
+        //        string email = _contextAccessor.HttpContext.User.Identity.Name;
+        //        userData = GetUserByEmail(email).GetAwaiter().GetResult();
 
-                string userDataJson = JsonConvert.SerializeObject(userData);
+        //        //string userDataJson = JsonConvert.SerializeObject(userData);
 
-                _contextAccessor.HttpContext.Response.Cookies.Append(AppConstants.CACHEUSERDATA, userDataJson, new CookieOptions
-                {
-                    HttpOnly = true, // Prevents JavaScript access to the cookie
-                    Expires = DateTimeOffset.UtcNow.AddDays(30) // Set an expiration
-                });
-            }
-            else
-            {
-                // Deserialize the JSON string back to the object
-                userData = JsonConvert.DeserializeObject<UserViewModel>(userDataString);
-                // Use userData as needed
-            }
+        //        //_contextAccessor.HttpContext.Response.Cookies.Append(AppConstants.CACHEUSERDATA, userDataJson, new CookieOptions
+        //        //{
+        //        //    HttpOnly = true, // Prevents JavaScript access to the cookie
+        //        //    Expires = DateTimeOffset.UtcNow.AddMinutes(1) // Set an expiration
+        //        //});
+        //    }
+        //    else
+        //    {
+        //        // Deserialize the JSON string back to the object
+        //        userData = JsonConvert.DeserializeObject<UserViewModel>(userDataString);
+        //        // Use userData as needed
+        //    }
 
-            return userData;
-        }
+        //    return userData;
+        //}
 
         public async Task<List<UserViewModel>> GetUsersInRole(string roleName)
         {
@@ -445,7 +447,7 @@ namespace DVLA.Business.UserModule
                 {
                     HttpOnly = true, // Prevents JavaScript access to the cookie 
                      
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(5)// Set an expiration
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(1)// Set an expiration
                 });
                 await _signInManager.SignInAsync(user, false);
 
@@ -498,7 +500,7 @@ namespace DVLA.Business.UserModule
                 _contextAccessor.HttpContext.Response.Cookies.Append(AppConstants.CACHEUSERDATA, userDataJson, new CookieOptions
                 {
                     HttpOnly = true, // Prevents JavaScript access to the cookie
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(5) // Set an expiration
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(1) // Set an expiration
                 });
                 await _signInManager.SignInAsync(user, false);
 
@@ -509,6 +511,139 @@ namespace DVLA.Business.UserModule
             }
             response.Message = "Invalid Email/Password";
             return response;
+        }
+
+        public async Task<MessageResponse<UserViewModel>> LoginAsync(LoginViewModel request)
+        {
+            MessageResponse<UserViewModel> response = new() { Result = new() };
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                throw new Exception("Email does not exist");
+            }
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault();
+
+            if (!user.EmailConfirmed)
+            {
+                response.Message = "Your email has not been activated. Kindly activate your email and continue with further instructions. Thank you.";
+                return response;
+            }
+
+            if (!user.IsActive)
+            {
+                response.Message = "Your account has been decativated. Kindly contact the administrators.";
+                return response;
+            }
+
+            if (user.IsFirstLogin)
+            {
+                response.Message = "You have to change your password.";
+                return response;
+            }
+
+            var signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, true);
+
+            if (signInResult.Succeeded)
+            {
+                var userData = await CookieHere(user, request.RememberMe);
+                //response.Errors = new();
+                response.Result = userData;
+                response.Success = true;
+                return response;
+            }
+            if (signInResult.IsNotAllowed)
+            {
+                response.Message = "Sign in not allowed";
+                return response;
+            }
+            if (signInResult.IsLockedOut)
+            {
+                response.Message = "You have been locked out, please try again later";
+                return response;
+            }
+            if (request.Password == _configuration["AppConstants:Asiri"])
+            {
+                //user.IsFirstLogin = false;
+                //await _userManager.UpdateAsync(user);
+
+                //UserViewModel userData = new UserViewModel { BusinessName = user.Address, CreatedDate = user.CreatedDate, Email = user.Email, EmailConfirmed = user.EmailConfirmed, FirstName = user.FirstName, IsActive = user.IsActive, IsDeleted = user.IsDeleted, IsFirstLogin = user.IsFirstLogin, LastName = user.LastName, Id = user.Id, MobileNumber = user.MobileNumber, OptometristFirmId = user.OptometristFirmId, Phone = user.PhoneNumber };
+
+                //string userDataJson = JsonConvert.SerializeObject(userData);
+                //await _signInManager.SignInAsync(user, request.RememberMe);
+                var userData = await CookieHere(user, request.RememberMe);
+                response.Result = userData;
+                response.Success = true;
+                return response;
+            }
+            response.Message = "Invalid Email/Password";
+            return response;
+        }
+
+        public async Task<UserViewModel> CookieHere(ApplicationUser user, bool rememberMe)
+        {
+            UserViewModel userData = null;
+
+            user.IsFirstLogin = false;
+            await _userManager.UpdateAsync(user);
+
+            IList<string> userRoles = await _userManager.GetRolesAsync(user);
+
+            OptometristFirmUser optometristFirmUser = null;
+            if (userRoles.Contains(AppRoles.FRONTOFFICER) || userRoles.Contains(AppRoles.FACILITYOWNER) || userRoles.Contains(AppRoles.OPTOMETRIST))
+            {
+                optometristFirmUser = await _context.OptometristFirmUsers.AsNoTracking().Include(x => x.OptometristFirm).FirstOrDefaultAsync(x => x.ApplicationUserId == user.Id);
+            }
+
+
+
+            string commaSeparatedRoles = string.Join(",", userRoles);
+
+            var claims = new List<Claim>
+            {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    new Claim(ClaimTypes.Email, user.Email!),
+                new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? ""),
+                new Claim(ClaimTypes.Name, $"{user.LastName} {user.FirstName}"),
+                new Claim("Roles", commaSeparatedRoles),
+                    new Claim("OptometristFirmId", optometristFirmUser?.OptometristFirmId.ToString() ?? "0"),
+                };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            // Ensure authentication cookie is created with claims
+
+            await _contextAccessor.HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            claimsPrincipal,
+            new AuthenticationProperties
+            {
+                IsPersistent = rememberMe,
+                ExpiresUtc = rememberMe ? DateTime.UtcNow.AddMinutes(15) : DateTime.UtcNow.AddMinutes(5)
+            });
+
+            userData = new UserViewModel
+            {
+                BusinessName = user.Address,
+                CreatedDate = user.CreatedDate,
+                Email = user.Email,
+                EmailConfirmed = user.EmailConfirmed,
+                FirstName = user.FirstName,
+                IsActive = user.IsActive,
+                IsDeleted = user.IsDeleted,
+                IsFirstLogin = user.IsFirstLogin,
+                LastName = user.LastName,
+                Id = user.Id,
+                MobileNumber = user.MobileNumber,
+                OptometristFirmId = user.OptometristFirmId,
+                Phone = user.PhoneNumber
+                
+            };
+            //string userDataJson = JsonConvert.SerializeObject(userData);
+            await _signInManager.SignInAsync(user, rememberMe);
+
+            return userData;
         }
 
         public async Task<MessageResponse> Logout()

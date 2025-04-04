@@ -16,7 +16,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
         PaginationResponseModel<List<VisualAssessmentResultItemViewModel>> FetchAssessmentResults(PaginationRequestModel<ClientSearchRequest> model);
 
 
-        string GenerateReferenceNo(int optometristFirmId);
+        string GenerateReferenceNo(int optometristFirmId, Status status);
         string GenerateFormNo();
         VisualAssessmentResultModel FetchAssessmentResult(string ReferenceNumber);
         List<VisualAssessmentResultModel> FetchAssessmentResults(long? optometristAdminId, long? optometristId, long? id);

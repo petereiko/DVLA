@@ -149,7 +149,14 @@
                                                 @i
                                             </td>
                                             <td>
-                                                @Html.DisplayFor(modelItem => item.ReferenceNumber)
+                                                @if (item.Status == Status.Complete)
+                                                {
+                                                    <span class="mb-1 badge rounded-pill text-bg-success">@item.ReferenceNumber</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="mb-1 badge rounded-pill text-bg-info">N/A</span>
+                                                }
                                             </td>
                                             <td>
                                                 @{

@@ -68,24 +68,23 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 .AddRoleStore<RoleStore<ApplicationRole, DVLADbContext, string, ApplicationUserRole, IdentityRoleClaim<string>>>()
 .AddDefaultTokenProviders();
 
-//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-//    .AddCookie(options =>
-//    {
-//        options.Cookie.HttpOnly = true;
-//        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Ensure cookies are only sent over HTTPS
-//        options.ExpireTimeSpan = TimeSpan.FromMinutes(10); // Set cookie expiration time
-//        options.LoginPath = "/Account/Login";
-//        options.AccessDeniedPath = "/Account/AccessDenied";
-//        options.SlidingExpiration = true; // Enables sliding expiration
-//    });
 
+// Add authentication services
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
+        options.Cookie.Name = "AuthDemo.Cookie";
         options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
         options.AccessDeniedPath = "/Account/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+        options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Use HTTPS
     });
+builder.Services.AddAuthorization();
+
+builder.Services.AddHttpContextAccessor();
 
 
 //Add UserManager<ApplicationUser>, RoleManager<ApplicationRole>, and SignInManager<ApplicationUser>
@@ -96,8 +95,8 @@ builder.Services.AddScoped<SignInManager<ApplicationUser>>();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(5); // Set session duration
-    options.Cookie.HttpOnly = false; // Make the cookie HTTP only
+    options.IdleTimeout = TimeSpan.FromMinutes(15); // Set session duration
+    options.Cookie.HttpOnly = true; // Make the cookie HTTP only
     options.Cookie.IsEssential = true; // Make the cookie essential
 });
 builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
@@ -120,6 +119,7 @@ builder.Services.AddTransient<INotificationRepository, NotificationRepository>()
 builder.Services.AddTransient<IPaymentService, PaymentService>();
 builder.Services.AddTransient<ISmsRepository, SmsRepository>();
 builder.Services.AddTransient<IAuditRepo, AuditRepo>();
+builder.Services.AddTransient<IAuthUser, AuthUser>();
 builder.Services.AddTransient<BackgroundJobService>();
 
 
@@ -177,13 +177,16 @@ app.UseStaticFiles(new StaticFileOptions()
     Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Passports")),
     RequestPath = "/passports"
 });
-app.UseSession();
+
 
 app.UseRouting();
 
 app.UseAuthentication();
 
+app.UseSession();
+
 app.UseAuthorization();
+
 
 app.UseHangfireDashboard("/hangfire");
 

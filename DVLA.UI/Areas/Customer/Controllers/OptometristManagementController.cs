@@ -34,10 +34,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
         private readonly IAuditRepo _AuditRepo;
         private readonly IConfiguration _configuration;
         private readonly ILogger<OptometristManagementController> _logger;
-        private readonly string currentUserId;
+        private readonly IAuthUser _authUser;
 
         public OptometristManagementController(IRepositoryQuery<ApplicationUser> userRepositoryQuery, IUserService userService
-            , INotificationRepository notificationRepository, IAuditRepo AuditRepo, IRepositoryQuery<OptometristFirm> optometristQuery, IRepositoryQuery<OptometristFirmUser> optometristUserQuery, IUserRepository userRepository, UserManager<ApplicationUser> userManager, IConfiguration configuration, ILogger<OptometristManagementController> logger)
+            , INotificationRepository notificationRepository, IAuditRepo AuditRepo, IRepositoryQuery<OptometristFirm> optometristQuery, IRepositoryQuery<OptometristFirmUser> optometristUserQuery, IUserRepository userRepository, UserManager<ApplicationUser> userManager, IConfiguration configuration, ILogger<OptometristManagementController> logger, IAuthUser authUser)
         {
             _userRepository = userRepository;
             _optometristQuery = optometristQuery;
@@ -45,19 +45,19 @@ namespace DVLA.UI.Areas.Customer.Controllers
             _userRepositoryQuery = userRepositoryQuery;
             _notificationRepository = notificationRepository;
             _AuditRepo = AuditRepo;
-            currentUserId = userService.GetUserData().Id;
             _userManager = userManager;
             _configuration = configuration;
             _logger = logger;
+            _authUser = authUser;
         }
         // GET: User
         public async Task<IActionResult> Index()
         {
-            var optometristFirmUser = _optometristUserQuery.FilterAsync(x => x.ApplicationUserId == currentUserId).Result.FirstOrDefault();
+            var optometristFirmUser = _optometristUserQuery.FilterAsync(x => x.ApplicationUserId == _authUser.UserId).Result.FirstOrDefault();
             int OptometristFirmId = optometristFirmUser == null ? 0 : optometristFirmUser.OptometristFirmId;
-            ApplicationUser user = await _userManager.FindByIdAsync(currentUserId);
+            ApplicationUser user = await _userManager.FindByIdAsync(_authUser.UserId);
             IList<string> roles = await _userManager.GetRolesAsync(user);
-            var users = _userRepository.GetUsers(AppRoles.SYSTEMADMIN, currentUserId).Where(x => x.OptometristFirmId == OptometristFirmId && roles.Contains(AppRoles.OPTOMETRIST));
+            var users = _userRepository.GetUsers(AppRoles.SYSTEMADMIN, _authUser.UserId).Where(x => x.OptometristFirmId == OptometristFirmId && roles.Contains(AppRoles.OPTOMETRIST));
             _AuditRepo.AddAudit(Activities.VIEW_OPTOMETRIST, "View Optomstrist");
             return View(users);
         }
@@ -69,7 +69,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             {
                 return RedirectToAction("Index", "Customer", new { area = "Customer" });
             }
-            var optometristUser = _optometristUserQuery.Filter(x => x.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(x => x.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             var model = new UserModel
             {
                 OptometristFirmId = optometristUser == null ? 0 : optometristUser.OptometristFirmId,
@@ -106,7 +106,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         IsActive = true,
                         MobileNumber = model.MobileNumber,
                         UserName = model.Email,
-                        CreatedBy = currentUserId,
+                        CreatedBy = _authUser.UserId,
                         DefaultRole = AppRoles.OPTOMETRIST,
                         OptometristFirmId = model.OptometristFirmId,
                         PhoneNumber = model.Phone,
@@ -181,7 +181,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             try
             {
 
-                string administratorId = currentUserId;
+                string administratorId = _authUser.UserId;
                 model.OptometristFirmId = _optometristUserQuery.FilterAsync(x => x.ApplicationUserId == administratorId).Result.FirstOrDefault().OptometristFirmId;
 
                 if (!ModelState.IsValid)
@@ -260,7 +260,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     applicationUser.IsActive = true;
                 }
 
-                applicationUser.ModifiedBy = currentUserId;
+                applicationUser.ModifiedBy = _authUser.UserId;
                 applicationUser.DateUpdated = DateTime.Now;
                 var updateUser = await _userManager.UpdateAsync(applicationUser);
                 if (updateUser.Succeeded)

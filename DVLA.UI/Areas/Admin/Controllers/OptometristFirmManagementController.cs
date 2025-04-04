@@ -41,14 +41,14 @@ namespace DVLA.UI.Areas.Admin.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IConfiguration _configuration;
-        private readonly string currentUserId;
         private readonly DVLADbContext _context;
+        private readonly IAuthUser _authUser;
         private readonly static object _locker = new object();
 
         // GET: Admin/OptometristManagement
         public OptometristFirmManagementController(IAuditRepo AuditRepo, IRepositoryQuery<OptometristFirm> optometristQuery, IRepositoryQuery<Region> regionQuery,
             IRepositoryQuery<District> districtQuery,
-            INotificationRepository notificationRepository, IUserService userService, IRepositoryQuery<OptometristFirmUser> optometristUserQuery, IReportRepository reportRepository, IUserRepository userRepository, ILogger<OptometristFirmManagementController> logger, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IConfiguration configuration, DVLADbContext context)
+            INotificationRepository notificationRepository, IUserService userService, IRepositoryQuery<OptometristFirmUser> optometristUserQuery, IReportRepository reportRepository, IUserRepository userRepository, ILogger<OptometristFirmManagementController> logger, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IConfiguration configuration, DVLADbContext context, IAuthUser authUser)
         {
             _AuditRepo = AuditRepo;
             _regionQuery = regionQuery;
@@ -59,11 +59,11 @@ namespace DVLA.UI.Areas.Admin.Controllers
             _reportRepository = reportRepository;
             _userRepository = userRepository;
             _logger = logger;
-            currentUserId = userService.GetUserData().Id;
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
             _context = context;
+            _authUser = authUser;
         }
 
         [HttpGet]
@@ -79,7 +79,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 }
                 ViewBag.Regions = JsonConvert.DeserializeObject<List<Region>>(HttpContext.Session.GetString("Regions"));
                 var model = await _reportRepository.FetchAllOptometristFirms(0, null);
-
+                model = model.Where(x => !x.IsActive).ToList();
                 _AuditRepo.AddAudit(Activities.VIEW_OPTOMETRIST_FIRM, "View Optometrist Firm");
                 return View(model);
             }
@@ -113,8 +113,9 @@ namespace DVLA.UI.Areas.Admin.Controllers
                     HttpContext.Session.SetString("Regions", JsonConvert.SerializeObject(_regionQuery.GetAllAsync().GetAwaiter().GetResult().OrderBy(x => x.Name)));
                 }
                 ViewBag.Regions = JsonConvert.DeserializeObject<List<Region>>(HttpContext.Session.GetString("Regions"));
-                var model = await _reportRepository.FetchAllOptometristFirms(Region.GetValueOrDefault(), District);
-
+                var model = await _reportRepository.FetchAllOptometristFirms(Region, District);
+                model = model.Where(x => x.IsActive).ToList();
+                HttpContext.Session.SetString("ExportItems", JsonConvert.SerializeObject(model));
                 _AuditRepo.AddAudit(Activities.VIEW_OPTOMETRIST_FIRM, "View Optometrist Firm");
                 return View(model);
             }
@@ -124,6 +125,53 @@ namespace DVLA.UI.Areas.Admin.Controllers
             }
             return View(new List<OptometristFirmModel>());
 
+        }
+
+
+        [HttpGet]
+        public ActionResult ExportOptometristFirms()
+        {
+            try
+            {
+                if (HttpContext.Session.GetString("ExportItems") == null)
+                {
+                    return NoContent();
+                }
+
+
+                List<OptometristFirmModel> model = JsonConvert.DeserializeObject<List<OptometristFirmModel>>(HttpContext.Session.GetString("ExportItems"));
+               
+                //Convert List to Excel
+                List<OptometristFirmExcelExport> exportItems = model.Select(x => new OptometristFirmExcelExport
+                {
+                    AccreditationNumber = x.AccreditationNumber,
+                    BusinessAddress = x.BusinessAddress,
+                    BusinessName = x.BusinessName,
+                    CentreCode = x.CentreCode,
+                    ContactEmailAddress = x.ContactEmailAddress,
+                    ContactFirstName = x.ContactFirstName,
+                    ContactLastName = x.ContactLastName,
+                    ContactPhoneNumber = x.ContactLastName,
+                    DigitalAddress = x.DigitalAddress,
+                    DistrictName = x.DistrictName,
+                    MobileNumber = x.MobileNumber,
+                    RegionName = x.RegionName,
+                    RegistrationNumber = x.RegistrationNumber,
+                    ReorderLevel = x.ReorderLevel,
+                    TelephoneNumber = x.TelephoneNumber,
+                    Town = x.Town
+                }).ToList();
+                byte[] exportData = Utility.ExportToExcel(exportItems);
+                _AuditRepo.AddAudit(Activities.VIEW_OPTOMETRIST_FIRM, "View Optometrist Firm");
+
+                return File(exportData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OptometristFirms.xlsx");
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return View(new List<OptometristFirmModel>());
         }
 
         public ActionResult Deactivated()
@@ -281,7 +329,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                             MobileNumber = model.MobileNumber,
                             Address = model.BusinessAddress,
                             UserName = model.ContactEmailAddress,
-                            CreatedBy = currentUserId,
+                            CreatedBy = _authUser.UserId,
                             CreatedDate = DateTime.UtcNow,
                             DefaultRole = AppRoles.FACILITYOWNER,
                             EmailConfirmed = true,
@@ -350,7 +398,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                                 ContactFirstName = model.ContactFirstName,
                                 ContactLastName = model.ContactLastName,
                                 ContactPhoneNumber = model.ContactPhoneNumber,
-                                CreatedBy = currentUserId,
+                                CreatedBy = _authUser.UserId,
                                 DigitalAddress = model.DigitalAddress,
                                 IsActive = true,
                                 IsDeleted = false,
@@ -521,7 +569,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 optomestrist.ContactFirstName = model.ContactFirstName;
                 optomestrist.ContactLastName = model.ContactLastName;
                 optomestrist.ContactPhoneNumber = model.ContactPhoneNumber;
-                optomestrist.CreatedBy = currentUserId;
+                optomestrist.CreatedBy = _authUser.UserId;
                 optomestrist.DigitalAddress = model.DigitalAddress;
                 optomestrist.IsActive = true;
                 optomestrist.IsDeleted = false;
@@ -644,7 +692,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                         return Json(new { success = false, message });
                     }
                     optometrist.IsActive = !optometrist.IsActive;
-                    optometrist.ModifiedBy = currentUserId;
+                    optometrist.ModifiedBy = _authUser.UserId;
                     optometrist.ModifiedDate = DateTime.Now;
                     await _context.SaveChangesAsync();
 
@@ -692,7 +740,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                         return RedirectToAction("Index");
                     }
                     optometrist.IsActive = !optometrist.IsActive;
-                    optometrist.ModifiedBy = currentUserId;
+                    optometrist.ModifiedBy = _authUser.UserId;
                     optometrist.ModifiedDate = DateTime.Now;
                     await _context.SaveChangesAsync();
 

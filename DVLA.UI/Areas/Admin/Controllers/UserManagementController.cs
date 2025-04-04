@@ -34,12 +34,12 @@ namespace DVLA.UI.Areas.Admin.Controllers
         private readonly IRepositoryQuery<OptometristFirmUser> _optometristUserQuery;
         private readonly IConfiguration _configuration;
         private readonly IAuditRepo _AuditRepo;
-        private readonly string currentUserId;
         private readonly ILogger<UserManagementController> _logger;
         private readonly DVLADbContext _context;
+        private readonly IAuthUser _authUser;
 
         public UserManagementController(IRepositoryQuery<ApplicationUser> userRepositoryQuery
-            , INotificationRepository notificationRepository, IUserService userService, IAuditRepo AuditRepo, IRepositoryQuery<OptometristFirm> optometristQuery, IRepositoryQuery<OptometristFirmUser> optometristUserQuery, IUserRepository userRepository, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IConfiguration configuration, ILogger<UserManagementController> logger, DVLADbContext context)
+            , INotificationRepository notificationRepository, IUserService userService, IAuditRepo AuditRepo, IRepositoryQuery<OptometristFirm> optometristQuery, IRepositoryQuery<OptometristFirmUser> optometristUserQuery, IUserRepository userRepository, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IConfiguration configuration, ILogger<UserManagementController> logger, DVLADbContext context, IAuthUser authUser)
         {
             _userRepository = userRepository;
             _optometristQuery = optometristQuery;
@@ -49,10 +49,10 @@ namespace DVLA.UI.Areas.Admin.Controllers
             _AuditRepo = AuditRepo;
             _userManager = userManager;
             _roleManager = roleManager;
-            currentUserId = userService.GetUserData().Id;
             _configuration = configuration;
             _logger = logger;
             _context = context;
+            _authUser = authUser;
         }
         // GET: User
         public ActionResult Index()
@@ -60,11 +60,11 @@ namespace DVLA.UI.Areas.Admin.Controllers
             List<UserViewModel> users = new ();
             if (User.IsInRole(AppRoles.OPTOMETRIST) || User.IsInRole(AppRoles.FACILITYOWNER))
             {
-                users = _userRepository.GetUsers(null, currentUserId);
+                users = _userRepository.GetUsers(null, _authUser.UserId);
             }
             else
             {
-                users = _userRepository.GetUsers(null, currentUserId);
+                users = _userRepository.GetUsers(null, _authUser.UserId);
             }
             
             _AuditRepo.AddAudit(Activities.VIEW_USER, "View Users");
@@ -146,7 +146,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                         IsActive = true,
                         MobileNumber = model.MobileNumber,
                         UserName = model.Email,
-                        CreatedBy = currentUserId,
+                        CreatedBy = _authUser.UserId,
                         Pin = model.PIN,
                         EmailConfirmed = model.EmailConfirmed,
                         PhoneNumber = model.Phone,
@@ -312,7 +312,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                     applicationUser.IsDeleted = false;
                 }
 
-                applicationUser.ModifiedBy = currentUserId;
+                applicationUser.ModifiedBy = _authUser.UserId;
                 applicationUser.DateUpdated = DateTime.Now;
                 var updateUser = await _userManager.UpdateAsync(applicationUser);
                 if (updateUser.Succeeded)

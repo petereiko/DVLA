@@ -20,28 +20,28 @@ namespace DVLA.Business.UserModule
         private readonly ILogger<AuditRepo> _logger;
         private readonly string _connectionString;
         private readonly IUserService _userService;
-        private readonly string UserId;
+        private readonly IAuthUser _authUser;
 
         private static object initLock = new object();
 
-        public AuditRepo(DVLADbContext context, ILogger<AuditRepo> logger, IConfiguration configuration, IUserService userService)
+        public AuditRepo(DVLADbContext context, ILogger<AuditRepo> logger, IConfiguration configuration, IUserService userService, IAuthUser authUser)
         {
             _context = context;
             _logger = logger;
             _connectionString = configuration["DefaultConnection"];
             _userService = userService;
-            UserId = userService.GetUserData().Id;
+            _authUser = authUser;
         }
 
         public void AddAudit(long moduleActionId, string description)
         {
-            var user = _context.ApplicationUsers.FirstOrDefault(x => x.Id == UserId);
+            var user = _context.ApplicationUsers.FirstOrDefault(x => x.Id == _authUser.UserId);
 
             var auditLog = new ActivityLog
             {
                 NameOfUser = user?.LastName == null ? user?.LastName : user?.FirstName,
                 ModuleActionId = moduleActionId,
-                CreatedBy = UserId,
+                CreatedBy = _authUser.UserId,
                 Description = description,
                 CreatedDate = DateTime.Now
             };

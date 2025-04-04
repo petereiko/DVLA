@@ -26,16 +26,16 @@ namespace DVLA.UI.Areas.Admin.Controllers
         private ISlotRepository _slotRepository;
         private ISlotUsageRepository _slotUsageRepository;
         private ILogger<SlotManagementController> _logger;
-        private readonly string currentUserId;
         private readonly IUserService _userService;
-        public SlotManagementController(ISlotRepository slotRepository, IUserService userService, ISlotUsageRepository slotUsageRepository, IAuditRepo auditRepo, ILogger<SlotManagementController> logger)
+        private readonly IAuthUser _authUser;
+        public SlotManagementController(ISlotRepository slotRepository, IUserService userService, ISlotUsageRepository slotUsageRepository, IAuditRepo auditRepo, ILogger<SlotManagementController> logger, IAuthUser authUser)
         {
             _slotRepository = slotRepository;
             _slotUsageRepository = slotUsageRepository;
             _auditRepo = auditRepo;
             _logger = logger;
             _userService = userService;
-            currentUserId = userService.GetUserData().Id;
+            _authUser = authUser;
         }
         // GET: Admin/SlotManagement
         public ActionResult SlotRequest(int? status=1)
@@ -130,7 +130,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
 
                 return View(model);
             }
-            model.FormData.CreatedBy = currentUserId;
+            model.FormData.CreatedBy = _authUser.UserId;
             model.FormData.CreatedDate = DateTime.Now;
             var response = _slotRepository.CreateSlotPrice(model.FormData);
             if (response.Success)
@@ -175,7 +175,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 }
                 return View(model);
             }
-            model.FormData.UpdatedBy = currentUserId;
+            model.FormData.UpdatedBy = _authUser.UserId;
             model.FormData.ModifiedDate = DateTime.Now;
             var response = _slotRepository.UpdateSlotPrice(model.FormData, id);
             if (response.Success)
@@ -284,9 +284,9 @@ namespace DVLA.UI.Areas.Admin.Controllers
         [HttpPost]
         public ActionResult SlotUsageStatistics(SlotUsageViewModel model) 
         {
-            int? optometristFirmId = _userService.GetUserData().OptometristFirmId;
 
-            IEnumerable<SlotUsageModel> slotUsages = _slotUsageRepository.FetchOptometristSlotUsage(model.StartDate, model.EndDate, model.AccessType, optometristFirmId);
+
+            IEnumerable<SlotUsageModel> slotUsages = _slotUsageRepository.FetchOptometristSlotUsage(model.StartDate, model.EndDate, model.AccessType, _authUser.OptometristFirmId);
             model.SlotUsages = slotUsages;
 
             model.TotalAccessPurchase = slotUsages.Sum(x => x.TotalSlotPurchased);
@@ -303,7 +303,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
             SlotStatisticsViewModel model = new()
             {
                 SlotStatisticsFilter = new() { AccessType = null },
-                OptometristFirmId = _userService.GetUserData().OptometristFirmId
+                OptometristFirmId = _authUser.OptometristFirmId
             };
             model = await _slotUsageRepository.SlotPurchasedAsync(model);
             return View(model);
@@ -312,7 +312,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> SlotPurchased(SlotStatisticsViewModel model)
         {
-            model.OptometristFirmId = _userService.GetUserData().OptometristFirmId;
+            model.OptometristFirmId = _authUser.OptometristFirmId;
             model = await _slotUsageRepository.SlotPurchasedAsync(model);
             return View(model);
         }
@@ -327,7 +327,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 {
                     AccessType = null
                 },
-                OptometristFirmId = _userService.GetUserData().OptometristFirmId
+                OptometristFirmId = _authUser.OptometristFirmId
             };
             model = await _slotUsageRepository.SlotUsedAsync(model);
             return View(model);
@@ -336,7 +336,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> SlotUsed(SlotStatisticsViewModel model)
         {
-            model.OptometristFirmId = _userService.GetUserData().OptometristFirmId;
+            model.OptometristFirmId = _authUser.OptometristFirmId;
             model = await _slotUsageRepository.SlotUsedAsync(model);
             return View(model);
         }
@@ -347,7 +347,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
             SlotStatisticsViewModel model = new()
             {
                 SlotStatisticsFilter = new() { AccessType = null },
-                OptometristFirmId = _userService.GetUserData().OptometristFirmId
+                OptometristFirmId = _authUser.OptometristFirmId
             };
             model = await _slotUsageRepository.SlotBalanceAsync(model);
             return View(model);
@@ -356,7 +356,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> SlotBalance(SlotStatisticsViewModel model)
         {
-            model.OptometristFirmId = _userService.GetUserData().OptometristFirmId;
+            model.OptometristFirmId = _authUser.OptometristFirmId;
             model = await _slotUsageRepository.SlotBalanceAsync(model);
             return View(model);
         }

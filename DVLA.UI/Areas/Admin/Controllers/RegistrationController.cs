@@ -32,7 +32,6 @@ namespace DVLA.UI.Areas.Admin.Controllers
         private readonly ISmsRepository _smsRepository;
         private IVisualAssessmentResultRepository _visualAssessmentResultRepository;
         //private readonly int OptometristFirmId;
-        private readonly string currentUserId;
         private readonly ILogger<RegistrationController> _logger;
 
         // GET: VisualAssessmentResult/Applicant
@@ -47,7 +46,6 @@ namespace DVLA.UI.Areas.Admin.Controllers
             _smsRepository = smsRepository;
             _visualAssessmentResultRepository = visualAssessmentResultRepository;
             _optometristFirmQuery = optometristFirmQuery;
-            currentUserId = userService.GetUserData().Id;
             _logger = logger;
             _optometristFirmUserQuery = optometristFirmUserQuery;
         }
@@ -227,11 +225,11 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 applicant.CreatedBy = model.CreatedBy;
                 applicant.IsDeleted = model.IsDeleted;
                 applicant.ModifiedBy = model.UpdatedBy;
-                if ((model.IsRegistration ?? false) && string.IsNullOrEmpty(model.ReferenceNumber))
-                {
-                    applicant.ReferenceNumber = _visualAssessmentResultRepository.GenerateReferenceNo(model.OptometristFirmId);
-                    applicant.IsSynchronized = false;
-                }
+                //if ((model.IsRegistration ?? false) && string.IsNullOrEmpty(model.ReferenceNumber))
+                //{
+                //    applicant.ReferenceNumber = _visualAssessmentResultRepository.GenerateReferenceNo(model.OptometristFirmId);
+                //    applicant.IsSynchronized = false;
+                //}
                 _applicantQuery.Update(applicant);
 
 

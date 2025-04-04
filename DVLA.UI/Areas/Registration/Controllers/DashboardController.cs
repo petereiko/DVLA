@@ -24,7 +24,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
         private readonly IRepositoryQuery<OptometristFirmUser> _optometristUserQuery;
         private readonly IRepositoryQuery<OptometristFirm> _optometristFirmQuery;
         private readonly IRepositoryQuery<Slot> _slotRepositoryQuery;
-        private readonly string currentUserId;
+        private readonly IAuthUser _authUser;
 
         private static readonly Random rand = new Random();
         private string GetRandomColor()
@@ -34,7 +34,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
 
         public DashboardController(IAuditRepo AuditRepo, IAnalyticRepository analyticRepository, ISlotRepository slotRepository,
             IRepositoryQuery<OptometristFirm> optometristFirmQuery, IRepositoryQuery<OptometristFirmUser> optometristUserQuery,
-            IRepositoryQuery<Slot> slotRepositoryQuery, IUserService userService)
+            IRepositoryQuery<Slot> slotRepositoryQuery, IUserService userService, IAuthUser authUser)
         {
             _AuditRepo = AuditRepo;
             _slotRepository = slotRepository;
@@ -42,7 +42,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
             _optometristUserQuery = optometristUserQuery;
             _optometristFirmQuery = optometristFirmQuery;
             _slotRepositoryQuery = slotRepositoryQuery;
-            currentUserId = userService.GetUserData().Id;
+            _authUser = authUser;
         }
 
         public ActionResult Index()
@@ -53,7 +53,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
 
         public JsonResult GetAvailableSlotCount()
         {
-            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             var result = _analyticRepository.GetAvailableSlots(optometristUser.OptometristFirmId);
 
             return Json(new { success = true, result });
@@ -61,7 +61,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
 
         public JsonResult GetUsedSlotCount()
         {
-            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             var result = _analyticRepository.GetUsedSlots(optometristUser.OptometristFirmId);
 
             return Json(new { success = true, result });
@@ -69,7 +69,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
 
         public JsonResult GetApprovedApplicationCount()
         {
-            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             var result = _analyticRepository.GetApprovedRequestCount(optometristUser.OptometristFirmId);
 
             return Json(new { success = true, result });
@@ -77,7 +77,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
 
         public JsonResult GetDeclinedApplicationCount()
         {
-            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             var result = _analyticRepository.GetDeclinedRequestCount(optometristUser.OptometristFirmId);
 
             return Json(new { success = true, result });
@@ -86,7 +86,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
 
         public ContentResult GetSynchronizationChartCount()
         {
-            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             var result = _analyticRepository.GetSychronizationChartCount(optometristUser.OptometristFirmId);
             foreach (ChartCount n in result)
             {
@@ -98,7 +98,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
 
         public ContentResult GetUsedSlotChartCount()
         {
-            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             var result = _analyticRepository.GetUsedSlotChartCount(optometristUser.OptometristFirmId);
             foreach (ChartCount n in result)
             {
@@ -110,7 +110,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
 
         public ContentResult GetApprovedApplicationChartCount()
         {
-            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             var result = _analyticRepository.GetRequestChartCount((long)SlotRequestStatus.Approved, optometristUser.OptometristFirmId);
             foreach (ChartCount n in result)
             {
@@ -122,7 +122,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
 
         public ContentResult GetDeclinedApplicationChartCount()
         {
-            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(u => u.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             var result = _analyticRepository.GetRequestChartCount((long)SlotRequestStatus.Reject, optometristUser.OptometristFirmId);
             foreach (ChartCount n in result)
             {

@@ -35,14 +35,14 @@ namespace DVLA.UI.Areas.Customer.Controllers
         private readonly IRepositoryQuery<VisualAssessmentResult> _applicantQuery;
         private readonly IRepositoryQuery<OptometristFirm> _optometristFirmQuery;
         private readonly ILogger<ReportManagementController> _logger;
-        private readonly string currentUserId;
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
+        private readonly IAuthUser _authUser;
 
 
         public ReportManagementController(IAuditRepo AuditRepo, IReportRepository reportRepository,
-            IRepositoryQuery<OptometristFirmUser> optometristUserQuery, IUserService userService, IVisualAssessmentResultRepository assessmentResultRepository, IRepositoryQuery<VisualAssessmentResult> applicantQuery, IRepositoryQuery<OptometristFirm> optometristFirmQuery, IAuditRepo auditRepo, ILogger<ReportManagementController> logger, IWebHostEnvironment environment, IConfiguration configuration)
+            IRepositoryQuery<OptometristFirmUser> optometristUserQuery, IUserService userService, IVisualAssessmentResultRepository assessmentResultRepository, IRepositoryQuery<VisualAssessmentResult> applicantQuery, IRepositoryQuery<OptometristFirm> optometristFirmQuery, IAuditRepo auditRepo, ILogger<ReportManagementController> logger, IWebHostEnvironment environment, IConfiguration configuration, IAuthUser authUser)
         {
             _AuditRepo = AuditRepo;
             _reportRepository = reportRepository;
@@ -52,10 +52,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
             _optometristFirmQuery = optometristFirmQuery;
             _AuditRepo = auditRepo;
             _userService = userService;
-            currentUserId = userService.GetUserData().Id;
             _logger = logger;
             _environment = environment;
             _configuration = configuration;
+            _authUser = authUser;
         }
         [HttpGet]
         public IActionResult Index()
@@ -75,7 +75,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             }
 
             var report = new List<CustomerReportViewModel>();
-            var optometristUser = _optometristUserQuery.Filter(x => x.ApplicationUserId == currentUserId).FirstOrDefault();
+            var optometristUser = _optometristUserQuery.Filter(x => x.ApplicationUserId == _authUser.UserId).FirstOrDefault();
             int OptometristFirmId = optometristUser == null ? 0 : optometristUser.OptometristFirmId;
             try
             {
@@ -123,11 +123,11 @@ namespace DVLA.UI.Areas.Customer.Controllers
         {
             if (User.IsInRole(AppRoles.OPTOMETRIST))
             {
-                model.Clients = _reportRepository.FetchClientSearch(model.SearchParameter, null, currentUserId).Result.ToList();
+                model.Clients = _reportRepository.FetchClientSearch(model.SearchParameter, null, _authUser.UserId).Result.ToList();
             }
             else if (User.IsInRole(AppRoles.FACILITYOWNER))
             {
-                model.Clients = _reportRepository.FetchClientSearch(model.SearchParameter, currentUserId, null).Result.ToList();
+                model.Clients = _reportRepository.FetchClientSearch(model.SearchParameter, _authUser.UserId, null).Result.ToList();
             }
             return View(model);
         }
@@ -141,7 +141,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
             PaginationRequestModel<ClientSearchRequest> request = new()
             {
-                InputModel = new() { OptometristFirmId = _userService.GetUserData().OptometristFirmId, Search = "" },
+                InputModel = new() { OptometristFirmId = _authUser.OptometristFirmId, Search = "" },
                 PageIndex = Entries
             };
             ViewBag.Entries = Entries.ToString();
@@ -158,7 +158,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             ViewBag.Entries = model.Entries.ToString();
             PaginationRequestModel<ClientSearchRequest> request = new()
             {
-                InputModel = new() { OptometristFirmId = _userService.GetUserData().OptometristFirmId, Search = "", StartDate = model.StartDate, EndDate = model.EndDate },
+                InputModel = new() { OptometristFirmId = _authUser.OptometristFirmId, Search = "", StartDate = model.StartDate, EndDate = model.EndDate },
                 PageSize = model.Entries
             };
             ViewBag.StartDate = request.InputModel.StartDate.ToString("dd/MM/yyyy");
@@ -177,8 +177,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             int sortCol = int.Parse(Request.Query["iSortCol_0"]);
             string sortDir = Request.Query["sSortDir_0"];
             string search = Request.Query["sSearch"];
-            var userData = _userService.GetUserData();
-            int? OptometristFirmId = userData.OptometristFirmId;
+            int? OptometristFirmId = _authUser.OptometristFirmId;
             ResultViewModel data = _assessmentResultRepository.FetchAssessmentResults(displayLength, displayStart, sortCol, sortDir, search, OptometristFirmId);
 
 
@@ -222,7 +221,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
                 Int64 applicanId = Convert.ToInt64(Utility.Decrypt(token));
                 var applicant = _applicantQuery.Filter(x => x.Id == applicanId).FirstOrDefault();
-                var optometristUser = _optometristUserQuery.FilterInclude(x => x.ApplicationUserId == currentUserId, x => x.OptometristFirm).FirstOrDefault();
+                var optometristUser = _optometristUserQuery.FilterInclude(x => x.ApplicationUserId == _authUser.UserId, x => x.OptometristFirm).FirstOrDefault();
                 int OptometristFirmId = optometristUser == null ? 0 : optometristUser.OptometristFirmId;
                 //var firm = _optometristFirmQuery.Filter(x => x.Id == OptometristFirmId).FirstOrDefault();
 
@@ -411,7 +410,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 //System.IO.File.WriteAllBytes(path, imageBytes);
                 //model.PassportImageUrl = filename + ".png";
                 //string passFile = applicant.PassportImageUrl;
-                var optometristUser = _optometristUserQuery.FilterInclude(x => x.ApplicationUserId == currentUserId, x => x.OptometristFirm).FirstOrDefault();
+                var optometristUser = _optometristUserQuery.FilterInclude(x => x.ApplicationUserId == _authUser.UserId, x => x.OptometristFirm).FirstOrDefault();
                 int OptometristFirmId = optometristUser == null ? 0 : optometristUser.OptometristFirmId;
 
                 //var firm = _optometristFirmQuery.FilterAsync(x => x.Id == OptometristFirmId).Result.FirstOrDefault();

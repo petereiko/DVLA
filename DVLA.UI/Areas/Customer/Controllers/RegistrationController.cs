@@ -35,12 +35,12 @@ namespace DVLA.UI.Areas.Customer.Controllers
         private readonly ISmsRepository _smsRepository;
         private IVisualAssessmentResultRepository _visualAssessmentResultRepository;
         private readonly ILogger<RegistrationController> _logger;
-        private readonly string currentUserId;
+        private readonly IAuthUser _authUser;
 
         // GET: VisualAssessmentResult/Applicant
         public RegistrationController(IAuditRepo AuditRepo, IRepositoryQuery<VisualAssessmentResult> applicantQuery, IRepositoryQuery<Region> regionQuery,
             INotificationRepository notificationRepository, IReportRepository reportRepository, ISmsRepository smsRepository, IVisualAssessmentResultRepository visualAssessmentResultRepository,
-            IRepositoryQuery<OptometristFirm> optometristFirmQuery, IAuditRepo auditRepo, IUserService userService, ILogger<RegistrationController> logger, IRepositoryQuery<OptometristFirmUser> optometristFirmUserQuery)
+            IRepositoryQuery<OptometristFirm> optometristFirmQuery, IAuditRepo auditRepo, IUserService userService, ILogger<RegistrationController> logger, IRepositoryQuery<OptometristFirmUser> optometristFirmUserQuery, IAuthUser authUser)
         {
             _AuditRepo = AuditRepo;
             _applicantQuery = applicantQuery;
@@ -51,9 +51,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
             _visualAssessmentResultRepository = visualAssessmentResultRepository;
             _optometristFirmQuery = optometristFirmQuery;
             _AuditRepo = auditRepo;
-            currentUserId = userService.GetUserData().Id;
             _logger = logger;
             _optometristFirmUserQuery = optometristFirmUserQuery;
+            _authUser = authUser;
         }
 
         // GET: Admin/Optometrist
@@ -62,7 +62,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
             try
             {
-                OptometristFirmUser optometristFirmUser = _optometristFirmUserQuery.Filter(x => x.ApplicationUserId == currentUserId).FirstOrDefault();
+                OptometristFirmUser optometristFirmUser = _optometristFirmUserQuery.Filter(x => x.ApplicationUserId == _authUser.UserId).FirstOrDefault();
                 int OptometristFirmId = optometristFirmUser == null ? 0 : optometristFirmUser.OptometristFirmId;
                 //var obj2 = _applicantQuery.GetAll().ToList();
                 var obj = _applicantQuery.GetAllAsync().Result.Join(_optometristFirmQuery.GetAllAsync().Result,
@@ -206,7 +206,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     Nationality = model.Nationality,
                     Email = model.Email,
                     IsRegistration = true,
-                    CreatedBy = currentUserId,
+                    CreatedBy = _authUser.UserId,
                 };
 
                 await _applicantQuery.AddAsync(applicant);

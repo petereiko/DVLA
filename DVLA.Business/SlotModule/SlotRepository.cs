@@ -41,21 +41,21 @@ namespace DVLA.Business.SlotModule
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly string UserId;
         private readonly string _connectionString;
+        private readonly IAuthUser _authUser;
         private static readonly object _lock = new object();
 
-        public SlotRepository(DVLADbContext context, ILogger<SlotRepository> logger, IHostingEnvironment environment, IUserService userService, IConfiguration configuration, IEmailService emailService, UserManager<ApplicationUser> userManager)
+        public SlotRepository(DVLADbContext context, ILogger<SlotRepository> logger, IHostingEnvironment environment, IUserService userService, IConfiguration configuration, IEmailService emailService, UserManager<ApplicationUser> userManager, IAuthUser authUser)
         {
             _context = context;
             _logger = logger;
             _environment = environment;
             _userService = userService;
-            UserId = userService.GetUserData().Id;
             _configuration = configuration;
             _emailService = emailService;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
             _userManager = userManager;
+            _authUser = authUser;
         }
 
         public List<PriceModel> AmountPerSlot()
@@ -89,7 +89,7 @@ namespace DVLA.Business.SlotModule
                     slotRequest.Status = SlotRequestStatus.Approved;
                     slotRequest.DateApproved = DateTime.Now;
                     slotRequest.ModifiedDate = DateTime.Now;
-                    slotRequest.ModifiedBy = UserId;
+                    slotRequest.ModifiedBy = _authUser.UserId;
                     context.SaveChanges();
 
                     //Add the number of purchased slot to existing
@@ -182,7 +182,7 @@ namespace DVLA.Business.SlotModule
         public MessageResponse<long> CreateSlotPrice(SlotPriceModel model)
         {
             MessageResponse<long> response = new();
-            model.CreatedBy = _userService.GetUserData().Id;
+            model.CreatedBy = _authUser.UserId;
             SlotPrice slotPrice = new SlotPrice { IsActive = model.IsActive, Price = model.Price, CreatedBy = model.CreatedBy, CreatedDate = model.CreatedDate, AccessType = model.AccessType };
             if (_context.SlotPrices.Any(x => x.AccessType == model.AccessType && x.IsActive))
             {
@@ -250,7 +250,7 @@ namespace DVLA.Business.SlotModule
                 Quantity = Quantity,
                 AccessType = model.AccessType.GetValueOrDefault(),
                 Status = model.Status,
-                CreatedBy = UserId,
+                CreatedBy = _authUser.UserId,
                 CreatedDate = DateTime.Now,
                 IsActive = true,
                 IsDeleted = false,
@@ -265,7 +265,7 @@ namespace DVLA.Business.SlotModule
                 response.Message = $"Your request for {slotRequest.Quantity} slot(s) has been submitted successfully. Please wait for the Admin to review it.";
                 response.Success = true;
 
-                var currentUser = _context.ApplicationUsers.AsNoTracking().FirstOrDefault(x => x.Id == UserId);
+                var currentUser = _context.ApplicationUsers.AsNoTracking().FirstOrDefault(x => x.Id == _authUser.UserId);
                 if (currentUser != null)
                 {
 
@@ -729,7 +729,7 @@ namespace DVLA.Business.SlotModule
         {
             MessageResponse response = new();
 
-            var userData = _userService.GetUserData();
+            var userData = _authUser.UserId;
 
             Slot slot = _context.Slots.FirstOrDefault(x => x.OptometristFirmId == model.OptometristFirmId && x.AccessType == (AccessType)model.AccessType);
             if (slot == null)
@@ -748,7 +748,7 @@ namespace DVLA.Business.SlotModule
             SlotReductionLog log = new SlotReductionLog
             {
                 Comment = model.Comment.Trim(),
-                CreatedBy = userData.Id,
+                CreatedBy = _authUser.UserId,
                 CreatedDate = DateTime.Now,
                 IsActive = true,
                 IsDeleted = false,
@@ -779,7 +779,7 @@ namespace DVLA.Business.SlotModule
             slotPrice.IsActive = model.IsActive;
             slotPrice.Price = model.Price;
             slotPrice.AccessType = model.AccessType;
-            slotPrice.ModifiedBy = _userService.GetUserData().Id;
+            slotPrice.ModifiedBy = _authUser.UserId;
             slotPrice.ModifiedDate = model.ModifiedDate;
             if (model.IsActive)
             {

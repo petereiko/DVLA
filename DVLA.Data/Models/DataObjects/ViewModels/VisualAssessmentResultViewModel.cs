@@ -32,6 +32,7 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
         [DataType(DataType.Date)]
         public DateTime? DOB { get; set; }
         public PassOrFail? PassOrFail { get; set; }
+        public int? PassOrFailInt { get; set; }
         public PassResult? PassResult { get; set; }
         public string PostalAddress { get; set; }
         public string ContactNumber { get; set; }

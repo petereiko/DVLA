@@ -12,7 +12,7 @@ namespace DVLA.Business.UserModule
     {
         Task SeedRoles();
         Task<string> GeneratePasswordResetToken(string id);
-        UserViewModel GetUserData();
+        //UserViewModel GetUserData();
         Task<List<UserViewModel>> GetUsersInRole(string roleName);
         Task<PaginationResponseModel<List<UserViewModel>>> GetUsersAsync(PaginationRequestModel model);
         Task<UserViewModel> GetUserByEmail(string email);
@@ -26,7 +26,7 @@ namespace DVLA.Business.UserModule
         Task<MessageResponse> OnboardUser(UserViewModel model);
         Task<MessageResponse> ResetPassword(ResetPasswordViewModel model);
         Task<MessageResponse> EditUser(UserViewModel model);
-        Task<MessageResponse<UserViewModel>> Login(LoginViewModel model);
+        Task<MessageResponse<UserViewModel>> LoginAsync(LoginViewModel model);
         Task<MessageResponse> Logout();
         Task<bool> ConfirmEmail(string encodedToken, string userid);
     }

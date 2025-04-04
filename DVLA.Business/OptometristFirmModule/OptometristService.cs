@@ -28,22 +28,22 @@ namespace DVLA.Business.OptometristFirmModule
     {
         private readonly DVLADbContext _context;
         private readonly ILogger<OptometristService> _logger;
+        private readonly IAuthUser _authUser;
         private readonly IEmailService _emailService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
-        private readonly string UserId;
-        public OptometristService(DVLADbContext context, ILogger<OptometristService> logger, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IUserService userService, IConfiguration configuration, IEmailService emailService)
+        public OptometristService(DVLADbContext context, ILogger<OptometristService> logger, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IUserService userService, IConfiguration configuration, IEmailService emailService, IAuthUser authUser)
         {
             _context = context;
             _logger = logger;
             _userManager = userManager;
             _roleManager = roleManager;
             _userService = userService;
-            UserId = userService.GetUserData().Id;
             _configuration = configuration;
             _emailService = emailService;
+            _authUser = authUser;
         }
 
         public async Task<MessageResponse> CreateOptometricFirm(OptometristFirmViewModel model)
@@ -100,7 +100,7 @@ namespace DVLA.Business.OptometristFirmModule
                         MobileNumber = model.ContactPhoneNumber,
                         Address = model.BusinessAddress,
                         UserName = model.ContactEmail,
-                        CreatedBy = UserId,
+                        CreatedBy = _authUser.UserId,
                         DefaultRole = AppConstants.Roles[1],
                         Id = Guid.NewGuid().ToString()
                     };
@@ -123,7 +123,7 @@ namespace DVLA.Business.OptometristFirmModule
                             ContactFirstName = model.ContactFirstName,
                             ContactLastName = model.ContactLastName,
                             ContactPhoneNumber = model.ContactPhoneNumber,
-                            CreatedBy = UserId,
+                            CreatedBy = _authUser.UserId,
                             DigitalAddress = model.DigitalAddress,
                             IsActive = true,
                             IsDeleted = false,
@@ -320,7 +320,7 @@ namespace DVLA.Business.OptometristFirmModule
                     optomestristFirm.ContactFirstName = model.ContactFirstName;
                     optomestristFirm.ContactLastName = model.ContactLastName;
                     optomestristFirm.ContactPhoneNumber = model.ContactPhoneNumber;
-                    optomestristFirm.CreatedBy = UserId;
+                    optomestristFirm.CreatedBy = _authUser.UserId;
                     optomestristFirm.DigitalAddress = model.DigitalAddress;
                     optomestristFirm.IsActive = true;
                     optomestristFirm.IsDeleted = false;
@@ -343,7 +343,7 @@ namespace DVLA.Business.OptometristFirmModule
                             MobileNumber = model.ContactPhoneNumber,
                             Address = model.BusinessAddress,
                             UserName = model.ContactEmail,
-                            CreatedBy = UserId,
+                            CreatedBy = _authUser.UserId,
                             Id = Guid.NewGuid().ToString()
                         };
 
@@ -429,11 +429,11 @@ namespace DVLA.Business.OptometristFirmModule
                 {
                     if (user.IsDeleted) continue;
                     user.IsActive = optometrist.IsActive;
-                    user.ModifiedBy = UserId;
+                    user.ModifiedBy = _authUser.UserId;
                     user.DateUpdated = DateTime.UtcNow;
                 }
 
-                optometrist.ModifiedBy = UserId;
+                optometrist.ModifiedBy = _authUser.UserId;
                 optometrist.ModifiedDate = DateTime.Now;
                 await _context.SaveChangesAsync();
                 result.Success = true;

@@ -26,13 +26,15 @@ namespace DVLA.Business.ApplicantModule
         private readonly IHostingEnvironment _environment;
         private readonly IOptometristService _optometristService;
         private readonly IUserService _userService;
-        public ApplicantService(DVLADbContext context, ILogger<ApplicantService> logger, IHostingEnvironment environment, IOptometristService optometristService, IUserService userService)
+        private readonly IAuthUser _authUser;
+        public ApplicantService(DVLADbContext context, ILogger<ApplicantService> logger, IHostingEnvironment environment, IOptometristService optometristService, IUserService userService, IAuthUser authUser)
         {
             _context = context;
             _logger = logger;
             _environment = environment;
             _optometristService = optometristService;
             _userService = userService;
+            _authUser = authUser;
         }
 
 
@@ -142,7 +144,7 @@ namespace DVLA.Business.ApplicantModule
                     return response;
                 }
 
-                var userData = _userService.GetUserData();
+                //var userData = _userService.GetUserData();
 
                 Int64 applicanId = Convert.ToInt64(Utility.Decrypt(Id));
                 Applicant applicant = _context.Applicants.FirstOrDefault(x => x.Id == applicanId);
@@ -177,7 +179,7 @@ namespace DVLA.Business.ApplicantModule
                 applicant.ResultServiceType = model.ResultServiceType;
                 applicant.PassportImageUrl = model.PassportImageUrl;
                 applicant.TestType = (TestType)model.TestType;
-                applicant.ModifiedBy = userData.Id;
+                applicant.ModifiedBy = _authUser.UserId;
 
                 _context.SaveChanges();
 

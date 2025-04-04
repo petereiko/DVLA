@@ -114,25 +114,6 @@
                                     </div>
                                 </div>
                                 <br />
-                                <div class="row row-xs mg-b-10">
-                                    @if (Model != null)
-                                    {
-                                        if (Model.Id > 0 && !string.IsNullOrEmpty(Model.ReferenceNumber))
-                                        {
-                                            <div class="col-sm mg-t-10 mg-sm-t-0">
-                                                Reference Number
-                                                <div class="form-control">
-                                                    <span id="HX_BCV_OU">
-                                                        @Html.DisplayFor(model => model.ReferenceNumber)
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                        }
-                                    }
-                                    <div class="col-sm-8">
-                                    </div>
-                                </div>
                                 <div id="DetailsOfApplicant">
                                     <ul class="nav nav-tabs" id="DetailsOfApplicantTab">
                                         <li class="nav-item">
@@ -317,18 +298,18 @@
 
                                                 <script>
                                                     function Compute() {
-                                                        debugger;
-                                                        var left = document.getElementById('HX_BCV_OD').value;
-                                                        var right = document.getElementById('HX_BCV_OS').value;
-                                                        console.log('!isNaN(left) = ' + !isNaN(left));
-                                                        console.log('!isNaN(right) = ' + !isNaN(right));
-                                                        if (left != "" && right != "") {
-                                                            var result = parseInt(left) + parseInt(right);
-                                                            document.getElementById('HX_BCV_OU').innerHTML = result.toString();
-                                                        }
-                                                        else {
-                                                            document.getElementById('HX_BCV_OU').innerHTML = " ";
-                                                        }
+                                                    debugger;
+                                                    var left = document.getElementById('HX_BCV_OD').value;
+                                                    var right = document.getElementById('HX_BCV_OS').value;
+                                                    console.log('!isNaN(left) = ' + !isNaN(left));
+                                                    console.log('!isNaN(right) = ' + !isNaN(right));
+                                                    if (left != "" && right != "") {
+                                                    var result = parseInt(left) + parseInt(right);
+                                                    document.getElementById('HX_BCV_OU').innerHTML = result.toString();
+                                                    }
+                                                    else {
+                                                    document.getElementById('HX_BCV_OU').innerHTML = " ";
+                                                    }
                                                     }
                                                 </script>
 
@@ -440,18 +421,38 @@
                                             </div>
                                             <div class="row row-xs mg-b-10">
 
+                                                <input type="hidden" asp-for="PassOrFailInt"/>
+
                                                 <div class="col-sm">
-                                                    <select asp-for="PassOrFail" class="form-control" asp-items="Html.GetEnumSelectList<PassOrFail>()">
-                                                        @* <option value="">Select pass type</option> *@
+                                                    <select asp-for="PassOrFail" disabled class="form-control" asp-items="Html.GetEnumSelectList<PassOrFail>()">
+                                                        <option value="">Select pass type</option>
                                                     </select>
                                                     @* @Html.DropDownList("PassOrFail", EnumHelper.GetSelectList(typeof(PassOrFail)), "", new { @style = "width:100%;", @class = "form-control" }) *@
                                                     @Html.ValidationMessageFor(model => model.PassOrFail, "", new { @class = "text-danger" })
 
                                                 </div>
                                                 <div class="col-sm">
-                                                    <select asp-for="PassResult" style="display:none" asp-items="EnumExtensions.GetEnumSelectListWithDescriptions<PassResult>()" class="form-control">
-                                                        <option value="">Select Pass Result</option>
-                                                    </select>
+                                                    @if (Model.ResultConclusion == null)
+                                                    {
+                                                        <select asp-for="PassResult" style="display:none" asp-items="EnumExtensions.GetEnumSelectListWithDescriptions<PassResult>()" class="form-control">
+                                                            <option value="">Select Pass Result</option>
+                                                        </select>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (Model.PassOrFail == PassOrFail.Pass)
+                                                        {
+                                                            <select asp-for="PassResult" asp-items="EnumExtensions.GetEnumSelectListWithDescriptions<PassResult>()" class="form-control">
+                                                                <option value="">Select Pass Result</option>
+                                                            </select>
+                                                        }
+                                                        else
+                                                        {
+                                                            <select asp-for="PassResult" style="display:none" asp-items="EnumExtensions.GetEnumSelectListWithDescriptions<PassResult>()" class="form-control">
+                                                                <option value="">Select Pass Result</option>
+                                                            </select>
+                                                        }
+                                                    }
                                                     @Html.ValidationMessageFor(model => model.PassResult, "", new { @class = "text-danger" })
 
                                                 </div><div class="col-sm"></div><div class="col-sm"></div>
@@ -511,7 +512,8 @@
 
 @section scripts
 {
-    <script src="~/createvisualassessment.js"></script>
+
+    <script src="~/createvisualassessment.js" asp-append-version="true"></script>
 
 
 }

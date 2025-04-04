@@ -38,10 +38,11 @@ namespace DVLA.UI.Areas.Admin.Controllers
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _environment;
         private readonly IUserService _userService;
+        private readonly IAuthUser _authUser;
 
 
         public ReportManagementController(IAuditRepo AuditRepo, IRepositoryQuery<OptometristFirm> optometristFirmQuery, IRepositoryQuery<Region> regionQuery,
-            IReportRepository reportRepository, IVisualAssessmentResultRepository assessmentResultRepository, IRepositoryQuery<VisualAssessmentResult> applicantQuery, ILogger<ReportManagementController> logger, IConfiguration configuration, IWebHostEnvironment environment, IUserService userService)
+            IReportRepository reportRepository, IVisualAssessmentResultRepository assessmentResultRepository, IRepositoryQuery<VisualAssessmentResult> applicantQuery, ILogger<ReportManagementController> logger, IConfiguration configuration, IWebHostEnvironment environment, IUserService userService, IAuthUser authUser)
         {
             _AuditRepo = AuditRepo;
             _regionQuery = regionQuery;
@@ -53,6 +54,7 @@ namespace DVLA.UI.Areas.Admin.Controllers
             _configuration = configuration;
             _environment = environment;
             _userService = userService;
+            _authUser = authUser;
         }
 
         // GET: Admin/ReportManagement
@@ -126,13 +128,12 @@ namespace DVLA.UI.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult BiodataUpdate(int page=1)
         {
-            var userData = _userService.GetUserData();
             
             TempData["Action"] = Url.Action("BiodataUpdate", "ReportManagement", new { area = "Admin" });
 
             PaginationRequestModel<ClientSearchRequest> request = new()
             {
-                InputModel = new() { OptometristFirmId = userData.OptometristFirmId, Search = "" },
+                InputModel = new() { OptometristFirmId = Convert.ToInt32(_authUser.OptometristFirmId), Search = "" },
                 PageIndex = page
             };
 
