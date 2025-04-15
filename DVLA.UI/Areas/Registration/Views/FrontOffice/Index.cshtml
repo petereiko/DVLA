@@ -157,7 +157,7 @@
 
                                                 @if (item.Status == Status.InProgress)
                                                 {
-                                                    <a class="btn btn-primary mb-2 btn-sm" id="btnProcess" href="@Url.Action("Create", "VisualAssessmentResult", new { page="Details", token=Utility.Encrypt(item.Id.ToString()) })">Edit</a>
+                                                    <a class="btn btn-primary mb-2 btn-sm" id="btnProcess" href="@Url.Action("Update", "FrontOffice", new { token=Utility.Encrypt(item.Id.ToString()), area = "Registration" })">Edit</a>
 
                                                 }
 

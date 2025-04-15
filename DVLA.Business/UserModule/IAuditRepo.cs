@@ -11,6 +11,8 @@ namespace DVLA.Business.UserModule
     {
         void AddAudit(long moduleActionId, string description);
 
-        Task<List<ActivityModel>> GetAudit(AuditFilterModel model);
+        Task<List<ActivityModel>> GetAuditAsync(AuditFilterModel model);
+
+        Task<List<VisualAssessmentExportDto>> GetAuditExportAsync(AuditFilterModel model);
     }
 }

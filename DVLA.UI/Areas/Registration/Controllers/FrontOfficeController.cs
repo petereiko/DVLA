@@ -239,8 +239,8 @@ namespace DVLA.UI.Areas.Registration.Controllers
             return View(model);
         }
 
-
-        public ActionResult Update(string Id)
+        [HttpGet]
+        public ActionResult Update(string token)
         {
             try
             {
@@ -250,7 +250,11 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 }
                 ViewBag.OptometristFirms = _optometristFirmQuery.GetAll().ToList();
 
-                Int64 applicanId =Convert.ToInt64(Utility.Decrypt(Id));
+                var countries = _locationService.GetCountries();
+
+                ViewBag.Countries = countries;
+
+                Int64 applicanId =Convert.ToInt64(Utility.Decrypt(token));
                 var applicant = _applicantQuery.Filter(x => x.Id == applicanId).FirstOrDefault();
                 var optometristUser = _optometristFirmUserQuery.Filter(u => u.ApplicationUserId == currentUserId).FirstOrDefault();
                 var firm = _optometristFirmQuery.Filter(x => x.Id == optometristUser.OptometristFirmId).FirstOrDefault();
@@ -269,6 +273,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 model.Email = applicant.Email;
                 model.ResultServiceType = applicant.ResultServiceType;
                 //model.PassportImageUrl = applicant.PassportImageUrl;
+                model.Gender = applicant.Gender;
                 model.Status = applicant.Status;
                 model.OptometristFirmId = applicant.OptometristFirmId;
                 model.Optometrist = firm.BusinessName;
@@ -281,9 +286,9 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 model.UpdatedBy = applicant.ModifiedBy;
                 model.PassportImageUrl = applicant.PassportImageUrl;
 
-                if (!string.IsNullOrEmpty(model.PassportImageUrl) && model.PassportImageUrl.Contains(".png"))
+                if (!string.IsNullOrEmpty(model.PassportImageUrl))
                 {
-                    var path = Path.Combine(_environment.ContentRootPath, "Passports", model.PassportImageUrl);
+                    var path = Path.Combine(_environment.WebRootPath, "Passports", model.PassportImageUrl);
                     if (System.IO.File.Exists(path))
                     {
                         byte[] imageArray = System.IO.File.ReadAllBytes(path);
@@ -303,13 +308,17 @@ namespace DVLA.UI.Areas.Registration.Controllers
         }
              
         [HttpPost]
-        public ActionResult Update(ApplicantModel model, string Id)
+        public ActionResult Update(ApplicantModel model)
         {
             if (string.IsNullOrEmpty(User.Identity.Name))
             {
                 return RedirectToAction("Index", "FrontOffice", new { area = "Registration" });
             }
             ViewBag.OptometristFirms = _optometristFirmQuery.GetAll().ToList();
+
+            var countries = _locationService.GetCountries();
+
+            ViewBag.Countries = countries;
             try
             {
                 if (model.ResultServiceType == null)
@@ -361,8 +370,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     return View(model);
                 }
 
-                Int64 applicanId =Convert.ToInt64(Utility.Decrypt(Id));
-                var applicant = _applicantQuery.Filter(x => x.Id == applicanId).FirstOrDefault();
+                var applicant = _applicantQuery.Filter(x => x.Id == model.Id).FirstOrDefault();
 
                 string[] dob = model.DateOfBirth != null ? model.DateOfBirth.Split('-') : null;
                 model.DOB = dob != null ? new DateTime(Convert.ToInt32(dob[0]), Convert.ToInt32(dob[1]), Convert.ToInt32(dob[2])) : model.DOB;
@@ -392,6 +400,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 applicant.CreatedBy = model.CreatedBy;
                 applicant.IsDeleted = model.IsDeleted;
                 applicant.ModifiedBy = model.UpdatedBy;
+                applicant.Gender = model.Gender;
                 _applicantQuery.Update(applicant);
 
 

@@ -13,5 +13,7 @@ namespace DVLA.Business.UserModule
         string Roles { get; }
         string FullName { get; }
         int? OptometristFirmId { get; }
+        string OptometristFirmName { get; }
+        string BaseUrl { get; }
     }
 }

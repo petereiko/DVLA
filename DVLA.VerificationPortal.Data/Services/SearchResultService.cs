@@ -58,6 +58,32 @@ namespace DVLA.VerificationPortal.Application.Services
 
         }
 
+        public async Task<TestResultDto> GetResultAsync(string? reference)
+        {
+            TestResultDto? result = null;
+            try
+            {
+                Expression<Func<VisualAssessmentResult, bool>> expression = v => v.ReferenceNumber.Equals(reference);
+                IEnumerable<VisualAssessmentResult> results = await _visualAssessmentResultRepository.FilterAsync(expression, false);
+
+                foreach (var item in results)
+                {
+                    result = new()
+                    {
+                        FullName = $"{item.Surname} {item.FirstName}",
+                        PassConclusion = item.ResultConclusion,
+                        Verified = item.IsVerified
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return result;
+
+        }
+
         public async Task<VisualAssessmentResultDto> GetResultAsync(int id)
         {
             VisualAssessmentResult result = await _visualAssessmentResultRepository.GetSingleAsync(x => x.Id == id, false);

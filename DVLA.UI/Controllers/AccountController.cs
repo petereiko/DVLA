@@ -53,7 +53,6 @@ namespace DVLA.UI.Controllers
         }
 
         [HttpPost]
-        [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
@@ -68,8 +67,6 @@ namespace DVLA.UI.Controllers
                 model.Errors.Add("Invalid Email/Password");
                 return View(model);
             }
-            var roles = await _userManager.GetRolesAsync(user);
-            var role = roles.FirstOrDefault();
 
             if (!user.EmailConfirmed)
             {
@@ -156,7 +153,7 @@ namespace DVLA.UI.Controllers
 
 
         [HttpPost]
-        
+
         public async Task<IActionResult> Register(UserViewModel model)
         {
             if (!ModelState.IsValid)

@@ -7,6 +7,7 @@
 @{
     ViewData["Title"] = "Optometrist Firm";
     int selectedRegion = Convert.ToInt32(ViewBag.Region);
+    var sn = 0;
 }
 
 <div class="datatables">
@@ -67,6 +68,7 @@
                     <thead>
                         <!-- start row -->
                         <tr>
+                            <th>#</th>
                             <th>Practice Name</th>
                             <th>Slot Balance</th>
                             @* <th>Business Tel.</th> *@
@@ -81,8 +83,10 @@
                     <tbody id="table-content">
                         @foreach (OptometristFirmModel item in Model)
                         {
+                            sn++;
                             <!-- start row -->
                             <tr>
+                                <td>@sn</td>
                                 <td>@item.BusinessName</td>
                                 <td>@item.SlotBalance</td>
                                 @* <td>@item.ContactPhoneNumber</td> *@

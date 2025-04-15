@@ -786,7 +786,8 @@ namespace DVLA.UI.Areas.Customer.Controllers
             ViewBag.Token = token;
             try
             {
-                model.PassOrFail = (PassOrFail)model.PassOrFailInt;
+                model.PassOrFail = model.PassOrFailInt == null? null: (PassOrFail)model.PassOrFailInt;
+
 
                 var visualAcuitys = _visualAcuityScoreRepositoryQuery.FilterAsync(x => x.IsActive).Result.ToList();
                 var visualFieldScores = _visualFieldScoreRepositoryQuery.FilterAsync(x => x.IsActive).Result.ToList();
@@ -955,7 +956,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             await scope.CommitAsync();
                             TempData["SuccessMessage"] = "Eye Test Result created successfully";
                             _AuditRepo.AddAudit(Activities.CREATE_VISUAL_ASSESSMENT_RESULT, "Create Eye Test Result");
-                            return RedirectToAction("Index");
+                            return RedirectToAction("Detail", new { page = "Details", token = Utility.Encrypt(visualAssessmentResult.Id.ToString()) });
                         }
                         else
                         {
@@ -1052,7 +1053,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             await scope.CommitAsync();
                             TempData["SuccessMessage"] = "Record saved successfully";
                             _AuditRepo.AddAudit(Activities.CREATE_VISUAL_ASSESSMENT_RESULT, "Create Visual Assessment Result");
-                            return RedirectToAction("Index");
+                            return RedirectToAction("Detail", new { page = "Details", token = Utility.Encrypt(visualAssessmentResult.Id.ToString()) });
                         }
                     }
                     catch (Exception ex)

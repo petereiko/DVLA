@@ -21,19 +21,18 @@
                 <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
                     <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
 
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">@TempData["SuccessMessage"].ToString()</div>
+                        }
+
                         <form asp-action="BiodataUpdate" asp-controller="ReportManagement" method="post">
 
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-floating mb-3">
-                                        <input type="text" class="form-control mydatepicker" value="@ViewBag.StartDate" id="StartDate" name="StartDate" autocomplete="off" placeholder="Enter Start Date" data-date-format="dd/mm/yyyy" />
-                                        <label for="StartDate">Start Date</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-floating mb-3">
-                                        <input type="text" class="form-control mydatepicker" value="@ViewBag.EndDate" autocomplete="off" id="EndDate" name="EndDate" placeholder="Enter End Date" data-date-format="dd/mm/yyyy" />
-                                        <label for="EndDate">End Date</label>
+                                        <input type="text" class="form-control" value="@ViewBag.Name" id="Name" name="Name" autocomplete="off" placeholder="Enter Name" />
+                                        <label for="Name">Patient Name</label>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -83,15 +82,10 @@
                                     </select>
                                     entries
                                 </div>
-                                <div class="col-3">
-                                    <div class="d-md-flex align-items-center">
-
-                                        <div class="ms-auto mt-3 mt-md-0">
-                                            <button type="submit" class="btn btn-primary hstack gap-6">
-                                                Search
-                                            </button>
-                                        </div>
-                                    </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        Search
+                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -104,11 +98,10 @@
                                     <tr>
                                         <th class="width-10px text-center">#</th>
                                         <th>Names</th>
-                                        <th>Address</th>
-                                        <th>Company</th>
                                         <th>DS Reference</th>
                                         <th>Test Date</th>
-                                        <th>Grade</th>
+                                        <th>Result Conclusion</th>
+                                        <th>Status</th>
                                         <th></th>
                                     </tr>
 
@@ -123,12 +116,6 @@
                                             </td>
                                             <td><span>@item.ApplicantName </span></td>
                                             <td>
-                                                @Html.DisplayFor(modelItem => item.ApplicantAddress)
-                                            </td>
-                                            <td>
-                                                @Html.DisplayFor(modelItem => item.OptometristFirmName)
-                                            </td>
-                                            <td>
                                                 @Html.DisplayFor(modelItem => item.DSReference)
                                             </td>
                                             <td>
@@ -137,9 +124,11 @@
                                             <td>
                                                 @Html.DisplayFor(modelItem => item.ResultConclusion)
                                             </td>
-
                                             <td>
-                                                
+                                                @Html.DisplayFor(modelItem => item.Grade)
+                                            </td>
+                                            <td>
+
                                                 <div class="dropdown">
                                                     <div class="btn-group">
                                                         <button class="btn btn-primary dropdown-toggle show" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="true">
@@ -155,7 +144,7 @@
                                                         </ul>
                                                     </div>
                                                 </div>
-                                            
+
                                             </td>
                                         </tr>
                                     }

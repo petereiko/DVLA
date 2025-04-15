@@ -144,22 +144,24 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 //Convert List to Excel
                 List<OptometristFirmExcelExport> exportItems = model.Select(x => new OptometristFirmExcelExport
                 {
-                    AccreditationNumber = x.AccreditationNumber,
-                    BusinessAddress = x.BusinessAddress,
                     BusinessName = x.BusinessName,
+                    AccreditationNumber = x.AccreditationNumber,
                     CentreCode = x.CentreCode,
+                    RegistrationNumber = x.RegistrationNumber,
+                    DigitalAddress = x.DigitalAddress,
                     ContactEmailAddress = x.ContactEmailAddress,
+                    RegionName = x.RegionName,
+                    Town = x.Town,
+                    DistrictName = x.DistrictName,
+                    TelephoneNumber = x.TelephoneNumber,
                     ContactFirstName = x.ContactFirstName,
                     ContactLastName = x.ContactLastName,
                     ContactPhoneNumber = x.ContactLastName,
-                    DigitalAddress = x.DigitalAddress,
-                    DistrictName = x.DistrictName,
+                    BusinessAddress = x.BusinessAddress,
                     MobileNumber = x.MobileNumber,
-                    RegionName = x.RegionName,
-                    RegistrationNumber = x.RegistrationNumber,
                     ReorderLevel = x.ReorderLevel,
-                    TelephoneNumber = x.TelephoneNumber,
-                    Town = x.Town
+                    
+                    
                 }).ToList();
                 byte[] exportData = Utility.ExportToExcel(exportItems);
                 _AuditRepo.AddAudit(Activities.VIEW_OPTOMETRIST_FIRM, "View Optometrist Firm");

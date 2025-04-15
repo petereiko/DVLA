@@ -22,6 +22,31 @@ namespace DVLA.VerificationPortal.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("DVLA.VerificationPortal.Domain.Entities.ApiClient", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApiKey")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IP")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApiClients");
+                });
+
             modelBuilder.Entity("DVLA.VerificationPortal.Domain.Entities.AuditLog", b =>
                 {
                     b.Property<long>("Id")
@@ -253,14 +278,6 @@ namespace DVLA.VerificationPortal.Infrastructure.Migrations
                     b.Property<DateTime?>("DOB")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("DVLAReferenceNo")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("DriversLicence")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("Email")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -269,9 +286,8 @@ namespace DVLA.VerificationPortal.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("FormNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int?>("Gender")
+                        .HasColumnType("int");
 
                     b.Property<string>("GlareTest_BCV_OD")
                         .HasColumnType("nvarchar(max)");
@@ -297,14 +313,17 @@ namespace DVLA.VerificationPortal.Infrastructure.Migrations
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("LearnerDriversLicence")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("NameTitle")
-                        .HasColumnType("int");
+                    b.Property<string>("Nationality")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("OptometristFirmId")
                         .HasColumnType("int");
+
+                    b.Property<string>("OptometristFirmName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OptometristName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OtherName")
                         .HasMaxLength(50)
@@ -346,17 +365,13 @@ namespace DVLA.VerificationPortal.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("TaxIdentificationNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<DateTime?>("TestDate")
                         .HasColumnType("datetime2");
 
                     b.Property<byte>("TestType")
                         .HasColumnType("tinyint");
 
-                    b.Property<DateTime>("TransmittedDate")
+                    b.Property<DateTime?>("TransmittedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Unaided_OD")
@@ -413,6 +428,9 @@ namespace DVLA.VerificationPortal.Infrastructure.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("CentreName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()

@@ -1,11 +1,15 @@
-﻿using DVLA.Business.ReportModule;
+﻿using DVLA.Business.LocationModule;
+using DVLA.Business.ReportModule;
 using DVLA.Business.Repository;
 using DVLA.Business.UserModule;
+using DVLA.Business.VisualAssessmentResultModule;
 using DVLA.Data;
 using DVLA.Data.Models.DataObjects.DTOs;
+using DVLA.Data.Models.DataObjects.ViewModels;
 using DVLA.DATA.Domains;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -18,7 +22,7 @@ using System.Web;
 namespace DVLA.UI.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = AppRoles.SYSTEMADMIN)]
+    [Authorize(Roles = $"{AppRoles.SYSTEMADMIN},{AppRoles.FACILITYOWNER},{AppRoles.OPTOMETRIST}")]
     public class AuditManagementController : Controller
     {
         private readonly IAuditRepo _auditRepo;
@@ -27,8 +31,10 @@ namespace DVLA.UI.Areas.Admin.Controllers
         private readonly IRepositoryQuery<Module> _moduleRepositoryQuery;
         private readonly IRepositoryQuery<OptometristFirm> _optometristFirmQuery;
         private readonly ILogger<AuditManagementController> _logger;
+        private IVisualAssessmentResultRepository _visualAssessmentResultRepository;
+        private readonly ILocationService _locationService;
 
-        public AuditManagementController(IAuditRepo AuditRepo, IUserRepository userRepository, IRepositoryQuery<Module> moduleRepositoryQuery, IRepositoryQuery<OptometristFirm> optometristFirmQuery, IReportRepository reportRepository, ILogger<AuditManagementController> logger)
+        public AuditManagementController(IAuditRepo AuditRepo, IUserRepository userRepository, IRepositoryQuery<Module> moduleRepositoryQuery, IRepositoryQuery<OptometristFirm> optometristFirmQuery, IReportRepository reportRepository, ILogger<AuditManagementController> logger, IVisualAssessmentResultRepository visualAssessmentResultRepository, ILocationService locationService)
         {
             _auditRepo = AuditRepo;
             _userRepository = userRepository;
@@ -36,55 +42,49 @@ namespace DVLA.UI.Areas.Admin.Controllers
             _optometristFirmQuery = optometristFirmQuery;
             _moduleRepositoryQuery = moduleRepositoryQuery;
             _logger = logger;
+            _visualAssessmentResultRepository = visualAssessmentResultRepository;
+            _locationService = locationService;
         }
 
         // GET: Admin/AuditManagement
         [HttpGet]
         public ActionResult Index()
         {
-            if (string.IsNullOrEmpty(User.Identity.Name))
-            {
-                return RedirectToAction("Index", "Account");
-            }
+            ViewBag.ResultConclusions = new SelectList(_visualAssessmentResultRepository.ResultConclusion(), "Value", "Text");
 
-            ViewBag.OptometristFirms = _optometristFirmQuery.GetAll().ToList();
-            ViewBag.Modules = _moduleRepositoryQuery.GetAll().ToList();
-            ViewBag.Users = _userRepository.GetUsers(string.Empty, null);
-            return View(new List<ActivityModel>());
+            var countries = _locationService.GetCountries();
+            ViewBag.Countries = countries;
+            AuditGridViewModel model = new();
+            return View(model);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Index(AuditFilterModel model)
+        public async Task<ActionResult> Index(AuditGridViewModel model)
         {
-            if (string.IsNullOrEmpty(User.Identity.Name))
-            {
-                return RedirectToAction("Index", "Account");
-            }
-
-            var result = new List<ActivityModel>();
             try
             {
-                result = await _auditRepo.GetAudit(model);
+                model.Items = await _auditRepo.GetAuditAsync(model.Filter);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
             }
-
-            ViewBag.OptometristFirms = _optometristFirmQuery.GetAllAsync().Result.ToList();
-            ViewBag.Modules = _moduleRepositoryQuery.GetAllAsync().Result.ToList();
-            ViewBag.Users = _userRepository.GetUsers(string.Empty, null);
-            return View(result);
+            ViewBag.ResultConclusions = new SelectList(_visualAssessmentResultRepository.ResultConclusion(), "Value", "Text");
+            var countries = _locationService.GetCountries();
+            ViewBag.Countries = countries;
+            return View(model);
         }
 
 
         [HttpPost]
-        public ActionResult ExportAudit(List<ActivityModel> model)
+        public async Task<ActionResult> ExportAudit(AuditGridViewModel model)
         {
             if (model != null)
             {
+                model.ExportItems = await _auditRepo.GetAuditExportAsync(model.Filter);
+
                 string fileName = "Audit_Report.xlsx";
-                var json = JsonConvert.SerializeObject(model);
+                var json = JsonConvert.SerializeObject(model.ExportItems);
                 byte[] report = _reportRepository.WriteToExcel("xlsx", (DataTable)JsonConvert.DeserializeObject(json, (typeof(DataTable))));
                 return File(report, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
             }

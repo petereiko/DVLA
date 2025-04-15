@@ -6,6 +6,9 @@
 @{
     ViewData["Title"] = "Update";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string roles = string.Join(",", Model.Roles.Where(x => x.IsChecked).Select(x => x.Name).ToList());
+
 }
 
 <div class="row">
@@ -18,7 +21,7 @@
             <div class="card-body">
                 <h4 class="card-title mb-3">Edit User Details</h4>
                 <form asp-action="Update" method="post">
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
@@ -57,7 +60,9 @@
                                     <div class="form-check">
                                         <input type="hidden" asp-for="Roles[i].Id" />
                                         <input type="hidden" asp-for="Roles[i].Name" />
-                                        <input class="form-check-input primary" type="checkbox" asp-for="Roles[i].IsChecked" id="role_@i">
+                                        <input class="form-check-input primary role-name" type="checkbox" data-rolename="@Model.Roles[i].Name" asp-for="Roles[i].IsChecked" id="role_@i">
+
+                                        @* <input class="form-check-input primary" type="checkbox" asp-for="Roles[i].IsChecked" id="role_@i"> *@
                                         <label class="form-check-label text-dark fs-3" for="role_@i">
                                             @Model.Roles[i].Name
                                         </label>
@@ -78,7 +83,7 @@
                                 <label for="Phone">Optometrist Firm</label>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6" style="display:none" id="PinDiv">
                             <div class="form-floating mb-3">
                                 <input type="text" class="form-control" asp-for="PIN" placeholder="Enter PIN" required />
                                 <label for="PIN">Personal Identification Number</label>
@@ -95,12 +100,12 @@
                         <div class="col-6">
                             <div class="d-md-flex align-items-center">
 
-                                <div class="ms-auto mt-3 mt-md-0">
-                                    <button type="submit" class="btn btn-primary hstack gap-6">
 
-                                        Submit
-                                    </button>
-                                </div>
+                                <button type="button" class="btn btn-danger" onclick="history.back()">Back</button>
+                                <button type="submit" class="btn btn-primary hstack gap-6">
+
+                                    Submit
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -123,14 +128,48 @@
 
         <script>
             $(function () {
-                $('#DefaultRole').change(function () {
-                    let role = $(this).val();
-                    let sysAdminRole = '@AppRoles.SYSTEMADMIN';
-                    if (role == sysAdminRole) {
+
+
+                let userRoles = '@roles';
+                console.log('Roles', userRoles);
+                if(userRoles.includes('@AppRoles.OPTOMETRIST')||userRoles.includes('@AppRoles.FACILITYOWNER')||userRoles.includes('@AppRoles.FRONTOFFICER')){
+                        $('#OptometristArea').show();
+                    }
+                    else{
                         $('#OptometristArea').hide();
                     }
-                    else {
+
+                    if(userRoles.includes('@AppRoles.OPTOMETRIST')){
+                        $('#PinDiv').show();
+                    }
+                    else{
+                        $('#PinDiv').hide();
+                    }
+
+
+                let _roleName="";
+                let roles=[];
+
+                $('.role-name').change(function(){
+                    let role = $(this).attr('data-rolename')
+                    if($(this).prop('checked')){
+                        roles.push(role);
+                    }
+                    else{
+                        roles = roles.filter(r=>r!=role);
+                    }
+                    if(roles.includes('@AppRoles.OPTOMETRIST')){
+                        $('#PinDiv').show();
+                    }
+                    else{
+                        $('#PinDiv').hide();
+                    }
+
+                    if(roles.includes('@AppRoles.FRONTOFFICER')||roles.includes('@AppRoles.FACILITYOWNER')||roles.includes('@AppRoles.OPTOMETRIST')){
                         $('#OptometristArea').show();
+                    }
+                    else{
+                        $('#OptometristArea').hide();
                     }
                 });
             })

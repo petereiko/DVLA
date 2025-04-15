@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DVLA.Data;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +13,12 @@ namespace DVLA.Business.UserModule
     public class AuthUser: IAuthUser
     {
         private readonly IHttpContextAccessor _accessor;
+        private readonly DVLADbContext _context;
 
-        public AuthUser(IHttpContextAccessor accessor)
+        public AuthUser(IHttpContextAccessor accessor, DVLADbContext context)
         {
             _accessor = accessor;
+            _context = context;
         }
 
         public string Email => _accessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value!;
@@ -32,6 +36,34 @@ namespace DVLA.Business.UserModule
                 optoId = result ? optometristFirmId > 0 ? optometristFirmId : null : null;
 
                 return optoId;
+            }
+        }
+
+        public string OptometristFirmName
+        {
+            get
+            {
+                string name = "";
+                int? optoId = null;
+                int optometristFirmId;
+                string claim = _accessor.HttpContext?.User?.FindFirst("OptometristFirmId")?.Value!;
+                bool result = int.TryParse(claim, out optometristFirmId);
+                optoId = result ? optometristFirmId > 0 ? optometristFirmId : null : null;
+                if (optoId != null)
+                {
+                    var optometristFirm = _context.OptometristFirms.AsNoTracking().FirstOrDefault(x => x.Id == optoId);
+                    name = optometristFirm?.BusinessName;
+                }
+
+                return name;
+            }
+        }
+
+        public string BaseUrl
+        {
+            get
+            {
+                return $"{_accessor.HttpContext.Request.Scheme}://{_accessor.HttpContext.Request.Host}";
             }
         }
     }

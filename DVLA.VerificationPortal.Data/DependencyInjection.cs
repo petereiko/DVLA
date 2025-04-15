@@ -10,6 +10,8 @@ namespace DVLA.VerificationPortal.Application
         {
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ISearchResultService, SearchResultService>();
+            services.AddTransient<IApiClientService, ApiClientService>();
+            services.AddTransient<IUserService, UserService>();
             return services;
         }
     }

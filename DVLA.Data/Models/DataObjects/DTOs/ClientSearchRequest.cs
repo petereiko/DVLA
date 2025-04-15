@@ -8,8 +8,9 @@ namespace DVLA.Data.Models.DataObjects.DTOs
 {
     public class ClientSearchRequest
     {
-        public DateTime StartDate { get; set; } = DateTime.Now;
-        public DateTime EndDate { get; set; } = DateTime.Now;
+        //public DateTime StartDate { get; set; } = DateTime.Now;
+        //public DateTime EndDate { get; set; } = DateTime.Now;
+        public string Name { get; set; }
         public int? OptometristFirmId {  get; set; }
         public string Search { get; set; }
         public int Entries {  get; set; }

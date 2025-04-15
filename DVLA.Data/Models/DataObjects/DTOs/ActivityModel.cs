@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using DVLA.Data.Models.Enumerables;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,10 +10,25 @@ namespace DVLA.Data.Models.DataObjects.DTOs
 {
     public class ActivityModel
     {
+//        *Facility
+//* Client name
+//* Age
+//*Sex
+//* nationality 
+//*Service type 
+//*Results Conclusion
+
+
         public long Id { get; set; }
-        public string ModuleName { get; set; }
-        public string Description { get; set; }
-        public string FullName { get; set; }
-        public DateTime DateCreated { get; set; }
+        public string BusinessName { get; set; }
+        public string Applicant { get; set; }
+        public string Nationality { get; set; }
+        public string ResultServiceType { get; set; }
+        //public string Status { get; set; }
+        public string ResultConclusion { get; set; }
+        public string Gender { get; set; }
+        //public string PassOrFail { get; set; }
+        public DateTime? TestDate { get; set; }
+        public string Age { get; set; }
     }
 }

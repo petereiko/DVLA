@@ -1,7 +1,5 @@
 ﻿@using DVLA.Data
-@using DVLA.Data.Models.DataObjects.ViewModels
 @using DVLA.Data.Models.Enumerables
-@model UserViewModel
 <aside class="left-sidebar with-vertical">
     <div>
         <!-- ---------------------------------- -->
@@ -223,7 +221,7 @@
                                     }
 
 
-                                    @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.FACILITYOWNER) || User.IsInRole(AppRoles.FINANCE))
+                                    @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.FACILITYOWNER) || User.IsInRole(AppRoles.OPTOMETRIST))
                                     {
                                         <li class="sidebar-item">
                                             <a asp-action="Index" asp-controller="AuditManagement" asp-area="Admin" class="sidebar-link sublink">

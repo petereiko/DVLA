@@ -1,4 +1,5 @@
-﻿using DVLA.Business.ReportModule;
+﻿using DVLA.Business.LocationModule;
+using DVLA.Business.ReportModule;
 using DVLA.Business.Repository;
 using DVLA.Business.UserModule;
 using DVLA.Business.VisualAssessmentResultModule;
@@ -39,10 +40,11 @@ namespace DVLA.UI.Areas.Customer.Controllers
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
         private readonly IAuthUser _authUser;
+        private readonly ILocationService _locationService;
 
 
         public ReportManagementController(IAuditRepo AuditRepo, IReportRepository reportRepository,
-            IRepositoryQuery<OptometristFirmUser> optometristUserQuery, IUserService userService, IVisualAssessmentResultRepository assessmentResultRepository, IRepositoryQuery<VisualAssessmentResult> applicantQuery, IRepositoryQuery<OptometristFirm> optometristFirmQuery, IAuditRepo auditRepo, ILogger<ReportManagementController> logger, IWebHostEnvironment environment, IConfiguration configuration, IAuthUser authUser)
+            IRepositoryQuery<OptometristFirmUser> optometristUserQuery, IUserService userService, IVisualAssessmentResultRepository assessmentResultRepository, IRepositoryQuery<VisualAssessmentResult> applicantQuery, IRepositoryQuery<OptometristFirm> optometristFirmQuery, IAuditRepo auditRepo, ILogger<ReportManagementController> logger, IWebHostEnvironment environment, IConfiguration configuration, IAuthUser authUser, ILocationService locationService)
         {
             _AuditRepo = AuditRepo;
             _reportRepository = reportRepository;
@@ -56,6 +58,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             _environment = environment;
             _configuration = configuration;
             _authUser = authUser;
+            _locationService = locationService;
         }
         [HttpGet]
         public IActionResult Index()
@@ -145,8 +148,8 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 PageIndex = Entries
             };
             ViewBag.Entries = Entries.ToString();
-            ViewBag.StartDate = request.InputModel.StartDate.ToString("dd/MM/yyyy");
-            ViewBag.EndDate = request.InputModel.EndDate.ToString("dd/MM/yyyy");
+            //ViewBag.StartDate = request.InputModel.StartDate.ToString("dd/MM/yyyy");
+            ViewBag.Name = "";//request.InputModel.EndDate.ToString("dd/MM/yyyy");
             PaginationResponseModel<List<VisualAssessmentResultItemViewModel>> visualAssessments = _assessmentResultRepository.FetchAssessmentResults(request);
 
             return View(visualAssessments);
@@ -158,11 +161,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
             ViewBag.Entries = model.Entries.ToString();
             PaginationRequestModel<ClientSearchRequest> request = new()
             {
-                InputModel = new() { OptometristFirmId = _authUser.OptometristFirmId, Search = "", StartDate = model.StartDate, EndDate = model.EndDate },
+                InputModel = new() { OptometristFirmId = _authUser.OptometristFirmId, Search = "", Name = model.Name },
                 PageSize = model.Entries
             };
-            ViewBag.StartDate = request.InputModel.StartDate.ToString("dd/MM/yyyy");
-            ViewBag.EndDate = request.InputModel.EndDate.ToString("dd/MM/yyyy");
+            ViewBag.Name = model.Name;
             PaginationResponseModel<List<VisualAssessmentResultItemViewModel>> result = _assessmentResultRepository.FetchAssessmentResults(request);
             return View(result);
         }
@@ -217,7 +219,8 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
                 }
                 ViewBag.OptometristFirms = _optometristFirmQuery.GetAllAsync().Result.ToList();
-
+                var countries = _locationService.GetCountries();
+                ViewBag.Countries = countries;
 
                 Int64 applicanId = Convert.ToInt64(Utility.Decrypt(token));
                 var applicant = _applicantQuery.Filter(x => x.Id == applicanId).FirstOrDefault();
@@ -252,16 +255,19 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 model.UpdatedBy = applicant.ModifiedBy;
                 model.IsRegistration = applicant.IsRegistration;
                 model.ReferenceNumber = applicant.ReferenceNumber;
+                model.Gender = applicant.Gender;
 
-                if (!string.IsNullOrEmpty(applicant.PassportImageUrl) && applicant.PassportImageUrl.Contains(".png"))
+                if (!string.IsNullOrEmpty(applicant.PassportImageUrl))
                 {
-                    var path = Path.Combine(_environment.ContentRootPath, "wwwroot", "Passports", applicant.PassportImageUrl);
+                    //var path = Path.Combine(_environment.ContentRootPath, "wwwroot", "Passports", applicant.PassportImageUrl);
 
-                    if (System.IO.File.Exists(path))
-                    {
-                        byte[] imageArray = System.IO.File.ReadAllBytes(path);
-                        model.PassportImageUrl = Convert.ToBase64String(imageArray);
-                    }
+                    model.DisplayImageUrl = $"{_authUser.BaseUrl}/Passports/{applicant.PassportImageUrl}";
+
+                    //if (System.IO.File.Exists(path))
+                    //{
+                    //    byte[] imageArray = System.IO.File.ReadAllBytes(path);
+                    //    model.PassportImageUrl = Convert.ToBase64String(imageArray);
+                    //}
 
                 }
 
@@ -284,6 +290,8 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
             }
             ViewBag.OptometristFirms = (await _optometristFirmQuery.GetAllAsync()).ToList();
+            var countries = _locationService.GetCountries();
+            ViewBag.Countries = countries;
             try
             {
                 if (model.ResultServiceType == null)
@@ -351,6 +359,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 Int64 applicanId = model.Id;
                 var applicant = _applicantQuery.Filter(x => x.Id == applicanId).FirstOrDefault();
 
+                string oldPassport = applicant.PassportImageUrl;
+                bool hasUploadedNewPassport = model.Image != null || model.VideoCapture;
+
                 string[] dob = model.DateOfBirth != null ? model.DateOfBirth.Split('-') : null;
                 //model.DOB = dob != null ? new DateTime(Convert.ToInt32(dob[0]), Convert.ToInt32(dob[1]), Convert.ToInt32(dob[2])) : model.DOB;
 
@@ -359,7 +370,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 byte[] imageBytes = new byte[128];
                 MemoryStream contents = null;
 
-                if (model.Image != null || !string.IsNullOrEmpty(model.PassportImageUrl))
+                if (hasUploadedNewPassport)
                 {
                     if (model.Image != null && model.Image.Length > 0)
                     {
@@ -427,8 +438,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 applicant.ContactNumber = model.ContactNumber;
                 applicant.Nationality = model.Nationality;
                 applicant.Email = model.Email;
+                applicant.Gender = model.Gender;
                 applicant.ResultServiceType = model.ResultServiceType;
-                if (model.Image != null || !string.IsNullOrEmpty(model.PassportImageUrl))
+                applicant.Nationality = model.Nationality;
+                if (hasUploadedNewPassport)
                 {
                     applicant.PassportImageUrl = model.PassportImageUrl;
                 }
@@ -443,9 +456,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
                 await _applicantQuery.UpdateAsync(applicant);
 
-                if (!string.IsNullOrEmpty(model.PassportImageUrl) && model.PassportImageUrl.Contains(".png"))
+                if (!string.IsNullOrEmpty(oldPassport) && hasUploadedNewPassport)
                 {
-                    var deleteFilePath = Path.Combine(_environment.ContentRootPath, "Passports", model.PassportImageUrl);
+                    var deleteFilePath = Path.Combine(_environment.WebRootPath, "Passports", oldPassport);
                     if (System.IO.File.Exists(deleteFilePath)) System.IO.File.Delete(deleteFilePath);
                 }
 

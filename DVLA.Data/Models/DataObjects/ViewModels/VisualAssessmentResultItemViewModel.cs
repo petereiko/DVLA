@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DVLA.Data.Models.Enumerables;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,5 +18,6 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
         public string TestDate { get; set; }
         public string Grade { get; set; }
         public string Optometrist { get; set; }
+        //public PassResult PassResult { get; set; }
     }
 }

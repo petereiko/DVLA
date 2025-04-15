@@ -493,21 +493,20 @@ namespace DVLA.Business.VisualAssessmentResultModule
         {
             PaginationResponseModel<List<VisualAssessmentResultItemViewModel>> result = new() { ListResult = new(),  };
             //var offset = (model.PageSize - 1) * model.PageSize;
-            model.InputModel.StartDate = Utility.StartOfDay(model.InputModel.StartDate);
-            model.InputModel.EndDate = Utility.EndOfDay(model.InputModel.EndDate);
-
+            //model.InputModel.StartDate = Utility.StartOfDay(model.InputModel.StartDate);
+            //model.InputModel.EndDate = Utility.EndOfDay(model.InputModel.EndDate);
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
                 using (SqlCommand cmd = new SqlCommand("FetchVisualAssessmentResultByOptometricFirmId", conn))
                 {
+                    cmd.CommandTimeout = 300000;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@optometricId", model.InputModel.OptometristFirmId ?? System.Data.SqlTypes.SqlInt32.Null);
                     cmd.Parameters.AddWithValue("@Search", string.IsNullOrEmpty(model.InputModel.Search) ? System.Data.SqlTypes.SqlString.Null : model.InputModel.Search);
                     //cmd.Parameters.AddWithValue("@PageIndex", model.PageIndex);
                     cmd.Parameters.AddWithValue("@PageSize", model.PageSize);
-                    cmd.Parameters.AddWithValue("@StartDate", model.InputModel.StartDate);
-                    cmd.Parameters.AddWithValue("@EndDate", model.InputModel.EndDate);
+                    cmd.Parameters.AddWithValue("@Name", model.InputModel.Name ?? System.Data.SqlTypes.SqlString.Null);
 
 
                     conn.Open();
@@ -524,7 +523,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                 OptometristFirmName = !reader.IsDBNull(reader.GetOrdinal("OptometristFirmName")) ? reader.GetString("OptometristFirmName") : null,
                                 TestDate = !reader.IsDBNull(reader.GetOrdinal("TestDateString")) ? reader.GetString("TestDateString") : null,
                                 Id = !reader.IsDBNull(reader.GetOrdinal("Id")) ? reader.GetInt64("Id") : 0,
-                                Grade = !reader.IsDBNull(reader.GetOrdinal("Grade")) ? reader.GetString("Grade") : null
+                                Grade = !reader.IsDBNull(reader.GetOrdinal("Grade")) ? reader.GetString("Grade") : null,
                             });
 
                         }

@@ -24,14 +24,15 @@
         border: 1px solid black
     }
 </style>
-
-
+<div>
+    <a asp-action="Create" asp-controller="VisualAssessmentResult" asp-area="Customer" class="btn btn-primary btn-sm left">New Assessment Result</a>
+    <button id="btn-print" class="btn btn-success btn-sm right">Print</button>
+</div>
+<br />
 <div class="datatables">
     <div class="card">
         <div class="card-body">
-            <p style="padding-right:80px; text-align:right">
-                <button id="btn-print" class="btn btn-success btn-sm">Print</button>
-            </p>
+            
             <center>
                 <div id="DivIdToPrint" style="background-image: url('/logos/Dvlalogo_reportwatermark.png') !important; background-repeat:no-repeat !important;background-size: contain !important;background-position: center !important">
                     <table style="width:85%">

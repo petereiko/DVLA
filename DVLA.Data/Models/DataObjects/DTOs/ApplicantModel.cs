@@ -51,7 +51,8 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public bool? IsRegistration { get; set; }
         public string Filename { get; set; }
 
-
+        public string DisplayImageUrl { get; set; }
+        public bool VideoCapture { get; set; }
 
     }
 }

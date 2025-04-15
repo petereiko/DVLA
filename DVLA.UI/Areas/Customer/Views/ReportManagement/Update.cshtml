@@ -17,194 +17,219 @@
             <div class="container">
 
                 <br />
-                <div id="loading" style="display: none;">
-                    <table style="height: 100%; border: 0; width: 100%; position: fixed; top: 0; left: 0; background-color: #FAFAFA; opacity: 0.8; filter: alpha(opacity=80); z-index: 9000;">
-                        <tbody>
-                            <tr>
-                                <td style="width: 100%; text-align:center; vertical-align : middle;">
-                                    <div id="Loadingtext" style="font-family: Arial; font-size: 24px; opacity: 1; filter: alpha(opacity=100); font-weight: bold; color: #000000; text-align: center; padding-top: 5px;"><img src="//i.stack.imgur.com/FhHRx.gif" />&nbsp;Please wait...</div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="row">
-                    <div class="col-sm-4" style="padding:0px">
-                        <video id="video" autoplay style="height: 200px;clip-path: inset(0px 20px 0px 20px); border:1px solid black"></video>
-                        <button onclick="Capture()" style="margin-left:20px" id="capture" class="btn btn-primary">Capture</button>
+
+                <form asp-action="Update" asp-controller="ReportManagement" enctype="multipart/form-data" id="target">
+                    <div id="loading" style="display: none;">
+                        <table style="height: 100%; border: 0; width: 100%; position: fixed; top: 0; left: 0; background-color: #FAFAFA; opacity: 0.8; filter: alpha(opacity=80); z-index: 9000;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 100%; text-align:center; vertical-align : middle;">
+                                        <div id="Loadingtext" style="font-family: Arial; font-size: 24px; opacity: 1; filter: alpha(opacity=100); font-weight: bold; color: #000000; text-align: center; padding-top: 5px;"><img src="//i.stack.imgur.com/FhHRx.gif" />&nbsp;Please wait...</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="col-sm-4" style="padding:0px">
-                        <canvas id="canvas" width="200" height="200" />
-                        <img src="" hidden id="photo" style="height: 200px; width:200px; border:1px solid black" />
-
-
-                    </div>
-                    <div class="col-sm-4">
-                        Upload Image
-                        <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
-                            @Html.TextBoxFor(m => m.Image, new { @class = "form-control", type = "file", accept = "image/jpeg", onchange = "handleImage(e)" })
-                            @Html.ValidationMessageFor(m => m.Image, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-            </div>
-
-            <form asp-action="Update" asp-controller="ReportManagement" enctype="multipart/form-data" id="target">
-                @Html.HiddenFor(model => model.PassportImageUrl)
-                @Html.HiddenFor(model => model.Id)
-                @Html.HiddenFor(model => model.OptometristFirmId)
-                @Html.HiddenFor(model => model.ReferenceNumber)
-                @Html.HiddenFor(model => model.IsRegistration)
-                @Html.HiddenFor(model => model.IsActive)
-                @Html.HiddenFor(model => model.Status)
-
-                <div class="container">
-                    <div class="row row-xs mg-b-10">
-                        <div class="col-sm-4">
-                            @Html.LabelFor(m => m.OptometristFirmId) <span class="text-danger">: </span>
-                            <b>@Html.DisplayFor(model => model.Optometrist)</b>
-                            @Html.HiddenFor(model => model.OptometristFirmId)
-                            @Html.HiddenFor(model => model.Optometrist)
-                        </div>
-                    </div>
-                    <br />
                     <div class="row">
-                        <div class="col-sm-4">
-                            Reference Number
-                            <input type="text" asp-for="ReferenceNumber" class="form-control" readonly />
+                        <div class="col-sm-3" style="padding:0px">
+                            <video id="video" autoplay style="height: 200px;clip-path: inset(0px 20px 0px 20px); border:1px solid black"></video>
+                            @if (string.IsNullOrEmpty(Model.DisplayImageUrl))
+                            {
+                                <button type="button" onclick="Capture()" style="margin-left:20px" id="capture" class="btn btn-primary">Capture</button>
+                            }
+                            else
+                            {
+                                <button type="button" onclick="Capture()" style="margin-left:20px" id="capture" class="btn btn-primary">Re-Capture</button>
+                            }
                         </div>
-                        <div class="col-sm-4">
-                            Service Type
-                            <select asp-for="ResultServiceType" class="form-control" asp-items="Html.GetEnumSelectList<ResultServiceType>()">
-                                <option>Select Service Type</option>
-                            </select>
-@*                             @Html.DropDownList("ResultServiceType", EnumHelper.GetSelectList(typeof(ResultServiceType)), "Select Service Type", new { @style = "width:100%;", @class = "form-control", @id = "ddlServiceType" })
- *@                            @Html.ValidationMessageFor(model => model.ResultServiceType, "", new { @class = "text-danger" })
+                        <div class="col-sm-3" style="padding:0px">
+                            <canvas id="canvas" width="200" height="200" />
+                            <img src="" hidden id="photo" style="height: 200px; width:200px; border:1px solid black" />
+                            @if (!string.IsNullOrEmpty(Model.DisplayImageUrl))
+                            {
+                                <img src="@Model.DisplayImageUrl" style="height: 200px; width:200px; border:1px solid black" />
+                            }
                         </div>
-                        
+                        @if (!string.IsNullOrEmpty(Model.DisplayImageUrl))
+                        {
+                            <div class="col-sm-3" style="padding:0px">
+                                <label>Current Passport</label>
+                                <img src="@Model.DisplayImageUrl" style="height: 180px; width:200px; border:1px solid black" />
+                            </div>
+                        }
+                        <div class="col-sm-3">
+                            @if (string.IsNullOrEmpty(Model.DisplayImageUrl))
+                            {
+                                <span>Upload Image</span>
+                            }
+                            else
+                            {
+                                <span>Re-Upload Image</span>
+                            }
+                            <div style="margin-bottom:0px !important; padding-bottom:0px !important;">
+                                @Html.TextBoxFor(m => m.Image, new { @class = "form-control", type = "file", accept = "image/jpeg", onchange = "handleImage(e)" })
+                                @Html.ValidationMessageFor(m => m.Image, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
                     </div>
-                    <br/>
-                    
-                    <div id="DetailsOfApplicant">
-                        <ul class="nav nav-tabs" id="DetailsOfApplicantTab">
-                            <li class="nav-item">
-                                <a class="nav-link active" data-toggle="tab">Details of Applicant</a>
-                            </li>
+                    @Html.HiddenFor(model => model.PassportImageUrl)
+                    @Html.HiddenFor(Model => Model.VideoCapture)
+                    @Html.HiddenFor(model => model.Id)
+                    @Html.HiddenFor(model => model.OptometristFirmId)
+                    @Html.HiddenFor(model => model.ReferenceNumber)
+                    @Html.HiddenFor(model => model.IsRegistration)
+                    @Html.HiddenFor(model => model.IsActive)
+                    @Html.HiddenFor(model => model.Status)
 
-                        </ul>
+                    <div class="container">
+                        <div class="row row-xs mg-b-10">
+                            <div class="col-sm-4">
+                                @Html.LabelFor(m => m.OptometristFirmId) <span class="text-danger">: </span>
+                                <b>@Html.DisplayFor(model => model.Optometrist)</b>
+                                @Html.HiddenFor(model => model.OptometristFirmId)
+                                @Html.HiddenFor(model => model.Optometrist)
+                            </div>
+                        </div>
                         <br />
-                        <div class="tab-content mb-4">
-                            <div class="tab-pane active" id="DetailsTab">
-                                <div class="row row-xs mg-b-10">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                Reference Number
+                                <input type="text" asp-for="ReferenceNumber" class="form-control" readonly />
+                            </div>
+                            <div class="col-sm-4">
+                                Service Type
+                                <select asp-for="ResultServiceType" class="form-control" asp-items="Html.GetEnumSelectList<ResultServiceType>()">
+                                    <option>Select Service Type</option>
+                                </select>
+                                @*                             @Html.DropDownList("ResultServiceType", EnumHelper.GetSelectList(typeof(ResultServiceType)), "Select Service Type", new { @style = "width:100%;", @class = "form-control", @id = "ddlServiceType" })
+ *@                            @Html.ValidationMessageFor(model => model.ResultServiceType, "", new { @class = "text-danger" })
+                            </div>
 
-                                    @* <div class="col-sm">
-                                        Title
-                                        <select asp-for="NameTitle" class="form-control" asp-items="Html.GetEnumSelectList<NameTitle>()">
-                                            <option>Select Name Title</option>
-                                        </select>
-                                        @Html.ValidationMessageFor(model => model.NameTitle, "", new { @class = "text-danger" })
-                                    </div> *@
-                                    <div class="col-sm">
+                        </div>
+                        <br />
+
+                        <div id="DetailsOfApplicant">
+                            <ul class="nav nav-tabs" id="DetailsOfApplicantTab">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-toggle="tab">Details of Applicant</a>
+                                </li>
+
+                            </ul>
+                            <br />
+                            <div class="tab-content mb-4">
+                                <div class="tab-pane active" id="DetailsTab">
+                                    <div class="row row-xs mg-b-10">
+                                        <div class="col-sm">
+                                        </div>
                                     </div>
-                                </div>
-                                <br />
-                                <div class="row row-xs mg-b-10">
+                                    <br />
+                                    <div class="row row-xs mg-b-10">
 
-                                    <div class="col-sm">
-                                        Surname
-                                        @Html.TextBoxFor(model => model.Surname, new { @class = "form-control", @placeholder = "Surname", @autocomplete = "off" })
+                                        <div class="col-sm">
+                                            Surname
+                                            @Html.TextBoxFor(model => model.Surname, new { @class = "form-control", @placeholder = "Surname", @autocomplete = "off" })
 
-                                        @Html.ValidationMessageFor(model => model.Surname, "", new { @class = "text-danger" })
+                                            @Html.ValidationMessageFor(model => model.Surname, "", new { @class = "text-danger" })
 
+                                        </div>
+                                        <div class="col-sm">
+                                            First Name
+                                            @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @placeholder = "First Name", @autocomplete = "off" })
+
+                                            @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                                        </div>
+                                        
                                     </div>
-                                    <div class="col-sm">
-                                        First Name
-                                        @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @placeholder = "First Name", @autocomplete = "off" })
+                                    <br />
+                                    <div class="row row-xs mg-b-10">
+                                        <div class="col-sm mg-t-10 mg-sm-t-0">
+                                            Other Name
+                                            @Html.TextBoxFor(model => model.OtherName, new { @class = "form-control", @placeholder = "Other Name", @autocomplete = "off" })
 
-                                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-sm">
+                                            Date of Birth (DD/MM/YYYY)
+                                            <div class="input-group">
+                                                <input type="text" asp-for="DOB" value="@Model.DOB.GetValueOrDefault().ToString("dd/MM/yyyy")" class="form-control" autocomplete="off" data-date-format="dd/mm/yyyy" />
+
+                                                <div class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-th"></span>
+                                                </div>
+                                            </div>
+                                            @Html.ValidationMessageFor(model => model.DOB, "", new { @class = "text-danger" })
+                                            @Html.HiddenFor(model => model.DateOfBirth)
+                                        </div>
                                     </div>
-                                    <div class="col-sm mg-t-10 mg-sm-t-0">
-                                        Other Name
-                                        @Html.TextBoxFor(model => model.OtherName, new { @class = "form-control", @placeholder = "Other Name", @autocomplete = "off" })
+                                    <br />
+                                    <div class="row row-xs mg-b-10">
 
-                                    </div>
-                                    <div class="col-sm">
-                                        Date of Birth (DD/MM/YYYY)
-                                        <div class="input-group">
-                                            <input type="text" asp-for="DOB" value="@Model.DOB.GetValueOrDefault().ToString("dd/MM/yyyy")" class="form-control" autocomplete="off" data-date-format="dd/mm/yyyy" />
+                                        <div class="col-sm">
+                                            Postal Address
 
-                                            <div class="input-group-addon">
-                                                <span class="glyphicon glyphicon-th"></span>
+                                            @Html.TextAreaFor(model => model.PostalAddress, new { @class = "form-control", @placeholder = "Postal Address" })
+                                            @Html.ValidationMessageFor(model => model.PostalAddress, "", new { @class = "text-danger" })
+
+                                        </div>
+
+                                        <div class="col-sm">
+                                            Gender
+                                            <div class="form-floating mb-3">
+                                                <select asp-for="Gender" class="form-control" required>
+                                                    <option>--Select Gender--</option>
+                                                    <option value="1">Male</option>
+                                                    <option value="2">Female</option>
+                                                </select>
+                                                @Html.ValidationMessageFor(model => model.Gender, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
-                                        @Html.ValidationMessageFor(model => model.DOB, "", new { @class = "text-danger" })
-                                        @Html.HiddenFor(model => model.DateOfBirth)
+
+
+                                    </div>
+                                    <br />
+                                    <div class="row row-xs mg-b-10">
+
+                                        <div class="col-sm">
+                                            Contact Number
+                                            @Html.TextBoxFor(model => model.ContactNumber, new { @class = "form-control", @placeholder = "Contact Number", @autocomplete = "off" })
+                                            @Html.ValidationMessageFor(model => model.ContactNumber, "", new { @class = "text-danger" })
+
+                                        </div>
+                                        <div class="col-sm">
+                                            Nationality
+                                            <select asp-for="Nationality" class="form-control" asp-items="@((List<SelectListItem>)ViewBag.Countries)">
+                                                <option value="">--Select Nationality--</option>
+                                            </select>
+                                            @Html.ValidationMessageFor(model => model.Nationality, "", new { @class = "text-danger" })
+
+                                        </div>
+
                                     </div>
                                 </div>
-                                <br />
-                                <div class="row row-xs mg-b-10">
 
-                                    <div class="col-sm">
-                                        Postal Address
-
-                                        @Html.TextAreaFor(model => model.PostalAddress, new { @class = "form-control", @placeholder = "Postal Address" })
-                                        @Html.ValidationMessageFor(model => model.PostalAddress, "", new { @class = "text-danger" })
-
-                                    </div>
-
-                                </div>
-                                <br />
-                                <div class="row row-xs mg-b-10">
-
-                                    <div class="col-sm">
-                                        Contact Number
-                                        @Html.TextBoxFor(model => model.ContactNumber, new { @class = "form-control", @placeholder = "Contact Number", @autocomplete = "off" })
-                                        @Html.ValidationMessageFor(model => model.ContactNumber, "", new { @class = "text-danger" })
-
-                                    </div>
-                                    <div class="col-sm">
-                                        Tax Identification Number (TIN)
-                                        @Html.TextBoxFor(model => model.Nationality, new { @class = "form-control", @placeholder = "Tax Identification Number", @autocomplete = "off" })
-                                        @Html.ValidationMessageFor(model => model.Nationality, "", new { @class = "text-danger" })
-
-                                    </div>
-                                    <div class="col-sm">
-                                        Email (if applicable)
-                                        @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @placeholder = "Email", @autocomplete = "off" })
-
-                                    </div>
-
-                                </div>
                             </div>
-
                         </div>
-                    </div>
-                    <br />
-                    <div class="row">
-                        <div class="col-lg-12 mb-2">
-                            <div class="row">
-                                <div class="col-lg-6 text-left">
-                                    @* <a href="@Url.Action("BiodataUpdate","ReportManagement")" class="btn btn-secondary">Back to Application List</a> *@
-                                    <button onclick="history.back()" class="btn btn-secondary">Back to Application List</button>
-                                </div>
-                                <div class="col-lg-6 text-right">
+                        <br />
+                        <div class="row">
+                            <div class="col-lg-12 mb-2">
+                                <div class="row">
+                                    <div class="col-lg-6 text-left">
+                                        @* <a href="@Url.Action("BiodataUpdate","ReportManagement")" class="btn btn-secondary">Back to Application List</a> *@
+                                        <button type="button" onclick="history.back()" class="btn btn-secondary">Back to Application List</button>
+                                    </div>
+                                    <div class="col-lg-6 text-right">
 
-                                    <input type="submit" name="SubmitResult" class="btn btn-primary" value="Submit" />
+                                        <input type="submit" name="SubmitResult" class="btn btn-primary" value="Submit" />
 
 
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+
                     </div>
-
-
-                </div>
-            </form>
-
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -229,7 +254,7 @@
             var _month = ('0' + (dob.getMonth() + 1)).slice(-2);
             var _year = dob.getFullYear();
             $('#DateOfBirth').val(_year + '-' + _month + '-' + _day);
-            
+
 
             $('#DOB').on('changeDate', function (e) {
                 var date = e.date;
@@ -245,7 +270,7 @@
 
             load();
 
-            
+
 
             $('#PassOrFail').change(function () {
 
@@ -354,6 +379,8 @@
             //document.getElementById("PassportUrl").value = imageData;
 
             $('#PassportImageUrl').val(imageData);
+
+            $('#VideoCapture').val(true);
 
             console.log('Image', imageData);
 

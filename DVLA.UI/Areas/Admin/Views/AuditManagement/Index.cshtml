@@ -2,7 +2,7 @@
 @using DVLA.Data.Models.DataObjects.DTOs
 @using DVLA.Data.Models.DataObjects.ViewModels
 
-@model List<ActivityModel>
+@model AuditGridViewModel
 @{
 
     ViewBag.Title = "Audit Management";
@@ -22,57 +22,63 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-floating mb-3">
-                                    <select id="ModuleId" name="ModuleId" class="form-control">
-                                        <option>Select Module</option>
-                                        @foreach (Module item in (IEnumerable<Module>)ViewBag.Modules)
-                                        {
-                                            <option value="@item.Id">@item.Name</option>
-                                        }
-                                    </select>
-                                    <label for="ModuleId">Module</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-floating mb-3">
-                                    <select id="OptometristFirmId" name="OptometristFirmId" class="form-control">
-                                        <option value="">Select Optometrist Firm</option>
-                                        @foreach (OptometristFirm item in (IEnumerable<OptometristFirm>)ViewBag.OptometristFirms)
-                                        {
-                                            <option value="@item.Id">@item.BusinessName</option>
-                                        }
-                                    </select>
-                                    <label for="OptometristFirmId">Optometric Firm</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-floating mb-3">
-                                    <select id="UserId" name="UserId" class="form-control">
-                                        <option value="">Select User</option>
-                                        @foreach (UserViewModel item in (IEnumerable<UserViewModel>)ViewBag.Users)
-                                        {
-                                            <option value="@item.Id">@item.Email</option>
-                                        }
-                                    </select>
-                                    <label for="UserId">User</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-floating mb-3">
-                                    <input type="date" id="StartDate" name="StartDate" class="form-control" />
+                                    <input type="text" asp-for="Filter.StartDate" required autocomplete="off" class="form-control mydatepicker" data-date-format="dd/mm/yyyy" />
                                     <label for="StartDate">Start Date</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-floating mb-3">
-                                    <input type="date" id="EndDate" name="EndDate" class="form-control" />
-                                    <label for="StartDate">End Date</label>
+                                    <input type="text" asp-for="Filter.EndDate" required autocomplete="off" class="form-control mydatepicker" data-date-format="dd/mm/yyyy" />
+                                    <label for="EndDate">End Date</label>
                                 </div>
                             </div>
-                            <div class="col-4">
-                                <div class="d-md-flex align-items-center">
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <select asp-for="Filter.Gender" class="form-control">
+                                        <option value="">Select Gender</option>
+                                        <option value="1">Male</option>
+                                        <option value="2">Female</option>
+                                    </select>
+                                    <label for="Gender">Gender</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <select asp-for="Filter.PassOrFail" class="form-control">
+                                        <option value="">Select Test Status</option>
+                                        <option value="1">Pass</option>
+                                        <option value="2">Fail</option>
+                                    </select>
+                                    <label for="PassOrFail">Test Status</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <select asp-for="Filter.ResultConclusion" class="form-control" asp-items="(SelectList)ViewBag.ResultConclusions">
+                                        <option value="">Select Result Conclusion</option>
+                                    </select>
+                                    <label for="ResultConclusion">Result Conclusion</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <select asp-for="Filter.Nationalitiy" class="form-control" asp-items="@((List<SelectListItem>)ViewBag.Countries)">
+                                        <option value="">--Select Nationality--</option>
+                                    </select>
+                                    <label for="Nationality">Nationality</label>
+                                </div>
+                            </div>
+                        </div>
 
-                                    <div class="ms-auto mt-3 mt-md-0">
-                                        <button type="submit" class="btn btn-primary hstack gap-6">
+                        <div class="row">
+                            <div class="col-12">
+                                <div>
+
+                                    <div>
+                                        <button type="submit" class="btn btn-primary" formaction="/Admin/AuditManagement/ExportAudit">
+                                            Export to Excel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary" formaction="/Admin/AuditManagement/Index">
                                             Search
                                         </button>
                                     </div>
@@ -82,19 +88,25 @@
                     </form>
 
 
+
+
                     <div class="d-flex mb-2 float-right">
 
-                        <div class="d-flex">
+                        @* <div class="d-flex">
                             @using (Html.BeginForm("ExportAudit", "AuditManagement", FormMethod.Post))
                             {
                                 var sn = 0;
-                                for (var n = 0; n < Model.Count; n++)
+                                for (var n = 0; n < Model.Items.Count; n++)
                                 {
                                     @Html.HiddenFor(x => x[n].Id)
-                                    @Html.HiddenFor(x => x[n].ModuleName)
-                                    @Html.HiddenFor(x => x[n].Description)
-                                    @Html.HiddenFor(x => x[n].FullName)
-                                    @Html.HiddenFor(x => x[n].DateCreated)
+                                    @Html.HiddenFor(x => x[n].BusinessName)
+                                    @Html.HiddenFor(x => x[n].Applicant)
+                                    @Html.HiddenFor(x => x[n].Gender)
+                                    @Html.HiddenFor(x => x[n].Nationality)
+                                    @Html.HiddenFor(x => x[n].PassOrFail)
+                                    @Html.HiddenFor(x => x[n].ResultConclusion)
+                                    @Html.HiddenFor(x => x[n].Status)
+                                    @Html.HiddenFor(x => x[n].TestDate)
                                 }
 
                                 <button type="submit" id="add_row" class="btn btn-primary">
@@ -103,7 +115,7 @@
                                 </button>
                             }
 
-                        </div>
+                        </div> *@
                     </div>
 
                     <div>
@@ -115,42 +127,59 @@
                                             SN
                                         </th>
                                         <th>
-                                            Module
+                                            Facility
                                         </th>
                                         <th>
-                                            Description
+                                            Applicant
                                         </th>
 
                                         <th>
-                                            User
+                                            Gender
                                         </th>
 
                                         <th>
-                                            Action Time
+                                            Nationality
                                         </th>
+
+                                        <th>Conclusion</th>
+
+                                        <th>Service Type</th>
+
+                                        <th>Age</th>
                                     </tr>
 
                                 </thead>
                                 <tbody>
-                                    @foreach (var item in Model)
+                                    @foreach (ActivityModel item in Model.Items)
                                     {
                                         i = i + 1;
                                         <tr>
 
                                             <td>@i</td>
                                             <td>
-                                                @Html.DisplayFor(modelItem => item.ModuleName)
+                                                @Html.DisplayFor(modelItem => item.BusinessName)
                                             </td>
                                             <td>
-                                                @Html.DisplayFor(modelItem => item.Description)
-                                            </td>
-
-                                            <td>
-                                                @Html.DisplayFor(modelItem => item.FullName)
+                                                @Html.DisplayFor(modelItem => item.Applicant)
                                             </td>
 
                                             <td>
-                                                @Html.DisplayFor(modelItem => item.DateCreated)
+                                                @Html.DisplayFor(modelItem => item.Gender)
+                                            </td>
+
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Nationality)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ResultConclusion)
+                                            </td>
+
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ResultServiceType)
+                                            </td>
+
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Age)
                                             </td>
 
                                         </tr>
@@ -175,7 +204,7 @@
 
     <script type="text/javascript">
 
-        
+
 
     </script>
 }

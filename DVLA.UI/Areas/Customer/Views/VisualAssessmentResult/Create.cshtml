@@ -471,8 +471,8 @@
                                             </div>
                                             <div class="col-lg-6 text-right">
 
-                                                <input type="submit" id="btnSave" class="btn btn-primary" value="Save & Continue" />
-                                                <input type="submit" id="btnSubmit" class="btn btn-primary" value="Finalize & Submit" />
+                                                <input type="submit" id="btnSave" onclick="PreSubmit()" class="btn btn-primary" value="Save & Continue" />
+                                                <input type="submit" onclick="PreSubmit()" id="btnSubmit" class="btn btn-primary" value="Finalize & Submit" />
 
                                                 @* @if (Model == null)
                                                 {
@@ -515,6 +515,8 @@
 
     <script src="~/createvisualassessment.js" asp-append-version="true"></script>
 
+        function PreSubmit(){
 
+        }
 }
 

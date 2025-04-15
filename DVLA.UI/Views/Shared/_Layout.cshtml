@@ -9,7 +9,7 @@
 @inject ISlotUsageRepository _slotUsageService;
 @inject IAuthUser _authUser;
 @{
-    UserViewModel userData = new();
+    //UserViewModel userData = new();
     long[] quantities = new long[4];
     if (User.Identity.IsAuthenticated)
     {
@@ -49,7 +49,7 @@
         <!-- Sidebar Start -->
         @if (User.Identity.IsAuthenticated)
         {
-            <partial name="_LeftNav" model="userData"/>
+            <partial name="_LeftNav"/>
         }
         <!--  Sidebar End -->
         <div class="page-wrapper">
@@ -151,7 +151,7 @@
                                 <ul class="navbar-nav gap-2 flex-row ms-auto align-items-center justify-content-center">
                                     <li class="nav-item hover-dd dropdown">
                                         <a style="width:auto !important" class="nav-link" href="javascript:void(0)" id="drop2" aria-expanded="false">
-                                            @userData.OptometristFirmName
+                                            @_authUser.OptometristFirmName
                                         </a>
                                     </li>
                                     <!-- ------------------------------- -->
@@ -734,7 +734,7 @@
                                                         <div class="ms-3">
                                                             <h5 class="mb-1 fs-4">Markarn Doe</h5>
                                                             <p class="mb-0 fs-2 d-flex align-items-center text-muted">
-                                                                @userData.Email
+                                                                @_authUser.Email
                                                             </p>
                                                         </div>
                                                     </div>
