@@ -377,6 +377,90 @@ namespace DVLA.Business.ReportModule
             return result;
         }
 
+
+        public List<VisualAssessmentResultDto> FetchAllPendingTransmissions()
+        {
+            var result = new List<VisualAssessmentResultDto>();
+            try
+            {
+
+                string SafeGetString(SqlDataReader r, string col) =>
+    r.IsDBNull(r.GetOrdinal(col)) ? null : r.GetString(col);
+
+                //string? SafeGetNullableDate(SqlDataReader r, string col) =>
+                 //   r.IsDBNull(r.GetOrdinal(col)) ? null : r.GetDateTime(col).ToString();
+
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand("FetchPendingTransmissions", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        conn.Open();
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                result.Add(new VisualAssessmentResultDto
+                                {
+                                    VisualAssessmentResultId = reader.GetInt64(reader.GetOrdinal("Id")),
+                                    Surname = SafeGetString(reader, "Surname"),
+                                    CreatedBy = SafeGetString(reader, "CreatedBy"),
+                                    BCV_OD = SafeGetString(reader, "BCV_OD"),
+                                    Id = reader.GetInt64(reader.GetOrdinal("Id")),
+                                    BCV_OS = SafeGetString(reader, "BCV_OS"),
+                                    BCV_OU = SafeGetString(reader, "BCV_OU"),
+                                    ColourVision_BCV_OU = SafeGetString(reader, "ColourVision_BCV_OU"),
+                                    ContactNumber = SafeGetString(reader, "ContactNumber"),
+                                    ContrastSensitivity_BCV = SafeGetString(reader, "ContrastSensitivity_BCV"),
+                                    Email = SafeGetString(reader, "Email"),
+                                    FirstName = SafeGetString(reader, "FirstName"),
+                                    GlareTest_BCV_OD = SafeGetString(reader, "GlareTest_BCV_OD"),
+                                    GlareTest_BCV_OS = SafeGetString(reader, "GlareTest_BCV_OS"),
+                                    GlareTest_BCV_OU = SafeGetString(reader, "GlareTest_BCV_OU"),
+                                    PassOrFail = reader.IsDBNull(reader.GetOrdinal("PassOrFail")) ? null : (PassOrFail)reader.GetInt32("PassOrFail"),
+                                    AccessType = reader.IsDBNull(reader.GetOrdinal("AccessType")) ? null : (AccessType)reader.GetInt32("AccessType"),
+                                    PassResult = reader.IsDBNull(reader.GetOrdinal("PassResult")) ? null : (PassResult)reader.GetInt32("PassResult"),
+                                    ResultServiceType = reader.IsDBNull(reader.GetOrdinal("ResultServiceType")) ? null : (ResultServiceType)reader.GetInt32("ResultServiceType"),
+                                    Gender = reader.IsDBNull(reader.GetOrdinal("Gender")) ? null : (Gender)reader.GetInt32("Gender"),
+                                    IsRegistration = reader.IsDBNull(reader.GetOrdinal("IsRegistration")) ? null : reader.GetBoolean("IsRegistration"),
+                                    Status = reader.IsDBNull(reader.GetOrdinal("Status")) ? null : (Status)reader.GetInt32("Status"),
+                                    TestType = (TestType)reader.GetByte(reader.GetOrdinal("TestType")),
+                                    DOB = reader.IsDBNull(reader.GetOrdinal("DOB")) ? null : reader.GetDateTime(reader.GetOrdinal("DOB")),
+                                    TestDate = reader.IsDBNull(reader.GetOrdinal("TestDate")) ? null : reader.GetDateTime(reader.GetOrdinal("TestDate")),
+                                    CreatedDate = reader.GetDateTime(reader.GetOrdinal("CreatedDate")),
+                                    HX_BCV_OD = SafeGetString(reader, "HX_BCV_OD"),
+                                    HX_BCV_OS = SafeGetString(reader, "HX_BCV_OS"),
+                                    HX_BCV_OU = SafeGetString(reader, "HX_BCV_OU"),
+                                    Nationality = SafeGetString(reader, "Nationality"),
+                                    OptometristFirmId = reader.GetInt32(reader.GetOrdinal("OptometristFirmId")),
+                                    OptometristFirmName = SafeGetString(reader, "OptometristFirmName"),
+                                    ReferenceNumber = SafeGetString(reader, "ReferenceNumber"),
+                                    OptometristName = SafeGetString(reader, "OptometristName"),
+                                    OtherName = SafeGetString(reader, "OtherName"),
+                                    PathologicalRemarks = SafeGetString(reader, "PathologicalRemarks"),
+                                    Unaided_OD = SafeGetString(reader, "Unaided_OD"),
+                                    Unaided_OS = SafeGetString(reader, "Unaided_OS"),
+                                    ResultConclusion = SafeGetString(reader, "ResultConclusion"),
+                                    PostalAddress = SafeGetString(reader, "PostalAddress"),
+                                    SingleImage_BCV_OU = SafeGetString(reader, "SingleImage_BCV_OU"),
+                                    PassportImageUrl = SafeGetString(reader, "PassportImageUrl"),
+                                    Unaided_OU = SafeGetString(reader, "Unaided_OU"),
+                                });
+                            }
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return result;
+        }
+
+
         public byte[] WriteToExcel(string extension, DataTable dt)
         {
             byte[] report = null;

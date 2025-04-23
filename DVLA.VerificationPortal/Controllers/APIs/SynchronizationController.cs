@@ -20,10 +20,10 @@ namespace DVLA.VerificationPortal.Controllers.APIs
         }
 
         [HttpPost("push-visual-assessment")]
-        public async Task<IActionResult> PushVisualAssessmentResults()
+        public async Task<IActionResult> PushVisualAssessmentResults(VisualAssessmentResultDto model)
         {
             _logger.LogInformation("Synchronization Endpoint started");
-            MessageResponse result = await _searchService.Push();
+            MessageResponse result = await _searchService.Push(model);
             _logger.LogInformation("Synchronization Endpoint ended");
             if (result.Success)
                 return Ok(result);

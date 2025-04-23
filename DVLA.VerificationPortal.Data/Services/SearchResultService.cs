@@ -88,7 +88,7 @@ namespace DVLA.VerificationPortal.Application.Services
         {
             VisualAssessmentResult result = await _visualAssessmentResultRepository.GetSingleAsync(x => x.Id == id, false);
             var model = _mapper.Map<VisualAssessmentResultDto>(result);
-            model.EncodedKey = Utility.EncryptUrlID((int)model.Id);
+            //model.EncodedKey = Utility.EncryptUrlID((int)model.Id);
             return model;
         }
 
@@ -104,31 +104,17 @@ namespace DVLA.VerificationPortal.Application.Services
             return new() { Message = "Visual Assessment Result pushed successfully", Success = true };
         }
 
-        public async Task<MessageResponse> Push()
+        public async Task<MessageResponse> Push(VisualAssessmentResultDto model)
         {
             try
             {
-                HttpRequest request = _contextAccessor.HttpContext.Request;
-                string? json = request.Form["VisualAssessmentResult"];
-                VisualAssessmentResultDto model = JsonConvert.DeserializeObject<VisualAssessmentResultDto>(json);
                 if (model == null) return new() { Message = "No content" };
-
-                string PassportFolder = Path.Combine(_environment.WebRootPath, "Passports");
-                if (!Directory.Exists(PassportFolder)) Directory.Exists(PassportFolder);
-
-                IFormFile? file = request.Form.Files.FirstOrDefault();
-                if (file != null)
-                {
-                    string filePath = Path.Combine(PassportFolder, file.FileName);
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await request.Form.Files.FirstOrDefault()!.CopyToAsync(stream);
-                }
 
                 List<VisualAssessmentResult> entities = new();
                 VisualAssessmentResult entity = _mapper.Map<VisualAssessmentResult>(model);
 
                 VisualAssessmentResult record = await _visualAssessmentResultRepository.GetSingleAsync(x => x.VisualAssessmentResultId == entity.VisualAssessmentResultId, false);
-                if (record != null) return new() { Message = "Record Exists", Success = false };
+                if (record != null) return new() { Message = "Record Exists", Success = true };
                 entity.Id = 0;
                 await _visualAssessmentResultRepository.AddAsync(entity);
                 return new() { Message = "Visual Assessment Result pushed successfully", Success = true };

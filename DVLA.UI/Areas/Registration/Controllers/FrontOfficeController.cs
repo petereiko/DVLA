@@ -188,29 +188,32 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 }
 
                 //string referenceNumber = _visualAssessmentResultRepository.GenerateFormNo();
+                if (model.ResultServiceType == ResultServiceType.LearnerDriversLicence) model.TestType = TestType.NewTest;
+                else model.TestType = TestType.ReTest;
 
-                var applicant = new VisualAssessmentResult()
-                {
-                    CreatedDate = DateTime.Now,
-                    Id = model.Id,
-                    Surname = model.Surname,
-                    OptometristFirmId = model.OptometristFirmId,
-                    ResultServiceType = model.ResultServiceType,
-                    AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
-                    PassportImageUrl = model.Filename,
-                    TestType = model.TestType,
-                    Status = Status.InProgress,
-                    FirstName = model.FirstName,
-                    OtherName = model.OtherName,
-                    DOB = (DateTime)model.DOB,
-                    PostalAddress = model.PostalAddress,
-                    ContactNumber = model.ContactNumber,
-                    Nationality = model.Nationality,
-                    Email = model.Email,
-                    IsRegistration = true,
-                    CreatedBy = currentUserId,
-                    Gender = model.Gender
-                };
+
+                    var applicant = new VisualAssessmentResult()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Id = model.Id,
+                        Surname = model.Surname,
+                        OptometristFirmId = model.OptometristFirmId,
+                        ResultServiceType = model.ResultServiceType,
+                        AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
+                        PassportImageUrl = model.Filename,
+                        TestType = model.TestType,
+                        Status = Status.InProgress,
+                        FirstName = model.FirstName,
+                        OtherName = model.OtherName,
+                        DOB = (DateTime)model.DOB,
+                        PostalAddress = model.PostalAddress,
+                        ContactNumber = model.ContactNumber,
+                        Nationality = model.Nationality,
+                        Email = model.Email,
+                        IsRegistration = true,
+                        CreatedBy = currentUserId,
+                        Gender = model.Gender
+                    };
 
                 await _applicantQuery.AddAsync(applicant);
 

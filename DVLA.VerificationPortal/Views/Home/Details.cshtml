@@ -2,6 +2,7 @@
 @using DVLA.VerificationPortal.Shared.DTOs
 @using DVLA.VerificationPortal.Shared.Enums
 @model VisualAssessmentResultDto
+@inject IConfiguration _configuration;
 
 @{
     ViewData["Title"] = "Visual Assessment Details";
@@ -20,58 +21,58 @@
 
     <style>
         body {
-            background-color: #f8f9fa;
-            font-family: 'Roboto', sans-serif;
+        background-color: #f8f9fa;
+        font-family: 'Roboto', sans-serif;
         }
 
         .card {
-            margin-top: 20px;
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .btn {
-            background-color: #34495E;
-            color: white;
+        background-color: #34495E;
+        color: white;
         }
 
         .btn-danger{
-            background-color:red;
-            color:white;
-            border:1px solid red;
-            width:100px;
+        background-color:red;
+        color:white;
+        border:1px solid red;
+        width:100px;
         }
 
-            .btn:hover {
-                background-color: white;
-                color: #34495E;
-            }
+        .btn:hover {
+        background-color: white;
+        color: #34495E;
+        }
 
         .card-header {
-            background-color: #34495E;
-            color: white;
-            border-radius: 10px 10px 0 0;
+        background-color: #34495E;
+        color: white;
+        border-radius: 10px 10px 0 0;
         }
 
         .card-body {
-            padding: 20px;
+        padding: 20px;
         }
 
         .result-section {
-            margin-bottom: 20px;
+        margin-bottom: 20px;
         }
 
-            .result-section h5 {
-                color: #34495E;
-            }
+        .result-section h5 {
+        color: #34495E;
+        }
 
         h1 {
-            font-weight: 700;
+        font-weight: 700;
         }
 
         p {
-            font-weight: 400;
+        font-weight: 400;
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -127,14 +128,18 @@
                             <div class="col-sm-4">
                                 @if (!Model.IsVerified)
                                 {
-                                    <button onclick="VerifyResult('@Model.EncodedKey')" class="btn btn-primary btn-sm right">Verify Eye Test Result</button>
+                                    string token = Utility.EncryptUrlID((int)Model.Id);
+                                    <button onclick="VerifyResult('@token')" class="btn btn-primary btn-sm right">Verify Eye Test Result</button>
                                 }
                                 else
                                 {
                                     <img src="~/logos/verify.jpeg" width="80" height="80" />
                                 }
                                 <br /><br />
-                                <img class="img-thumbnail" width="150" height="150" src="~/Passports/@Model.PassportImageUrl" alt="Passport Photo" />
+                                @{
+                                    string passportUrl = $"{_configuration["AppConstants:PassportUrl"]}{Model.PassportImageUrl}";
+                                }
+                                <img class="img-thumbnail" width="150" height="150" src="@passportUrl" alt="Passport Photo" />
                             </div>
                         </div>
                         <br />

@@ -17,6 +17,7 @@ namespace DVLA.Business.ReportModule
         Task<List<ClientModel>> FetchClientSearch(ClientSearchParameter searchParameter, string optometristAdminId = null, string optometristId = null);
         Task<List<SlotReductionModel>> FetchSlotReductionLogs(SlotReductionLogSearchParameter search);
         Task<List<OptometristFirmModel>> FetchAllOptometristFirms(int? regionId, int? district);
+        List<VisualAssessmentResultDto> FetchAllPendingTransmissions();
         byte[] WriteToExcel(string extension, DataTable dt);
     }
 }

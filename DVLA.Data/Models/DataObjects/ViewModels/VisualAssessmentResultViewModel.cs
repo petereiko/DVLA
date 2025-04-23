@@ -25,7 +25,7 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
         public string ReferenceNumber { get; set; }
         public ResultServiceType? ResultServiceType { get; set; }
         public string Surname { get; set; }
-        public TestType TestType { get; set; }
+        public TestType? TestType { get; set; }
         public string FirstName { get; set; }
         public string OtherName { get; set; }
 

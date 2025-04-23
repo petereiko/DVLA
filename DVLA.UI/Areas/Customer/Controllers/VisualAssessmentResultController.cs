@@ -518,6 +518,8 @@ namespace DVLA.UI.Areas.Customer.Controllers
             ViewBag.Token = token;
             try
             {
+                VisualAssessmentResultViewModel model = null;
+
                 var visualAcuitys = _visualAcuityScoreRepositoryQuery.Filter(x => x.IsActive).ToList();
                 var visualFieldScores = _visualFieldScoreRepositoryQuery.Filter(x => x.IsActive).ToList();
                 var colourVisionScores = _visualAssessmentResultRepository.GetColorVisionScores();
@@ -540,7 +542,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
                     id = long.Parse(Utility.Decrypt(token));
 
-                    var visualAssessmentResults = (await _visualAssessmentResultRepositoryQuery.FilterAsync(x => x.Id == id)).Select(y => new VisualAssessmentResultViewModel()
+                    model = (await _visualAssessmentResultRepositoryQuery.FilterAsync(x => x.Id == id)).Select(y => new VisualAssessmentResultViewModel()
                     {
                         Id = y.Id,
                         PassOrFail = y.PassOrFail,
@@ -548,7 +550,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         Surname = y.Surname,
                         FirstName = y.FirstName,
                         OtherName = y.OtherName,
-                        DOB = (DateTime)y.DOB,
+                        DOB = (DateTime?)y.DOB,
                         PostalAddress = y.PostalAddress,
                         ContactNumber = y.ContactNumber,
                         Nationality = y.Nationality,
@@ -580,22 +582,21 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         Gender = y.Gender
                     }).FirstOrDefault();
 
-                    if (!string.IsNullOrEmpty(visualAssessmentResults.PassportImageUrl) && visualAssessmentResults.PassportImageUrl.Contains(".png"))
+                    if (!string.IsNullOrEmpty(model.PassportImageUrl) && model.PassportImageUrl.Contains(".png"))
                     {
-                        var path = Path.Combine(_environment.ContentRootPath, "Passports", visualAssessmentResults.PassportImageUrl);
+                        var path = Path.Combine(_environment.ContentRootPath, "Passports", model.PassportImageUrl);
                         if (System.IO.File.Exists(path))
                         {
                             byte[] imageArray = System.IO.File.ReadAllBytes(path);
-                            visualAssessmentResults.PassportImageUrl = Convert.ToBase64String(imageArray);
+                            model.PassportImageUrl = Convert.ToBase64String(imageArray);
                         }
                     }
-                    visualAssessmentResults.PassOrFailInt = visualAssessmentResults.PassOrFail != null ? (int)visualAssessmentResults.PassOrFail : null;
-                    return View(visualAssessmentResults);
+                    model.PassOrFailInt = model.PassOrFail != null ? (int)model.PassOrFail : null;
+                    return View(model);
 
                 }
                 else
                 {
-                    VisualAssessmentResultViewModel model = new();
                     model.Status = Status.InProgress;
                     return View(model);
                 }
@@ -629,6 +630,11 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 {
                     ModelState.AddModelError("PassportImageUrl", "Kindly take a Snapshot or upload a Passport");
                     ModelState.AddModelError("Image", "Kindly take a Snapshot or upload a Passport");
+                    result = false;
+                }
+                if (model.DOB == null)
+                {
+                    ModelState.AddModelError("DOB", "DOB is required");
                     result = false;
                 }
             }
@@ -821,11 +827,6 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
                 model.PassportImageUrl = await SaveImage(model);
 
-
-
-
-
-
                 var optometristUser = _optometristFirmUserRepositoryQuery.FilterAsync(x => x.ApplicationUserId == _authUser.UserId).Result.FirstOrDefault();
 
                 if (optometristUser == null)
@@ -879,14 +880,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                     model.Errors.Add("Please capture/upload passport");
                                     return View(model);
                                 }
-                                //if (model.PassResult == null)
-                                //{
-                                //    await scope.RollbackAsync();
-                                //    ModelState.AddModelError("PassResult", "Select a Pass Result");
-                                //    model.Errors.Add("Select a Pass Result");
-                                //    return View(model);
-                                //}
                             }
+
+                            if (model.ResultServiceType == ResultServiceType.LearnerDriversLicence) model.TestType = TestType.NewTest;
+                            else model.TestType = TestType.ReTest;
 
                             VisualAssessmentResult visualAssessmentResult = new VisualAssessmentResult()
                             {
@@ -899,7 +896,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 //DVLAReferenceNo = model.DVLAReferenceNo,
                                 FirstName = model.FirstName,
                                 OtherName = model.OtherName,
-                                DOB = (DateTime)model.DOB,
+                                DOB = (DateTime?)model.DOB,
                                 PostalAddress = model.PostalAddress,
                                 ContactNumber = model.ContactNumber,
                                 Nationality = model.Nationality,
@@ -937,7 +934,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 IsRegistration = false,
                                 ContrastSensitivity_BCV = model.ContrastSensitivity_BCV,
                                 AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
-                               
+
                             };
                             context.VisualAssessmentResults.Add(visualAssessmentResult);
                             await context.SaveChangesAsync();
@@ -956,7 +953,15 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             await scope.CommitAsync();
                             TempData["SuccessMessage"] = "Eye Test Result created successfully";
                             _AuditRepo.AddAudit(Activities.CREATE_VISUAL_ASSESSMENT_RESULT, "Create Eye Test Result");
-                            return RedirectToAction("Detail", new { page = "Details", token = Utility.Encrypt(visualAssessmentResult.Id.ToString()) });
+
+                            if (model.Status == Status.Complete)
+                            {
+                                return RedirectToAction("Detail", new { page = "Details", token = Utility.Encrypt(visualAssessmentResult.Id.ToString()) });
+                            }
+                            else
+                            {
+                                return RedirectToAction("Index");
+                            }
                         }
                         else
                         {
@@ -978,14 +983,18 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                     model.Errors.Add("Please capture/upload passport");
                                     return View(model);
                                 }
-                                //if (model.PassResult == null)
-                                //{
-                                //    await scope.RollbackAsync();
-                                //    ModelState.AddModelError("PassResult", "Select a Pass Result");
-                                //    model.Errors.Add("Select a Pass Result");
-                                //    return View(model);
-                                //}
+                                if (model.DOB == null)
+                                {
+                                    await scope.RollbackAsync();
+                                    ModelState.AddModelError("DOB", "Select Date of Birth");
+                                    model.Errors.Add("Select Date of Birth");
+                                    return View(model);
+                                }
                             }
+
+                            if (model.ResultServiceType == ResultServiceType.LearnerDriversLicence) model.TestType = TestType.NewTest;
+                            else model.TestType = TestType.ReTest;
+
                             //visualAssessmentResult.NameTitle = model.NameTitle;
                             visualAssessmentResult.Gender = model.Gender;
                             visualAssessmentResult.PassOrFail = model.PassOrFail;
@@ -996,7 +1005,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             //visualAssessmentResult.DVLAReferenceNo = model.DVLAReferenceNo;
                             visualAssessmentResult.FirstName = model.FirstName;
                             visualAssessmentResult.OtherName = model.OtherName;
-                            visualAssessmentResult.DOB = (DateTime)model.DOB;
+                            visualAssessmentResult.DOB = (DateTime?)model.DOB;
                             visualAssessmentResult.PostalAddress = model.PostalAddress;
                             visualAssessmentResult.ContactNumber = model.ContactNumber;
                             visualAssessmentResult.Nationality = model.Nationality;
@@ -1053,7 +1062,15 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             await scope.CommitAsync();
                             TempData["SuccessMessage"] = "Record saved successfully";
                             _AuditRepo.AddAudit(Activities.CREATE_VISUAL_ASSESSMENT_RESULT, "Create Visual Assessment Result");
-                            return RedirectToAction("Detail", new { page = "Details", token = Utility.Encrypt(visualAssessmentResult.Id.ToString()) });
+
+                            if (model.Status == Status.Complete)
+                            {
+                                return RedirectToAction("Detail", new { page = "Details", token = Utility.Encrypt(visualAssessmentResult.Id.ToString()) });
+                            }
+                            else
+                            {
+                                return RedirectToAction("Index");
+                            }
                         }
                     }
                     catch (Exception ex)
