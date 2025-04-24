@@ -26,14 +26,16 @@ namespace DVLA.VerificationPortal.Application.Services
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IHostingEnvironment _environment;
         private readonly ILogger<SearchResultService> _logger;
+        private readonly IApiClientService _apiClientService;
 
-        public SearchResultService(IGenericRepository<VisualAssessmentResult> visualAssessmentResultRepository, IMapper mapper, IHttpContextAccessor contextAccessor, IHostingEnvironment environment, ILogger<SearchResultService> logger)
+        public SearchResultService(IGenericRepository<VisualAssessmentResult> visualAssessmentResultRepository, IMapper mapper, IHttpContextAccessor contextAccessor, IHostingEnvironment environment, ILogger<SearchResultService> logger, IApiClientService apiClientService)
         {
             _visualAssessmentResultRepository = visualAssessmentResultRepository;
             _mapper = mapper;
             _contextAccessor = contextAccessor;
             _environment = environment;
             _logger = logger;
+            _apiClientService = apiClientService;
         }
 
         public async Task<IEnumerable<VisualAssessmentResultDto>> GetResultsAsync(string searchTerm)

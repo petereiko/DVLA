@@ -17,6 +17,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Database.Context
 
 
         public DbSet<ApiClient> ApiClients { get; set; }
+        public DbSet<ApiAuditLog> ApiAuditLogs { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<ApplicationRole> ApplicationRoles { get; set; }
         public DbSet<ApplicationUserRole> ApplicationUserRoles { get; set; }

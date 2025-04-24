@@ -1,4 +1,5 @@
 ﻿using DVLA.VerificationPortal.Application.Interfaces;
+using DVLA.VerificationPortal.CustomAttributes;
 using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.AspNetCore.Http;
@@ -8,6 +9,7 @@ namespace DVLA.VerificationPortal.Controllers.APIs
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ApiKey]
     public class SynchronizationController : ControllerBase
     {
         private readonly ISearchResultService _searchService;
