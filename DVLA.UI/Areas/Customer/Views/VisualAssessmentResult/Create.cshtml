@@ -107,7 +107,7 @@
 
                                     <div class="col-sm">
                                         Service Type
-                                        <select asp-for="ResultServiceType" class="form-control" asp-items="Html.GetEnumSelectList<ResultServiceType>()">
+                                        <select asp-for="ResultServiceType" class="form-control" asp-items="Html.GetEnumSelectList<ResultServiceType>()" required>
                                             <option>Select Service Type</option>
                                         </select>
                                         @Html.ValidationMessageFor(model => model.ResultServiceType, "", new { @class = "text-danger" })
@@ -129,21 +129,18 @@
 
                                                 <div class="col-sm">
                                                     Surname
-                                                    @Html.TextBoxFor(model => model.Surname, new { @class = "form-control", @autocomplete = "off" })
-
+                                                    <input asp-for="Surname" class="form-control" autocomplete="off" required />
                                                     @Html.ValidationMessageFor(model => model.Surname, "", new { @class = "text-danger" })
 
                                                 </div>
                                                 <div class="col-sm">
                                                     First Name
-                                                    @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @autocomplete = "off" })
-
+                                                    <input asp-for="FirstName" class="form-control" autocomplete="off" required />
                                                     @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
                                                 </div>
                                                 <div class="col-sm mg-t-10 mg-sm-t-0">
                                                     Other Name
-                                                    @Html.TextBoxFor(model => model.OtherName, new { @class = "form-control", @autocomplete = "off" })
-
+                                                    <input asp-for="OtherName" class="form-control" autocomplete="off" />
                                                 </div>
                                                 <div class="col-sm">
                                                     Date of Birth (DD/MM/YYYY)
@@ -516,7 +513,6 @@
     <script src="~/createvisualassessment.js" asp-append-version="true"></script>
 
         function PreSubmit(){
-
         }
 }
 

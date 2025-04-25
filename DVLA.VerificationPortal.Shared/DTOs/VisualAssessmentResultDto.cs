@@ -10,7 +10,7 @@ namespace DVLA.VerificationPortal.Shared.DTOs
     public class VisualAssessmentResultDto
     {
         public long Id { get; set; }
-        public string EncodedKey { get; set; }
+        //public string? EncodedKey { get; set; }
         public long VisualAssessmentResultId { get; set; }
         public int OptometristFirmId { get; set; }
         public Gender? Gender { get; set; }

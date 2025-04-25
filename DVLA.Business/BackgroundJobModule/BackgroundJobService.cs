@@ -1,6 +1,7 @@
 ﻿using DVLA.Business.EmailModule;
 using DVLA.Business.NotificationModule;
 using DVLA.Business.PaymentModule;
+using DVLA.Business.ReportModule;
 using DVLA.Business.SlotModule;
 using DVLA.Data;
 using DVLA.Data.Models.DataObjects.DTOs;
@@ -35,7 +36,9 @@ namespace DVLA.Business.BackgroundJobModule
         private readonly IConfiguration _configuration;
         private readonly IHostingEnvironment _hostEnvironment;
         private readonly ILogger<BackgroundJobService> _logger;
-        public BackgroundJobService(DVLADbContext context, IEmailService emailService, IPaymentService paymentService, ISmsRepository smsRepository, IConfiguration configuration, IHostingEnvironment hostEnvironment, ILogger<BackgroundJobService> logger)
+        private readonly IReportRepository _reportRepository;
+
+        public BackgroundJobService(DVLADbContext context, IEmailService emailService, IPaymentService paymentService, ISmsRepository smsRepository, IConfiguration configuration, IHostingEnvironment hostEnvironment, ILogger<BackgroundJobService> logger, IReportRepository reportRepository)
         {
             _context = context;
             _emailService = emailService;
@@ -44,6 +47,7 @@ namespace DVLA.Business.BackgroundJobModule
             _configuration = configuration;
             _hostEnvironment = hostEnvironment;
             _logger = logger;
+            _reportRepository = reportRepository;
         }
 
         [DisableConcurrentExecution(60)]
@@ -158,121 +162,51 @@ namespace DVLA.Business.BackgroundJobModule
 
                 if (!runPushAssessment) { return; }
 
-                var optometristFirmUsers = _context.OptometristFirmUsers.AsNoTracking().Include(x => x.ApplicationUser);
+                var visualAssessmentResults = _reportRepository.FetchAllPendingTransmissions();
 
-                var visualAssessmentResults = _context.VisualAssessmentResults.AsNoTracking().Include(x => x.OptometristFirm).Where(x => x.CreatedDate < DateTime.Now.AddMinutes(-5)
-                && !x.IsTransmitted && x.Status == Status.Complete && !string.IsNullOrEmpty(x.ReferenceNumber)
-                && !string.IsNullOrEmpty(x.PassportImageUrl) && !x.HasTransmissionError && string.IsNullOrEmpty(x.TransmissionError)).Take(50)
-                .Select(x => new VisualAssessmentResultDto
+                foreach (VisualAssessmentResultDto item in visualAssessmentResults)
                 {
-                    AccessType = x.AccessType,
-                    BCV_OD = x.BCV_OD,
-                    BCV_OS = x.BCV_OS,
-                    BCV_OU = x.BCV_OU,
-                    ColourVision_BCV_OU = x.ColourVision_BCV_OU,
-                    ContactNumber = x.ContactNumber,
-                    ContrastSensitivity_BCV = x.ContrastSensitivity_BCV,
-                    CreatedBy = x.CreatedBy,
-                    CreatedDate = x.CreatedDate,
-                    DOB = x.DOB,
-                    Email = x.Email,
-                    FirstName = x.FirstName,
-                    GlareTest_BCV_OD = x.GlareTest_BCV_OD,
-                    GlareTest_BCV_OS = x.GlareTest_BCV_OS,
-                    GlareTest_BCV_OU = x.GlareTest_BCV_OU,
-                    HX_BCV_OD = x.HX_BCV_OD,
-                    HX_BCV_OS = x.HX_BCV_OD,
-                    HX_BCV_OU = x.HX_BCV_OD,
-                    IsRegistration = x.IsRegistration,
-                    OptometristFirmId = x.OptometristFirmId,
-                    OptometristFirmName = x.OptometristFirm.BusinessName,
-                    OptometristName = x.CreatedBy,
-                    Gender = x.Gender,
-                    OtherName = x.OtherName,
-                    PassOrFail = x.PassOrFail,
-                    PassResult = x.PassResult,
-                    PassportImageUrl = x.PassportImageUrl,
-                    PathologicalRemarks = x.PathologicalRemarks,
-                    PostalAddress = x.PostalAddress,
-                    ReferenceNumber = x.ReferenceNumber,
-                    ResultConclusion = x.ResultConclusion,
-                    ResultServiceType = x.ResultServiceType,
-                    SingleImage_BCV_OU = x.SingleImage_BCV_OU,
-                    Status = x.Status,
-                    Surname = x.Surname,
-                    Nationality = x.Nationality,
-                    TestDate = x.TestDate,
-                    TestType = x.TestType,
-                    TransmittedDate = DateTime.UtcNow,
-                    Unaided_OD = x.Unaided_OD,
-                    Unaided_OS = x.Unaided_OS,
-                    Unaided_OU = x.Unaided_OU,
-                    VisualAssessmentResultId = x.Id,
-                    Id = x.Id
-                });
-
-                foreach (var item in visualAssessmentResults)
-                {
-                    using var content = new MultipartFormDataContent();
-
-                    var optometristFirmUser = optometristFirmUsers.FirstOrDefault(x => x.ApplicationUserId == item.CreatedBy);
-                    if (optometristFirmUser != null)
+                    try
                     {
-                        var user = optometristFirmUser.ApplicationUser;
-                        if (user != null)
+                        using var client = new HttpClient();
+                        var request = new HttpRequestMessage(HttpMethod.Post, _configuration["AppConstants:ApiVerificationPushUrl"]);
+                        request.Headers.Add("X-API-KEY", _configuration["AppConstants:ApiKey"]);
+                        var content = new StringContent(JsonConvert.SerializeObject(item), null, "application/json");
+                        request.Content = content;
+                        var response = client.SendAsync(request).GetAwaiter().GetResult();
+                        if (response.IsSuccessStatusCode)
                         {
-                            item.OptometristName = user.FirstName + " " + user.LastName;
+                            var jsonSuccess = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            MessageResponse messageResponse = JsonConvert.DeserializeObject<MessageResponse>(jsonSuccess);
+                            if (messageResponse.Success)
+                            {
+                                var visualAssessmentResult = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.VisualAssessmentResultId);
+
+                                visualAssessmentResult.IsTransmitted = true;
+                                visualAssessmentResult.TransmittedDate = messageResponse.Message.Equals("Record Exists") ? visualAssessmentResult.TransmittedDate : DateTime.UtcNow;
+                                visualAssessmentResult.TransmissionError = null;
+                                visualAssessmentResult.HasTransmissionError = false;
+                                _context.SaveChanges();
+                            }
                         }
-                    }
-                    var json = JsonConvert.SerializeObject(item);
-                    content.Add(new StringContent(json, Encoding.UTF8, "application/json"), "VisualAssessmentResult");
-
-                    var filePath = Path.Combine(_hostEnvironment.WebRootPath, "Passports", item.PassportImageUrl);
-                    if (File.Exists(filePath))
-                    {
-                        var fileStream = File.OpenRead(filePath);
-                        var streamContent = new StreamContent(fileStream);
-                        streamContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-                        content.Add(streamContent, "Passport", item.PassportImageUrl);
-                    }
-                    else
-                    {
-                        VisualAssessmentResult visualAssessmentResult = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.Id);
-                        if (visualAssessmentResult != null)
+                        else
                         {
-                            visualAssessmentResult.HasTransmissionError = true;
-                            visualAssessmentResult.TransmissionError = "Passport File not found";
+                            string errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            var assessment = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.VisualAssessmentResultId);
+                            assessment.IsTransmitted = false;
+                            assessment.HasTransmissionError = true;
+                            assessment.TransmissionError = errorContent;
                             _context.SaveChanges();
                         }
-                        continue;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogInformation("Could not reach the Push API");
+                        _logger.LogError(ex.Message, ex);
+                        break;
                     }
 
-                    using var client = new HttpClient();
-                    var response = client.PostAsync(_configuration["AppConstants:ApiVerificationPushUrl"], content).GetAwaiter().GetResult();
-                    if (response.IsSuccessStatusCode)
-                    {
-                        MessageResponse result = JsonConvert.DeserializeObject<MessageResponse>(response.Content.ReadAsStringAsync().GetAwaiter().GetResult());
-                        if (result.Success)
-                        {
-                            var visualAssessmentResult = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.Id);
-                            if (visualAssessmentResult != null)
-                            {
-                                visualAssessmentResult.IsTransmitted = true;
-                                visualAssessmentResult.TransmittedDate = DateTime.UtcNow;
-                                _context.SaveChanges();
-                            }
-                        }
-                        else if (result.Message == "Record Exists")
-                        {
-                            var visualAssessmentResult = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.Id);
-                            if (visualAssessmentResult != null)
-                            {
-                                visualAssessmentResult.IsTransmitted = true;
-                                visualAssessmentResult.TransmittedDate = DateTime.UtcNow;
-                                _context.SaveChanges();
-                            }
-                        }
-                    }
+                    
                 }
             }
             catch (Exception ex)
