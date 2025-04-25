@@ -37,9 +37,10 @@ namespace DVLA.Business.VisualAssessmentResultModule
         private readonly IConfiguration _configuration;
         private readonly ISmsRepository _smsRepository;
         private readonly INotificationRepository _notificationRepository;
+        private readonly IRepositoryQuery<VisualAssessmentResult> _visualAssessmentResultRepository;
 
 
-        public VisualAssessmentResultService(DVLADbContext context, ILogger<VisualAssessmentResultService> logger, IConfiguration configuration, IHostingEnvironment environment, IRepositoryQuery<Slot> slotRepositoryQuery, ISmsRepository smsRepository, INotificationRepository notificationRepository)
+        public VisualAssessmentResultService(DVLADbContext context, ILogger<VisualAssessmentResultService> logger, IConfiguration configuration, IHostingEnvironment environment, IRepositoryQuery<Slot> slotRepositoryQuery, ISmsRepository smsRepository, INotificationRepository notificationRepository, IRepositoryQuery<VisualAssessmentResult> visualAssessmentResultRepository)
         {
             _context = context;
             _logger = logger;
@@ -49,6 +50,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
             _slotRepositoryQuery = slotRepositoryQuery;
             _smsRepository = smsRepository;
             _notificationRepository = notificationRepository;
+            _visualAssessmentResultRepository = visualAssessmentResultRepository;
         }
 
 
@@ -170,6 +172,27 @@ namespace DVLA.Business.VisualAssessmentResultModule
             var count = GenerateFormNumber();
             var result = string.Format("DVLA/{0}{1}", DateTime.Today.ToString("yy"), count.ToString().PadLeft(7, '0'));
             return result;
+        }
+
+        public async Task<IEnumerable<VisualAssessmentResultDto>> GetPendingTransmissions()
+        {
+            IEnumerable<VisualAssessmentResultDto> results=Enumerable.Empty<VisualAssessmentResultDto>();
+            try
+            {
+                _visualAssessmentResultRepository.Filter(x => x.HasTransmissionError == false && x.IsTransmitted == false).OrderByDescending(x => x.Id).Take(1000)
+                    .Select(x=> new VisualAssessmentResultDto 
+                    {
+                         AccessType=x.AccessType,
+                          Id=x.Id,
+                          ContactNumber=x.ContactNumber,
+                           
+                    })
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return results;
         }
 
 

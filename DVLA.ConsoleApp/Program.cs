@@ -5,6 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using DVLA.ConsoleApp.DBContext;
+using Microsoft.EntityFrameworkCore;
+using DVLA.ConsoleApp.Services;
 
 
 namespace DVLA.ConsoleApp
@@ -13,17 +19,77 @@ namespace DVLA.ConsoleApp
     {
         static void Main(string[] args)
         {
+            
+
+            var host = Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((context, config) =>
+            {
+                config.SetBasePath(Directory.GetCurrentDirectory());
+                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            })
+            .ConfigureServices((context, services) =>
+            {
+                var connStr = context.Configuration.GetConnectionString("Destination");
+
+                services.AddDbContext<DestinationDbContext>(options =>
+                    options.UseSqlServer(connStr));
+
+                services.AddTransient<DestinationService>(); // your main application logic
+            })
+            .Build();
+
+            Console.WriteLine("Program started");
             string cs = "Server=195.250.23.229;Database=DVLAVerificationDB;User Id=admin_verify;password=267tp8Va@;Encrypt=false;TrustServerCertificate=true;MultipleActiveResultSets=true;";
-            var records = GetDataTable(cs);
+            var records = GetData(cs);
 
-            cs = "Server=ingtechoptodriv\\SQLEXPRESS;Database=DVLAVerificationDB;User Id=dvla;password=Securityr&d2;Trusted_Connection=true;Encrypt=false;TrustServerCertificate=true;MultipleActiveResultSets=true;";
-            BulkInsertDataTable(records, cs, "VisualAssessmentResults");
+            Console.WriteLine($"{records.Count} records found");
 
+            var app = host.Services.GetRequiredService<DestinationService>();
+            app.InsertRecords(records);
+
+
+            
+
+           
+
+            //cs = "Server=ingtechoptodriv\\SQLEXPRESS;Database=DVLAVerificationDB;User Id=dvla;password=Securityr&d2;Trusted_Connection=true;Encrypt=false;TrustServerCertificate=true;MultipleActiveResultSets=true;";
+            cs = "Server=PETER-EIKORE\\SQLEXPRESS;Database=DVLAVerificationDB;User Id=sa;password=password;Encrypt=false;TrustServerCertificate=true;MultipleActiveResultSets=true;";
+
+            Console.WriteLine("Inserting records to new Table");
+            //BulkInsertDataTable(records, cs, "VisualAssessmentResults");
+            InsertData(records, cs);
+
+            Console.WriteLine("Done Inserting records");
         }
 
-        static void InsertData(List<VisualAssessmentResult> records)
+        static bool ReferenceExist(string reference, string cs)
         {
+            using SqlConnection conn = new SqlConnection(cs);
+            if (conn.State == ConnectionState.Closed)
+                conn.Open();
+            string cmdText = $"select COUNT(Id) from VisualAssessmentResults where LTRIM(RTRIM(ReferenceNumber))='{reference}'";
+            using SqlCommand cmd=new SqlCommand(cmdText, conn);
+            int count = (int)cmd.ExecuteScalar();
+            return count > 0;
+        }
 
+        static void InsertData(List<VisualAssessmentResult> records, string cs)
+        {
+            foreach (VisualAssessmentResult rec in records) 
+            {
+                bool referenceExists = ReferenceExist(rec.ReferenceNumber, cs);
+                if (referenceExists) continue;
+
+                using SqlConnection conn = new SqlConnection(cs);
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                string cmdText = $"Insert into VisualAssessmentResults values ({rec.VisualAssessmentResultId},{rec.OptometristFirmId},'{rec.ReferenceNumber}',{rec.ResultServiceType},{rec.TestType},{rec.PassOrFail},'{rec.Surname}','{rec.FirstName}','{rec.OtherName}','{rec.DOB}','{rec.PostalAddress}','{rec.ContactNumber}','{rec.Email}','{rec.Unaided_OD}','{rec.Unaided_OS}','{rec.Unaided_OU}','{rec.BCV_OD}','{rec.BCV_OS}','{rec.BCV_OU}','{rec.HX_BCV_OD}','{rec.HX_BCV_OS}','{rec.HX_BCV_OU}','{rec.SingleImage_BCV_OU}','{rec.GlareTest_BCV_OD}','{rec.GlareTest_BCV_OS}','{rec.GlareTest_BCV_OU}','{rec.ColourVision_BCV_OU}','{rec.ContrastSensitivity_BCV}','{rec.PathologicalRemarks}','{rec.ResultConclusion}','{rec.TestDate}', '{rec.PassportImageUrl}',{rec.Status},{rec.IsRegistration},{rec.AccessType},{rec.PassResult},{rec.TransmittedDate},{rec.CreatedDate},'{rec.CreatedBy}',{rec.IsVerified},'{rec.VerifiedDate}',{rec.Gender},'{rec.Nationality}','{rec.OptometristFirmName}','{rec.OptometristName}')";
+
+                using SqlCommand cmd = new SqlCommand(cmdText, conn);
+                cmd.ExecuteNonQuery();
+
+            }
         }
 
         static List<VisualAssessmentResult> GetData(string cs)
@@ -33,7 +99,7 @@ namespace DVLA.ConsoleApp
             {
                 using SqlConnection conn = new SqlConnection(cs);
                 conn.Open();
-                using SqlCommand cmd = new SqlCommand("select * from VisualAssessmentResults where CreatedDate>'2025-03-11 10:16:03.8952335'", conn);
+                using SqlCommand cmd = new SqlCommand("select top 1 * from VisualAssessmentResults where CreatedDate>'2025-03-11 10:16:03.8952335'", conn);
 
                 SqlDataReader rdr = cmd.ExecuteReader();
                 while (rdr.Read())
@@ -114,7 +180,7 @@ namespace DVLA.ConsoleApp
 
         static DataTable GetDataTable(string cs)
         {
-            DataTable records = new DataTable();
+            DataTable records = new DataTable();    
             try
             {
                 using SqlConnection conn = new SqlConnection(cs);
