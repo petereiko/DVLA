@@ -42,12 +42,13 @@
                                             <ul aria-expanded="false" class="collapse first-level">
                                                 @if (User.IsInRole(AppRoles.SYSTEMADMIN))
                                                 {
+                                                   
                                                     <li class="sidebar-item">
-                                                        <a asp-action="Index" asp-controller="EmailTemplate" asp-area="Admin" class="sidebar-link sublink">
+                                                        <a asp-action="Index" asp-controller="Transmission" asp-area="Admin" class="sidebar-link sublink">
                                                             <div class="round-16 d-flex align-items-center justify-content-center">
                                                                 <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                             </div>
-                                                            <span class="hide-menu">Email Templates</span>
+                                                            <span class="hide-menu">Result Transmission</span>
                                                         </a>
                                                     </li>
                                                     <li class="sidebar-item">

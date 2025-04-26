@@ -23,6 +23,7 @@
             <p class="card-subtitle mb-3">
                 <button onclick="PushData()" class="btn btn-primary">Push Data</button>
             </p>
+            <div id="message"></div>
             <div class="table-responsive">
                 <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
                     <thead>
@@ -73,7 +74,13 @@
             $.ajax({
                 url:'@Url.Action("PushData")',
                 type:'get',
-                dataType:'json'
+                dataType:'json',
+                success:function(response){
+                    document.getElementById('message').innerHTML=response.message;
+                },
+                error:function(err){
+                    document.getElementById('message').innerHTML=err.responseText;
+                }
 
             })
         }

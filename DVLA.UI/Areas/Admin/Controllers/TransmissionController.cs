@@ -5,10 +5,12 @@ using DVLA.Business.ReportModule;
 using DVLA.Business.VisualAssessmentResultModule;
 using DVLA.Data.Models.DataObjects.DTOs;
 using DVLA.Data.Models.DataObjects.UtilityObjects;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DVLA.UI.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class TransmissionController : Controller
     {
         private readonly IReportRepository _reportService;
