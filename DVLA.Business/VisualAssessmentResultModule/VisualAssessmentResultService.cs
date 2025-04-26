@@ -180,13 +180,13 @@ namespace DVLA.Business.VisualAssessmentResultModule
             try
             {
                 _visualAssessmentResultRepository.Filter(x => x.HasTransmissionError == false && x.IsTransmitted == false).OrderByDescending(x => x.Id).Take(1000)
-                    .Select(x=> new VisualAssessmentResultDto 
+                    .Select(x => new VisualAssessmentResultDto
                     {
-                         AccessType=x.AccessType,
-                          Id=x.Id,
-                          ContactNumber=x.ContactNumber,
-                           
-                    })
+                        AccessType = x.AccessType,
+                        Id = x.Id,
+                        ContactNumber = x.ContactNumber,
+
+                    });
             }
             catch (Exception ex)
             {

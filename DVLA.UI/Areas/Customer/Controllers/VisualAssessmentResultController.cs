@@ -518,7 +518,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             ViewBag.Token = token;
             try
             {
-                VisualAssessmentResultViewModel model = null;
+                VisualAssessmentResultViewModel model = new();
 
                 var visualAcuitys = _visualAcuityScoreRepositoryQuery.Filter(x => x.IsActive).ToList();
                 var visualFieldScores = _visualFieldScoreRepositoryQuery.Filter(x => x.IsActive).ToList();

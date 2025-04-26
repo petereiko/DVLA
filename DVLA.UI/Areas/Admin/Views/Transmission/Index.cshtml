@@ -1,0 +1,81 @@
+﻿@using DVLA.Data
+@using DVLA.Data.Models.DataObjects.DTOs
+
+@{
+    ViewData["Title"] = "Index";
+    int sn = 0;
+}
+@model IEnumerable<VisualAssessmentResultDto>
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            @* <div class="mb-2">
+            <h4 class="card-title mb-0">File export</h4>
+            </div> *@
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+
+            <p class="card-subtitle mb-3">
+                <button onclick="PushData()" class="btn btn-primary">Push Data</button>
+            </p>
+            <div class="table-responsive">
+                <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                    <thead>
+                        <!-- start row -->
+                        <tr>
+                            <th>#</th>
+                            <th>Facility</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                        <!-- end row -->
+                    </thead>
+                    <tbody>
+                        @foreach (VisualAssessmentResultDto item in Model)
+                        {
+                            sn++;
+                            <!-- start row -->
+                            <tr>
+                                <td>@sn</td>
+                                <td>@item.OptometristFirmName</td>
+                                <td>@item.FirstName @item.Surname</td>
+                                <td>@item.PassResult</td>
+                                <td>@item.AccessType</td>
+                                <td>@item.ResultConclusion</td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="Transmit('@item.Id')">Transmit</button>
+                                </td>
+                                <td>
+                                    <a asp-action="Update" asp-route-id="@Utility.Encrypt(item.Id.ToString())" class="btn btn-primary">Edit</a>
+                                </td>
+                            </tr>
+                            <!-- end row -->
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts{
+    <script>
+        function PushData(){
+            $.ajax({
+                url:'@Url.Action("PushData")',
+                type:'get',
+                dataType:'json'
+
+            })
+        }
+    </script>
+}

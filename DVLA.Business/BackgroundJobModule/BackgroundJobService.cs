@@ -158,11 +158,17 @@ namespace DVLA.Business.BackgroundJobModule
         {
             try
             {
+                _logger.LogInformation($"Push Visuai Assessment Result Started");
+
                 bool runPushAssessment = Convert.ToBoolean(_configuration["AppConstants:RunPushAssessmentResult"]);
+
+                _logger.LogInformation($"Service Started: {runPushAssessment}");
 
                 if (!runPushAssessment) { return; }
 
                 var visualAssessmentResults = _reportRepository.FetchAllPendingTransmissions();
+
+                _logger.LogInformation($"{visualAssessmentResults.Count} results found");
 
                 foreach (VisualAssessmentResultDto item in visualAssessmentResults)
                 {
@@ -171,9 +177,12 @@ namespace DVLA.Business.BackgroundJobModule
                         using var client = new HttpClient();
                         var request = new HttpRequestMessage(HttpMethod.Post, _configuration["AppConstants:ApiVerificationPushUrl"]);
                         request.Headers.Add("X-API-KEY", _configuration["AppConstants:ApiKey"]);
-                        var content = new StringContent(JsonConvert.SerializeObject(item), null, "application/json");
+                        var requestBody = JsonConvert.SerializeObject(item);
+                        _logger.LogInformation($"Request Body {requestBody}");
+                        var content = new StringContent(requestBody, null, "application/json");
                         request.Content = content;
                         var response = client.SendAsync(request).GetAwaiter().GetResult();
+                        _logger.LogInformation($"Response Object: {JsonConvert.SerializeObject(response)}");
                         if (response.IsSuccessStatusCode)
                         {
                             var jsonSuccess = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -191,7 +200,11 @@ namespace DVLA.Business.BackgroundJobModule
                         }
                         else
                         {
+
                             string errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                            _logger.LogInformation($"Error Object: {errorContent}");
+
                             var assessment = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.VisualAssessmentResultId);
                             assessment.IsTransmitted = false;
                             assessment.HasTransmissionError = true;

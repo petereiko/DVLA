@@ -10,6 +10,7 @@ namespace DVLA.Data
     {
         public static string CACHEUSERDATA = "UserData";
         public static string VISUALASSESSMENTSUBMISSION = "VisualAssessmentSubmission";
+        public static string TRANSMISSIONDATA = "TransmissionData";
         public static string[] Roles = { AppRoles.SYSTEMADMIN, AppRoles.FACILITYOWNER, AppRoles.OPTOMETRIST, AppRoles.FINANCE, AppRoles.FRONTOFFICER, AppRoles.SLOTMANAGER };
     }
 }

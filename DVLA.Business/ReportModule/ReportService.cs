@@ -15,6 +15,13 @@ using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using Microsoft.Extensions.Configuration;
 using DVLA.Data.Models.Enumerables;
+using DocumentFormat.OpenXml.InkML;
+using Microsoft.EntityFrameworkCore;
+using DVLA.DATA.Domains;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using DVLA.Data.Models.DataObjects.UtilityObjects;
+using System.Net.Http;
 
 namespace DVLA.Business.ReportModule
 {
@@ -23,11 +30,15 @@ namespace DVLA.Business.ReportModule
         private readonly DVLADbContext _context;
         private readonly ILogger<ReportService> _logger;
         private readonly string _connectionString;
-        public ReportService(DVLADbContext context, ILogger<ReportService> logger, IConfiguration configuration)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IConfiguration _configuration;
+        public ReportService(DVLADbContext context, ILogger<ReportService> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _logger = logger;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _httpContextAccessor = httpContextAccessor;
+            _configuration = configuration;
         }
 
         public void Dispose()
@@ -377,7 +388,97 @@ namespace DVLA.Business.ReportModule
             return result;
         }
 
+        public async Task<List<VisualAssessmentResult>> FetchData(TransmissionRequestDto model)
+        {
+            IQueryable<VisualAssessmentResult> query = _context.Database.SqlQueryRaw<VisualAssessmentResult>(model.SqlQuery);
+            List<VisualAssessmentResult> items = await query.ToListAsync();
+            //Store records in Session Object
+            if (items.Count > 0) _httpContextAccessor.HttpContext.Session.SetString(AppConstants.TRANSMISSIONDATA, JsonConvert.SerializeObject(items));
+            return items;
+        }
 
+        public async Task<MessageResponse> PushData()
+        {
+            MessageResponse result = new();
+            //Store records in Session Object
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                result.Message = "No HttpContext for this request";
+                return result;
+
+            }
+            string session = _httpContextAccessor.HttpContext.Session.GetString(AppConstants.TRANSMISSIONDATA);
+            if (string.IsNullOrEmpty(session))
+            {
+                result.Message = "Session has expired";
+                return result;
+            }
+            var items = JsonConvert.DeserializeObject<List<VisualAssessmentResult>>(session);
+            if (items.Count == 0)
+            {
+                result.Message = "No Items returned";
+                return result;
+            }
+
+            int counter = 0;
+            
+            foreach (VisualAssessmentResult item in items)
+            {
+                try
+                {
+                    using var client = new HttpClient();
+                    var request = new HttpRequestMessage(HttpMethod.Post, _configuration["AppConstants:ApiVerificationPushUrl"]);
+                    request.Headers.Add("X-API-KEY", _configuration["AppConstants:ApiKey"]);
+                    var requestBody = JsonConvert.SerializeObject(item);
+                    _logger.LogInformation($"Request Body {requestBody}");
+                    var content = new StringContent(requestBody, null, "application/json");
+                    request.Content = content;
+                    var response = client.SendAsync(request).GetAwaiter().GetResult();
+                    _logger.LogInformation($"Response Object: {JsonConvert.SerializeObject(response)}");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonSuccess = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                        MessageResponse messageResponse = JsonConvert.DeserializeObject<MessageResponse>(jsonSuccess);
+                        if (messageResponse.Success)
+                        {
+                            counter++;
+                            var visualAssessmentResult = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.Id);
+
+                            visualAssessmentResult.IsTransmitted = true;
+                            visualAssessmentResult.TransmittedDate = messageResponse.Message.Equals("Record Exists") ? visualAssessmentResult.TransmittedDate : DateTime.UtcNow;
+                            visualAssessmentResult.TransmissionError = null;
+                            visualAssessmentResult.HasTransmissionError = false;
+                            _context.SaveChanges();
+                        }
+                    }
+                    else
+                    {
+
+                        string errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                        _logger.LogInformation($"Error Object: {errorContent}");
+
+                        var assessment = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.Id);
+                        assessment.IsTransmitted = false;
+                        assessment.HasTransmissionError = true;
+                        assessment.TransmissionError = errorContent;
+                        _context.SaveChanges();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogInformation("Could not reach the Push API");
+                    _logger.LogError(ex.Message, ex);
+                    result.Message = "Could not reach the Push API";
+                    return result;
+                }
+
+
+            }
+            result.Message = $"{counter} transmitted successfully. {items.Count - counter} failed to transmit";
+            result.Success = counter > 0;
+            return await Task.FromResult(result);
+        }
         public List<VisualAssessmentResultDto> FetchAllPendingTransmissions()
         {
             var result = new List<VisualAssessmentResultDto>();
