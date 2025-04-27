@@ -22,7 +22,8 @@ namespace DVLA.VerificationPortal.Controllers.APIs
 
         public async Task AuditLogAsync()
         {
-            await _clientService.AuditLogAsync(CurrentController, CurrentAction);
+
+            await _clientService.AuditLogAsync(CurrentController, CurrentAction, _clientService.ApiId);
         }
     }
 }

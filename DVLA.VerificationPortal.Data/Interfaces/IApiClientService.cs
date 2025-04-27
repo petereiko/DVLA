@@ -10,7 +10,7 @@ namespace DVLA.VerificationPortal.Application.Interfaces
     public interface IApiClientService
     {
         Task<ApiClient?> AuthenticateAsync(string secret);
-        Task AuditLogAsync(string controller, string action);
+        Task AuditLogAsync(string controller, string action, int? apiClientId);
         string? ApiName { get; }
         string? ApiKey { get; }
         int? ApiId { get; }

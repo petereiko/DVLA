@@ -58,9 +58,9 @@ namespace DVLA.VerificationPortal.Application.Services
             return client;
         }
 
-        public async Task AuditLogAsync(string controller, string action)
+        public async Task AuditLogAsync(string controller, string action, int? apiClientId)
         {
-            ApiAuditLog log = new() { Action = action, Controller = controller, ApiClientId = ApiId, CreatedDate = DateTime.UtcNow };
+            ApiAuditLog log = new() { Action = action, Controller = controller, ApiClientId = apiClientId, CreatedDate = DateTime.UtcNow };
             await _apiAuditLogRepository.AddAsync(log);
         }
     }

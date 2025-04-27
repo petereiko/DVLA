@@ -158,5 +158,35 @@ namespace DVLA.VerificationPortal.Application.Services
             }
             return response;
         }
+
+        public async Task<MessageResponse> VerifyResultByReferenceAsync(string referenceNumber)
+        {
+            MessageResponse response = new();
+            try
+            {
+                VisualAssessmentResult assessment = await _visualAssessmentResultRepository.GetSingleAsync(x => x.ReferenceNumber == referenceNumber);
+                if (assessment == null)
+                {
+                    response.Message = "Record not found";
+                    return response;
+                }
+                if (assessment.IsVerified)
+                {
+                    response.Message = "This result is already verified";
+                    return response;
+                }
+                assessment.IsVerified = true;
+                assessment.VerifiedDate = DateTime.UtcNow;
+                await _visualAssessmentResultRepository.UpdateAsync(assessment);
+                response.Success = true;
+                response.Message = "Result verified successfully";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return response;
+        }
     }
 }

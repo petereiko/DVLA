@@ -1,6 +1,7 @@
 ﻿using DVLA.VerificationPortal.Application.Interfaces;
 using DVLA.VerificationPortal.CustomAttributes;
 using DVLA.VerificationPortal.Shared.DTOs;
+using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,6 +36,15 @@ namespace DVLA.VerificationPortal.Controllers.APIs
                 return BadRequest(new { status = "error", message = "Test has already been verified once" });
             }
             return Ok(new { status = "success", data = new { FullName = result.FullName, PassConclusion = result.PassConclusion } });
+        }
+
+        [HttpGet("verify-result/{reference}")]
+        public async Task<IActionResult> VerifyResult(string reference)
+        {
+            await AuditLogAsync();
+
+            MessageResponse response = await _searchResultService.VerifyResultByReferenceAsync(reference);
+            return Ok(response);
         }
     }
 }
