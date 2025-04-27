@@ -105,7 +105,7 @@
 @section Scripts{
     <script>
         function PushAllData(){
-
+                document.getElementById('message').innerHTML='Please wait...';
             let source=$('#RequestDto_SourceConnectionString').val();
             let destination=$('#RequestDto_DestinationConnectionString').val();
 
@@ -124,6 +124,7 @@
         }
 
         function PushSingleData(id){
+            document.getElementById('message').innerHTML='Please wait...';
             let source=$('#RequestDto_SourceConnectionString').val();
             let destination=$('#RequestDto_DestinationConnectionString').val();
             $.ajax({

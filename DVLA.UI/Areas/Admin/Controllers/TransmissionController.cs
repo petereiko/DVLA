@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DVLA.UI.Areas.Admin.Controllers
 {
+    [Authorize]
     [Area("Admin")]
     public class TransmissionController : Controller
     {
