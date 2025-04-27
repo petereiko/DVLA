@@ -23,21 +23,28 @@ namespace DVLA.UI.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            List<VisualAssessmentResultDto> results =new ();
-            return View(results);
+            TransmissionGridDto model = new ();
+            return View(model);
         }
 
         [HttpPost]
-        public IActionResult Index(TransmissionRequestDto model)
+        public async Task<IActionResult> Index(TransmissionGridDto model)
         {
-            var results = _reportService.FetchData(model);
-            return View(results);
+            model = await _reportService.FetchDataAsync(model);
+            return View(model);
         }
 
         [HttpGet]
-        public async Task<JsonResult> PushData()
+        public async Task<JsonResult> PushSingleData(long id, string source, string destination)
         {
-            MessageResponse result = await _reportService.PushData();
+            MessageResponse result = await _reportService.PushDataAsync(id, source, destination);
+            return Json(result);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> PushData(string source, string destination)
+        {
+            MessageResponse result = await _reportService.PushDataAsync(null, source, destination);
             return Json(result);
         }
     }

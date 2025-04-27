@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using DVLA.Data.Models.DataObjects.UtilityObjects;
 using System.Net.Http;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace DVLA.Business.ReportModule
 {
@@ -32,6 +33,7 @@ namespace DVLA.Business.ReportModule
         private readonly string _connectionString;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IConfiguration _configuration;
+        
         public ReportService(DVLADbContext context, ILogger<ReportService> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
@@ -388,97 +390,190 @@ namespace DVLA.Business.ReportModule
             return result;
         }
 
-        public async Task<List<VisualAssessmentResult>> FetchData(TransmissionRequestDto model)
+        public async Task<TransmissionGridDto> FetchDataAsync(TransmissionGridDto model)
         {
-            IQueryable<VisualAssessmentResult> query = _context.Database.SqlQueryRaw<VisualAssessmentResult>(model.SqlQuery);
-            List<VisualAssessmentResult> items = await query.ToListAsync();
-            //Store records in Session Object
-            if (items.Count > 0) _httpContextAccessor.HttpContext.Session.SetString(AppConstants.TRANSMISSIONDATA, JsonConvert.SerializeObject(items));
-            return items;
-        }
-
-        public async Task<MessageResponse> PushData()
-        {
-            MessageResponse result = new();
-            //Store records in Session Object
-            if (_httpContextAccessor.HttpContext == null)
+            try
             {
-                result.Message = "No HttpContext for this request";
-                return result;
-
-            }
-            string session = _httpContextAccessor.HttpContext.Session.GetString(AppConstants.TRANSMISSIONDATA);
-            if (string.IsNullOrEmpty(session))
-            {
-                result.Message = "Session has expired";
-                return result;
-            }
-            var items = JsonConvert.DeserializeObject<List<VisualAssessmentResult>>(session);
-            if (items.Count == 0)
-            {
-                result.Message = "No Items returned";
-                return result;
-            }
-
-            int counter = 0;
-            
-            foreach (VisualAssessmentResult item in items)
-            {
-                try
+                DbContextOptions<VerificationDbContext> sourceOptions = new DbContextOptionsBuilder<VerificationDbContext>()
+                .UseSqlServer(model.RequestDto.SourceConnectionString, sqlOptions =>
                 {
-                    using var client = new HttpClient();
-                    var request = new HttpRequestMessage(HttpMethod.Post, _configuration["AppConstants:ApiVerificationPushUrl"]);
-                    request.Headers.Add("X-API-KEY", _configuration["AppConstants:ApiKey"]);
-                    var requestBody = JsonConvert.SerializeObject(item);
-                    _logger.LogInformation($"Request Body {requestBody}");
-                    var content = new StringContent(requestBody, null, "application/json");
-                    request.Content = content;
-                    var response = client.SendAsync(request).GetAwaiter().GetResult();
-                    _logger.LogInformation($"Response Object: {JsonConvert.SerializeObject(response)}");
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var jsonSuccess = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                        MessageResponse messageResponse = JsonConvert.DeserializeObject<MessageResponse>(jsonSuccess);
-                        if (messageResponse.Success)
-                        {
-                            counter++;
-                            var visualAssessmentResult = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.Id);
+                    sqlOptions.CommandTimeout(18000);
+                })
+                .Options;
 
-                            visualAssessmentResult.IsTransmitted = true;
-                            visualAssessmentResult.TransmittedDate = messageResponse.Message.Equals("Record Exists") ? visualAssessmentResult.TransmittedDate : DateTime.UtcNow;
-                            visualAssessmentResult.TransmissionError = null;
-                            visualAssessmentResult.HasTransmissionError = false;
-                            _context.SaveChanges();
+                DbContextOptions<VerificationDbContext> destinationOptions = new DbContextOptionsBuilder<VerificationDbContext>()
+                .UseSqlServer(model.RequestDto.DestinationConnectionString, sqlOptions =>
+                {
+                    sqlOptions.CommandTimeout(18000);
+                })
+                .Options;
+
+                IQueryable<VerificationVisualAssessmentResult> query = null;
+                List<VerificationVisualAssessmentResult> items = new();
+
+                IQueryable<VerificationVisualAssessmentResult> destinationQuery = null;
+
+                using (var sourceContext = new VerificationDbContext(sourceOptions))
+                using (var destinationContext = new VerificationDbContext(destinationOptions))
+                {
+                    if (sourceContext.Database.CanConnect())
+                    {
+                        // Proceed to main form, pass the DbContext or options
+                         query = sourceContext.Database.SqlQueryRaw<VerificationVisualAssessmentResult>(model.RequestDto.SqlQuery);
+                        items = await query.ToListAsync();
+                        if (items.Count > 5000)
+                        {
+                            model.ErrorMessage = "You cannot load more than 5000 records at once. Adjust the query time";
+                            return model;
                         }
                     }
                     else
                     {
-
-                        string errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
-                        _logger.LogInformation($"Error Object: {errorContent}");
-
-                        var assessment = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.Id);
-                        assessment.IsTransmitted = false;
-                        assessment.HasTransmissionError = true;
-                        assessment.TransmissionError = errorContent;
-                        _context.SaveChanges();
+                        model.ErrorMessage = $"Unable to connect. Please check your internet connection or your connection string.";
+                        return model;
                     }
+                    if (destinationContext.Database.CanConnect())
+                    {
+                        // Proceed to main form, pass the DbContext or options
+                        destinationQuery = destinationContext.VisualAssessmentResults;
+                    }
+                    else
+                    {
+                        model.ErrorMessage = $"Unable to connect. Please check your internet connection or the Destination Connection String.";
+                        return model;
+                    }
+
+                    items = items.Where(x => !destinationQuery.Select(x => x.ReferenceNumber).Contains(x.ReferenceNumber)).ToList();
+
+                    if (items.Count > 0)
+                    {
+                        _httpContextAccessor.HttpContext.Session.SetString(AppConstants.TRANSMISSIONDATA, JsonConvert.SerializeObject(items));
+                        model.Results = items;
+                        model.SuccessMessage = $"{items.Count} records found";
+                    }
+                    else
+                    {
+                        model.ErrorMessage = "No new record was found";
+                        return model;
+                    }
+                    
                 }
-                catch (Exception ex)
+
+                
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                model.ErrorMessage = ex.Message;
+            }
+            return model;
+        }
+
+        public async Task<MessageResponse> PushDataAsync(long? id, string sourceConnString, string destConnString)
+        {
+            MessageResponse result = new();
+            int i = 0;
+            //Store records in Session Object
+            try
+            {
+                if (sourceConnString == destConnString)
                 {
-                    _logger.LogInformation("Could not reach the Push API");
-                    _logger.LogError(ex.Message, ex);
-                    result.Message = "Could not reach the Push API";
+                    result.Message = "Both Source nd Destination Connection String cannot be the same";
                     return result;
                 }
 
+                DbContextOptions<VerificationDbContext> options = new DbContextOptionsBuilder<VerificationDbContext>()
+                .UseSqlServer(destConnString, sqlOptions =>
+                {
+                    sqlOptions.CommandTimeout(18000); // timeout in seconds (e.g., 3 minutes)
+                })
+                .Options;
 
+                using (var context = new VerificationDbContext(options))
+                {
+                    if (await context.Database.CanConnectAsync())
+                    {
+                         string session = _httpContextAccessor.HttpContext.Session.GetString(AppConstants.TRANSMISSIONDATA);
+                        IEnumerable<VerificationVisualAssessmentResult> records = JsonConvert.DeserializeObject<IEnumerable<VerificationVisualAssessmentResult>>(session);
+                        records = id.HasValue ? records.Where(x => x.Id == id.Value) : records;
+                        
+                        records =  records.Select(x => new VerificationVisualAssessmentResult
+                        {
+                            AccessType = x.AccessType,
+                            BCV_OD = x.BCV_OD,
+                            BCV_OS = x.BCV_OS,
+                            BCV_OU = x.BCV_OU,
+                            ColourVision_BCV_OU = x.ColourVision_BCV_OU,
+                            ContactNumber = x.ContactNumber,
+                            ContrastSensitivity_BCV = x.ContrastSensitivity_BCV,
+                            CreatedBy = x.CreatedBy,
+                            CreatedDate = x.CreatedDate,
+                            DOB = x.DOB,
+                            Email = x.Email,
+                            FirstName = x.FirstName,
+                            Gender = x.Gender,
+                            GlareTest_BCV_OD = x.GlareTest_BCV_OD,
+                            GlareTest_BCV_OS = x.GlareTest_BCV_OS,
+                            GlareTest_BCV_OU = x.GlareTest_BCV_OU,
+                            HX_BCV_OD = x.HX_BCV_OD,
+                            HX_BCV_OS = x.HX_BCV_OD,
+                            HX_BCV_OU = x.HX_BCV_OD,
+                            IsRegistration = x.IsRegistration,
+                            IsVerified = x.IsVerified,
+                            Nationality = x.Nationality,
+                            OptometristFirmId = x.OptometristFirmId,
+                            OptometristFirmName = x.OptometristFirmName,
+                            OptometristName = x.OptometristName,
+                            OtherName = x.OtherName,
+                            PassOrFail = x.PassOrFail,
+                            PassportImageUrl = x.PassportImageUrl,
+                            PassResult = x.PassResult,
+                            PathologicalRemarks = x.PathologicalRemarks,
+                            PostalAddress = x.PostalAddress,
+                            ReferenceNumber = x.ReferenceNumber,
+                            ResultConclusion = x.ResultConclusion,
+                            ResultServiceType = x.ResultServiceType,
+                            SingleImage_BCV_OU = x.SingleImage_BCV_OU,
+                            Status = x.Status,
+                            Surname = x.Surname,
+                            TestDate = x.TestDate,
+                            TestType = x.TestType,
+                            TransmittedDate = x.TransmittedDate,
+                            Unaided_OD = x.Unaided_OD,
+                            Unaided_OS = x.Unaided_OS,
+                            Unaided_OU = x.Unaided_OU,
+                            VerifiedDate = x.VerifiedDate,
+                            VisualAssessmentResultId = x.VisualAssessmentResultId
+                        });
+                        
+                        foreach (var item in records)
+                        {
+                            i++;
+                            bool exist = context.VisualAssessmentResults.Any(x => x.ReferenceNumber == item.ReferenceNumber);
+                            if (exist) continue;
+
+                            context.VisualAssessmentResults.Add(item);
+                            context.SaveChanges();
+                        }
+                    }
+                    else
+                    {
+                        result.Message = "Unable to connect. Please check your connection string.";
+                        return result;
+                    }
+                }
             }
-            result.Message = $"{counter} transmitted successfully. {items.Count - counter} failed to transmit";
-            result.Success = counter > 0;
-            return await Task.FromResult(result);
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                _logger.LogError(ex.Message, ex);
+                return result;
+            }
+            result.Message = $"{i} records transmitted successfully";
+            result.Success = i > 0;
+            return result;
         }
+
         public List<VisualAssessmentResultDto> FetchAllPendingTransmissions()
         {
             var result = new List<VisualAssessmentResultDto>();

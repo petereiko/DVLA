@@ -1,11 +1,12 @@
-﻿@using DVLA.Data
+﻿@using DVLA.DATA.Domains
+@using DVLA.Data
 @using DVLA.Data.Models.DataObjects.DTOs
 
 @{
     ViewData["Title"] = "Index";
     int sn = 0;
 }
-@model IEnumerable<VisualAssessmentResultDto>
+@model TransmissionGridDto
 
 <div class="datatables">
     <!-- start File export -->
@@ -15,13 +16,46 @@
             <h4 class="card-title mb-0">File export</h4>
             </div> *@
 
-            @if (TempData["SuccessMessage"] != null)
+            @if (Model.ErrorMessage != null)
             {
-                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                <div class="alert alert-danger">@Model.ErrorMessage</div>
             }
+            @if (Model.SuccessMessage != null)
+            {
+                <div class="alert alert-success">@Model.SuccessMessage</div>
+            }
+            <div>
+                <form asp-action="Index" asp-controller="Transmission" method="post">
+                    <table style="width:100%">
+                        <tr>
+                            <td>
+                                <textarea asp-for="RequestDto.SqlQuery" class="form-control" placeholder="SQL Query"></textarea>
+                            </td>
+                            
+                        </tr>
+                        <tr>
+                            <td>
+                                <textarea asp-for="RequestDto.SourceConnectionString" class="form-control" placeholder="Source Connection String"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <textarea asp-for="RequestDto.DestinationConnectionString" class="form-control" placeholder="Destination Connection String"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="right">
+                                <button type="submit" class="btn btn-primary">Download Assessments</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
 
+
+            </div>
+            <br />
             <p class="card-subtitle mb-3">
-                <button onclick="PushData()" class="btn btn-primary">Push Data</button>
+                <button onclick="PushAllData()" class="btn btn-primary">Push All Data</button>
             </p>
             <div id="message"></div>
             <div class="table-responsive">
@@ -30,32 +64,32 @@
                         <!-- start row -->
                         <tr>
                             <th>#</th>
-                            <th>Facility</th>
+                            <th>Access Type</th>
                             <th>Name</th>
-                            <th>Role</th>
-                            <th>Email</th>
-                            <th>Status</th>
+                            <th>Pass Status</th>
+                            <th>Reference Number</th>
+                            <th>Contact Number</th>
+                            <th>Created Date</th>
                             <th>Action</th>
                         </tr>
                         <!-- end row -->
                     </thead>
                     <tbody>
-                        @foreach (VisualAssessmentResultDto item in Model)
+                        @foreach (VerificationVisualAssessmentResult item in Model.Results)
                         {
                             sn++;
                             <!-- start row -->
                             <tr>
                                 <td>@sn</td>
-                                <td>@item.OptometristFirmName</td>
-                                <td>@item.FirstName @item.Surname</td>
-                                <td>@item.PassResult</td>
                                 <td>@item.AccessType</td>
-                                <td>@item.ResultConclusion</td>
-                                <td>
-                                    <button class="btn btn-primary" onclick="Transmit('@item.Id')">Transmit</button>
-                                </td>
+                                <td>@item.FirstName @item.Surname</td>
+                                <td>@item.PassOrFail</td>
+                                <td>@item.ReferenceNumber</td>
+                                <td>@item.ContactNumber</td>
+                                <td>@item.CreatedDate</td>
                                 <td>
                                     <a asp-action="Update" asp-route-id="@Utility.Encrypt(item.Id.ToString())" class="btn btn-primary">Edit</a>
+                                    <button type="button" class="btn btn-primary" onclick="PushSingleData('@item.Id')">Push</button>
                                 </td>
                             </tr>
                             <!-- end row -->
@@ -70,9 +104,30 @@
 
 @section Scripts{
     <script>
-        function PushData(){
+        function PushAllData(){
+
+            let source=$('#RequestDto_SourceConnectionString').val();
+            let destination=$('#RequestDto_DestinationConnectionString').val();
+
             $.ajax({
-                url:'@Url.Action("PushData")',
+                url:`@Url.Action("PushData")?source=${source}&destination=${destination}`,
+                type:'get',
+                dataType:'json',
+                success:function(response){
+                    document.getElementById('message').innerHTML=response.message;
+                },
+                error:function(err){
+                    document.getElementById('message').innerHTML=err.responseText;
+                }
+
+            })
+        }
+
+        function PushSingleData(id){
+            let source=$('#RequestDto_SourceConnectionString').val();
+            let destination=$('#RequestDto_DestinationConnectionString').val();
+            $.ajax({
+                url:`@Url.Action("PushSingleData")?id=${id}&source=${source}&destination=${destination}`,
                 type:'get',
                 dataType:'json',
                 success:function(response){

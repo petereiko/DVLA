@@ -95,7 +95,7 @@ builder.Services.AddScoped<SignInManager<ApplicationUser>>();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(1); // Set session duration
+    options.IdleTimeout = TimeSpan.FromMinutes(10); // Set session duration
     options.Cookie.HttpOnly = true; // Make the cookie HTTP only
     options.Cookie.IsEssential = true; // Make the cookie essential
 });
