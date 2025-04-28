@@ -16,6 +16,9 @@ namespace DVLA.VerificationPortal.Shared.Enums
         Administrator=2,
 
         [Description("Verifier")]
-        Verifier=3
+        Verifier=3,
+
+        [Description("Pin Vendor")]
+        PinVendor=4
     }
 }

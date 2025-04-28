@@ -4,10 +4,12 @@ using DVLA.VerificationPortal.Domain.Entities;
 using DVLA.VerificationPortal.Domain.Interfaces;
 using DVLA.VerificationPortal.Shared;
 using DVLA.VerificationPortal.Shared.DTOs;
+using DVLA.VerificationPortal.Shared.Enums;
 using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -27,8 +29,9 @@ namespace DVLA.VerificationPortal.Application.Services
         private readonly IHostingEnvironment _environment;
         private readonly ILogger<SearchResultService> _logger;
         private readonly IApiClientService _apiClientService;
+        private readonly IConfiguration _configuration;
 
-        public SearchResultService(IGenericRepository<VisualAssessmentResult> visualAssessmentResultRepository, IMapper mapper, IHttpContextAccessor contextAccessor, IHostingEnvironment environment, ILogger<SearchResultService> logger, IApiClientService apiClientService)
+        public SearchResultService(IGenericRepository<VisualAssessmentResult> visualAssessmentResultRepository, IMapper mapper, IHttpContextAccessor contextAccessor, IHostingEnvironment environment, ILogger<SearchResultService> logger, IApiClientService apiClientService, IConfiguration configuration)
         {
             _visualAssessmentResultRepository = visualAssessmentResultRepository;
             _mapper = mapper;
@@ -36,6 +39,7 @@ namespace DVLA.VerificationPortal.Application.Services
             _environment = environment;
             _logger = logger;
             _apiClientService = apiClientService;
+            _configuration = configuration;
         }
 
         public async Task<IEnumerable<VisualAssessmentResultDto>> GetResultsAsync(string searchTerm)
@@ -74,7 +78,10 @@ namespace DVLA.VerificationPortal.Application.Services
                     {
                         FullName = $"{item.Surname} {item.FirstName}",
                         PassConclusion = item.ResultConclusion,
-                        Verified = item.IsVerified
+                        Verified = item.IsVerified,
+                        Passport = await Utility.ConvertImageUrlToBase64($"{_configuration["AppConstants:PassportUrl"]}{item.PassportImageUrl}"),
+                        TestDate = item.TestDate,
+                        TestType = EnumHelper.GetEnumDescription(item.ResultServiceType)
                     };
                 }
             }

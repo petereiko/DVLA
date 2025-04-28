@@ -105,7 +105,7 @@ namespace DVLA.DATA.Domains
         public AccessType? AccessType { get; set; }
         public PassResult? PassResult { get; set; }
         public bool IsTransmitted { get; set; }
-        public DateTime TransmittedDate { get; set; }
+        public DateTime? TransmittedDate { get; set; }
         public Gender? Gender { get; set; }
         public string TransmissionError { get; set; }
         public bool HasTransmissionError { get; set; }

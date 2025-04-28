@@ -35,7 +35,7 @@ namespace DVLA.VerificationPortal.Controllers.APIs
             {
                 return BadRequest(new { status = "error", message = "Test has already been verified once" });
             }
-            return Ok(new { status = "success", data = new { FullName = result.FullName, PassConclusion = result.PassConclusion } });
+            return Ok(new { status = "success", data = result });
         }
 
         [HttpGet("verify-result/{reference}")]

@@ -6,13 +6,11 @@ using System.Threading.Tasks;
 
 namespace DVLA.VerificationPortal.Domain.Entities
 {
-    public class ApiClient
+    public class PinSetting
     {
         public int Id { get; set; }
-        public string? Name { get; set; }
-        public string? ApiKey { get; set; }
         public bool IsActive { get; set; }
-        public string? IP { get; set; }
-        public virtual ICollection<Pin> Pins { get; set; } = new HashSet<Pin>();
+        public int MaxUseCount { get; set; }
+        public decimal Amount { get; set; }
     }
 }

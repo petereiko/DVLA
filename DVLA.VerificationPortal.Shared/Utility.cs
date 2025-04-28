@@ -58,6 +58,21 @@ namespace DVLA.VerificationPortal.Shared
         //    }
         //}
 
+        public static async Task<string> ConvertImageUrlToBase64(string imageUrl)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                var response = await client.GetAsync(imageUrl);
+                response.EnsureSuccessStatusCode();
+
+                var contentType = response.Content.Headers.ContentType.MediaType;
+                byte[] imageBytes = await response.Content.ReadAsByteArrayAsync();
+                string base64String = Convert.ToBase64String(imageBytes);
+
+                return $"data:{contentType};base64,{base64String}";
+            }
+        }
+
         private const int urlIdEcodeSalt = 13411;
         public static string EncryptUrlID(int id, int salt = 0)
         {

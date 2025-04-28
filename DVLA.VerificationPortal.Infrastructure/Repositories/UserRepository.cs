@@ -51,7 +51,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
 
         public async Task SeedRoles()
         {
-            string[] roles = { EnumHelper.GetEnumDescription(Role.Administrator), EnumHelper.GetEnumDescription(Role.Verifier), EnumHelper.GetEnumDescription(Role.SuperAdmin) };
+            string[] roles = { EnumHelper.GetEnumDescription(Role.Administrator), EnumHelper.GetEnumDescription(Role.Verifier), EnumHelper.GetEnumDescription(Role.SuperAdmin), EnumHelper.GetEnumDescription(Role.PinVendor) };
             foreach (string role in roles)
             {
                 bool roleExists = await _roleManager.RoleExistsAsync(role);

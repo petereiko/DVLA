@@ -205,7 +205,7 @@ namespace DVLA.Business.BackgroundJobModule
 
                             _logger.LogInformation($"Error Object: {errorContent}");
 
-                            var assessment = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.VisualAssessmentResultId);
+                            var assessment = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.Id);
                             assessment.IsTransmitted = false;
                             assessment.HasTransmissionError = true;
                             assessment.TransmissionError = errorContent;

@@ -26,6 +26,8 @@ namespace DVLA.VerificationPortal.Infrastructure.Database.Context
         public DbSet<EmailAttachment> EmailAttachments { get; set; }
 
         public DbSet<OptometristFirm> OptometristFirms { get; set; }
+        public DbSet<Pin> Pins { get; set; }
+        public DbSet<PinSetting> PinSettings { get; set; }
         public DbSet<VisualAssessmentResult> VisualAssessmentResults { get; set; }
 
 
