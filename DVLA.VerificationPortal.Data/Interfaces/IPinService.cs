@@ -10,6 +10,5 @@ namespace DVLA.VerificationPortal.Application.Interfaces
     public interface IPinService
     {
         Task<MessageResponse> VendPinsAsync();
-        Task<>
     }
 }
