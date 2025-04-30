@@ -79,10 +79,17 @@ namespace DVLA.VerificationPortal.Application.Services
                         FullName = $"{item.Surname} {item.FirstName}",
                         PassConclusion = item.ResultConclusion,
                         Verified = item.IsVerified,
-                        Passport = await Utility.ConvertImageUrlToBase64($"{_configuration["AppConstants:PassportUrl"]}{item.PassportImageUrl}"),
                         TestDate = item.TestDate,
                         TestType = EnumHelper.GetEnumDescription(item.ResultServiceType)
                     };
+                    try
+                    {
+                        result.Passport = await Utility.ConvertImageUrlToBase64($"{_configuration["AppConstants:PassportUrl"]}{item.PassportImageUrl}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex.Message, ex);
+                    }
                 }
             }
             catch (Exception ex)

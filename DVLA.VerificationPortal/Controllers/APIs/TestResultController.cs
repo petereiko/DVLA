@@ -31,10 +31,10 @@ namespace DVLA.VerificationPortal.Controllers.APIs
             {
                 return BadRequest(new { status = "error", message = "Applicant not found" });
             }
-            if (result.Verified)
-            {
-                return BadRequest(new { status = "error", message = "Test has already been verified once" });
-            }
+            //if (result.Verified)
+            //{
+            //    return BadRequest(new { status = "error", message = "Test has already been verified once" });
+            //}
             return Ok(new { status = "success", data = result });
         }
 
