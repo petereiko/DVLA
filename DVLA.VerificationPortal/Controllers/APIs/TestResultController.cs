@@ -43,8 +43,8 @@ namespace DVLA.VerificationPortal.Controllers.APIs
         {
             await AuditLogAsync();
 
-            MessageResponse response = await _searchResultService.VerifyResultByReferenceAsync(reference);
-            return Ok(response);
+            var response = await _searchResultService.VerifyResultByReferenceAsync(reference);
+            return Ok(new { resultConclusion = response.Result, success = response.Success, message = response.Message });
         }
     }
 }

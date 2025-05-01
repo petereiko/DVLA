@@ -77,7 +77,7 @@ namespace DVLA.VerificationPortal.Application.Services
                     result = new()
                     {
                         FullName = $"{item.Surname} {item.FirstName}",
-                        PassConclusion = item.ResultConclusion,
+                        PassConclusion = EnumHelper.GetEnumDescription(item.PassResult),
                         Verified = item.IsVerified,
                         TestDate = item.TestDate,
                         TestType = EnumHelper.GetEnumDescription(item.ResultServiceType)
@@ -173,9 +173,9 @@ namespace DVLA.VerificationPortal.Application.Services
             return response;
         }
 
-        public async Task<MessageResponse> VerifyResultByReferenceAsync(string referenceNumber)
+        public async Task<MessageResponse<string>> VerifyResultByReferenceAsync(string referenceNumber)
         {
-            MessageResponse response = new();
+            MessageResponse<string> response = new();
             try
             {
                 VisualAssessmentResult assessment = await _visualAssessmentResultRepository.GetSingleAsync(x => x.ReferenceNumber == referenceNumber);
@@ -194,6 +194,7 @@ namespace DVLA.VerificationPortal.Application.Services
                 await _visualAssessmentResultRepository.UpdateAsync(assessment);
                 response.Success = true;
                 response.Message = "Result verified successfully";
+                response.Result = EnumHelper.GetEnumDescription(assessment.PassResult);
                 return response;
             }
             catch (Exception ex)
