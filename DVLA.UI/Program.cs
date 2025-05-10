@@ -31,6 +31,7 @@ using DVLA.Business.DashboardModule;
 using DVLA.Business.NotificationModule;
 using DVLA.Business.PaymentModule;
 using System.Globalization;
+using DVLA.Business.TempPasswordModule;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -120,6 +121,7 @@ builder.Services.AddTransient<IPaymentService, PaymentService>();
 builder.Services.AddTransient<ISmsRepository, SmsRepository>();
 builder.Services.AddTransient<IAuditRepo, AuditRepo>();
 builder.Services.AddTransient<IAuthUser, AuthUser>();
+builder.Services.AddTransient<ITempPasswordService, TempPasswordService>();
 builder.Services.AddTransient<BackgroundJobService>();
 
 

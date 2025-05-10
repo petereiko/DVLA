@@ -1,0 +1,71 @@
+﻿@using DVLA.Data.Models.DataObjects.DTOs
+@using DVLA.Data.Models.DataObjects.ViewModels
+@model TempPasswordDto
+@{
+	ViewData["Title"] = "Create Temp Password";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+	<div class="col-12">
+		<!-- ----------------------------------------- -->
+		<!-- 1. Basic Form -->
+		<!-- ----------------------------------------- -->
+		<!-- start Basic Form -->
+		<div class="card">
+			<div class="card-body">
+				<form asp-action="Create" method="post" asp-route-userId="@Model.UserId">
+					<input type="hidden" asp-for="UserId"/>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-floating mb-3">
+								<input type="text" class="form-control" asp-for="Password" placeholder="Enter Temporal Password" required />
+								<label for="Password">Password</label>
+							</div>
+						</div>
+						<div class="col-12">
+							<div class="d-md-flex align-items-center">
+
+								<div class="ms-auto mt-3 mt-md-0">
+									<button type="submit" class="btn btn-primary hstack gap-6">
+
+										Reset Password
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<!-- end Basic Form -->
+	@section Scripts {
+		@if (Model.Errors.Any())
+		{
+			<script>
+				Swal.fire({
+					title: 'Error',
+					text: '@Model.Errors.FirstOrDefault()',
+					type: 'error'
+				});
+			</script>
+		}
+
+		<script>
+			$(function(){
+
+						$("#ExpiryDate").datepicker({
+				dateFormat: "dd-mm-yyyy",
+			});
+
+
+			})
+		</script>
+
+
+	}
+
+
+
+

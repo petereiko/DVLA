@@ -1,71 +1,64 @@
 ﻿@{
-    ViewData["Title"] = "Search Result";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Search Result";
+	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="row">
-    <div class="col-12">
-        <!-- ----------------------------------------- -->
-        <!-- 1. Basic Form -->
-        <!-- ----------------------------------------- -->
-        <!-- start Basic Form -->
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title mb-3"></h4>
-                <form method="post">
+	<div class="col-12">
+		<!-- ----------------------------------------- -->
+		<!-- 1. Basic Form -->
+		<!-- ----------------------------------------- -->
+		<!-- start Basic Form -->
+		<div class="card">
+			<div class="card-body">
+				<h4 class="card-title mb-3"></h4>
 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="SearchTerm" onkeyup="SearchResults(this)" name="SearchTerm" placeholder="Search by Reference Number, First Name, Last Name, Contact Number" required />
-                                <label for="tb-email">Search By Reference, First Name, Surname, Contact Number</label>
-                            </div>
-                        </div>
-                        @* <div class="col-12">
-                            <div class="d-md-flex align-items-center">
+				<div class="row">
+					<div class="col-6">
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control" id="SearchTerm" name="SearchTerm" placeholder="Search by Reference Number, First Name, Last Name, Contact Number" required />
+							<label for="tb-email">Search By Reference, First Name, Surname, Contact Number</label>
+						</div>
+					</div>
+					<div class="col-3">
 
-                                <div class="ms-auto mt-3 mt-md-0">
-                                    <button type="submit" class="btn btn-primary hstack gap-6">
+						<button type="button" onclick="SearchResults()" class="btn btn-primary" style="width:100%">
+							Search
+						</button>
+					</div>
+				</div>
+				<br />
+				<div class="row">
+					<div class="col-md-12">
+						<div id="main-content" style="display:none"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end Basic Form -->
+	@section Scripts {
+		<script>
+			function SearchResults() {
+				let searchTerm = document.getElementById('SearchTerm').value;
+				if (searchTerm == null || searchTerm == "") return;
 
-                                        Submit
-                                    </button>
-                                </div>
-                            </div>
-                        </div> *@
-                    </div>
-                    <br />
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div id="main-content" style="display:none"></div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <!-- end Basic Form -->
-    @section Scripts {
-        <script>
-            function SearchResults(e) {
-                let searchTerm = e.value;
-                if (searchTerm == null || searchTerm == "") return;
+				$.ajax({
+					url: '@Url.Action("SearchResults", "Home")?searchTerm=' + searchTerm,
+					type: 'get',
+					dataType: 'html',
+					success: function (response) {
+						$('#main-content').show();
+						$('#main-content').html(response);
+					},
+					error: function (err) {
 
-                $.ajax({
-                    url: '@Url.Action("SearchResults", "Home")?searchTerm=' + searchTerm,
-                    type: 'get',
-                    dataType: 'html',
-                    success: function (response) {
-                        $('#main-content').show();
-                        $('#main-content').html(response);
-                    },
-                    error: function (err) {
+					}
+				})
+			}
 
-                    }
-                })
-            }
-
-        </script>
-    }
+		</script>
+	}
 
 
 

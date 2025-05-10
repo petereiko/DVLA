@@ -22,6 +22,9 @@ namespace DVLA.Business.UserModule
 
         Task<MessageResponse<UserViewModel>> Authenticate(LoginViewModel model);
         Task<MessageResponse> SendResetPasswordToken(ForgotPasswordViewModel model);
+
+        Task<MessageResponse> ChangePasswordAsync(ChangePasswordViewModel model);
+        Task<MessageResponse> AdminResetPasswordAsync(string password, string userId);
         //Task<MessageResponse> OnboardFacilityManager(FacilityManagerViewModel model);
         Task<MessageResponse> OnboardUser(UserViewModel model);
         Task<MessageResponse> ResetPassword(ResetPasswordViewModel model);

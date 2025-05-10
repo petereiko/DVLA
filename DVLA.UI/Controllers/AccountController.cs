@@ -19,6 +19,7 @@ using System;
 using DVLA.DATA.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using DVLA.Business.TempPasswordModule;
 
 namespace DVLA.UI.Controllers
 {
@@ -32,8 +33,9 @@ namespace DVLA.UI.Controllers
         private readonly IConfiguration _configuration;
         private readonly DVLADbContext _context;
         private readonly IHttpContextAccessor _contextAccessor;
+        private readonly ITempPasswordService _tempPasswordService;
 
-        public AccountController(IUserService userService, ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, DVLADbContext context, IHttpContextAccessor contextAccessor)
+        public AccountController(IUserService userService, ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, DVLADbContext context, IHttpContextAccessor contextAccessor, ITempPasswordService tempPasswordService)
         {
             _userService = userService;
             _logger = logger;
@@ -43,6 +45,7 @@ namespace DVLA.UI.Controllers
             _configuration = configuration;
             _context = context;
             _contextAccessor = contextAccessor;
+            _tempPasswordService = tempPasswordService;
         }
 
         [HttpGet]
@@ -230,6 +233,32 @@ namespace DVLA.UI.Controllers
         {
             await _userService.Logout();
             return RedirectToAction("Login");
+        }
+
+
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            ChangePasswordViewModel model = new();
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.Errors.AddRange(ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage));
+                return View(model);
+            }
+            MessageResponse response = await _userService.ChangePasswordAsync(model);
+            if (response.Success)
+            {
+                TempData["SuccessMessage"] = response.Message;
+                return RedirectToAction("Login");
+            }
+            model.Errors.Add(response.Message);
+            return View(model);
         }
 
 

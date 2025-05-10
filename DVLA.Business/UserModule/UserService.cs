@@ -42,8 +42,9 @@ namespace DVLA.Business.UserModule
 
         private readonly IMemoryCache _memoryCache;
         private readonly TimeSpan cacheDuration = TimeSpan.FromDays(5); // Cache duration
+        private readonly IAuthUser _authUser;
 
-        public UserService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, DVLADbContext context, ILogger<UserService> logger, IHttpContextAccessor contextAccessor, IEmailService emailService, IConfiguration configuration, IMemoryCache memoryCache)
+        public UserService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, DVLADbContext context, ILogger<UserService> logger, IHttpContextAccessor contextAccessor, IEmailService emailService, IConfiguration configuration, IMemoryCache memoryCache, IAuthUser authUser)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -54,6 +55,7 @@ namespace DVLA.Business.UserModule
             _emailService = emailService;
             _configuration = configuration;
             _memoryCache = memoryCache;
+            _authUser = authUser;
         }
 
         public async Task SeedRoles()
@@ -704,6 +706,70 @@ namespace DVLA.Business.UserModule
 
         }
 
+
+        public async Task<MessageResponse> ChangePasswordAsync(ChangePasswordViewModel model)
+        {
+            MessageResponse response = new();
+            try
+            {
+                ApplicationUser user = await _userManager.FindByIdAsync(_authUser.UserId);
+                if (user == null)
+                {
+                    response.Message = "User does not exist";
+                    return response;
+                }
+
+                var identityResult = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+                if (identityResult.Succeeded) 
+                {
+                    response.Message = "Password Changed successfully";
+                    response.Success = true;
+                    return response;
+                }
+                response.Message = identityResult.Errors.FirstOrDefault().Description;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.Message = ex.Message;
+            }
+            return response;
+
+
+        }
+
+        public async Task<MessageResponse> AdminResetPasswordAsync(string password, string userId)
+        {
+            MessageResponse response = new();
+            try
+            {
+                ApplicationUser user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    response.Message = "User does not exist";
+                    return response;
+                }
+
+                string resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                var identityResult = await _userManager.ResetPasswordAsync(user, resetToken, password);
+                if (identityResult.Succeeded)
+                {
+                    response.Message = $"Password Reset successfully to {password}";
+                    response.Success = true;
+                    return response;
+                }
+                response.Message = identityResult.Errors.FirstOrDefault().Description;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+
         public async Task<MessageResponse> OnboardUser(UserViewModel model)
         {
             MessageResponse response = new();
@@ -921,9 +987,14 @@ namespace DVLA.Business.UserModule
             return response;
         }
 
-        public Task<List<UserViewModel>> GetAllUsers()
+        public async Task<List<UserViewModel>> GetAllUsers()
         {
-            throw new NotImplementedException();
+            return await _userManager.Users.AsNoTracking().Select(x => new UserViewModel
+            {
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                Id = x.Id
+            }).ToListAsync();
         }
     }
 }
