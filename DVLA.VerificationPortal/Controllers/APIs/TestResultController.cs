@@ -13,11 +13,12 @@ namespace DVLA.VerificationPortal.Controllers.APIs
     public class TestResultController : BaseApiController
     {
         private readonly ISearchResultService _searchResultService;
-
+        private IApiClientService _apiClientService;
 
         public TestResultController(ISearchResultService searchResultService, IApiClientService apiClientService):base(apiClientService)
         {
             _searchResultService = searchResultService;
+            _apiClientService = apiClientService;
         }
 
 
@@ -42,8 +43,8 @@ namespace DVLA.VerificationPortal.Controllers.APIs
         public async Task<IActionResult> VerifyResult(string reference)
         {
             await AuditLogAsync();
-
-            var response = await _searchResultService.VerifyResultByReferenceAsync(reference);
+            var apiClient = _apiClientService;
+            var response = await _searchResultService.VerifyResultByReferenceAsync(reference, Shared.Enums.VerifyType.API);
             return Ok(new { resultConclusion = response.Result, success = response.Success, message = response.Message });
         }
     }

@@ -25,20 +25,32 @@ namespace DVLA.VerificationPortal.Application.Services
             _apiAuditLogRepository = apiAuditLogRepository;
         }
 
-        public string? ApiName => _httpContextAccessor.HttpContext?.Request.Cookies["ApiName"];
+        public string? GetApiKey()
+        {
+            var headers = _httpContextAccessor.HttpContext?.Request?.Headers;
 
-        public string? ApiKey => _httpContextAccessor.HttpContext?.Request.Cookies["ApiKey"];
+            if (headers != null && headers.TryGetValue("ApiKey", out var apiKey))
+            {
+                return apiKey.ToString();
+            }
 
-        public int? ApiId
+            return null;
+        }
+
+        //public string? ApiName => _httpContextAccessor.HttpContext?.Request.Cookies["ApiName"];
+
+
+        public string? ApiKey
         {
             get
             {
-                int id = 0;
-               bool result =  int.TryParse(_httpContextAccessor.HttpContext?.Request.Cookies["ApiId"], out id);
-                if (result)
+                var headers = _httpContextAccessor.HttpContext?.Request?.Headers;
+
+                if (headers != null && headers.TryGetValue("X-API-KEY", out var apiKey))
                 {
-                    return id;
+                    return apiKey.ToString();
                 }
+
                 return null;
             }
         }
@@ -58,9 +70,12 @@ namespace DVLA.VerificationPortal.Application.Services
             return client;
         }
 
-        public async Task AuditLogAsync(string controller, string action, int? apiClientId)
+        public async Task AuditLogAsync(string controller, string action, string? apiKey)
         {
-            ApiAuditLog log = new() { Action = action, Controller = controller, ApiClientId = apiClientId, CreatedDate = DateTime.UtcNow };
+            IEnumerable<ApiClient> clients = await _apiClientRepository.FilterAsync(x => x.ApiKey == apiKey);
+            ApiClient? client = clients.FirstOrDefault();
+
+            ApiAuditLog log = new() { Action = action, Controller = controller, ApiClientId = client.Id, CreatedDate = DateTime.UtcNow };
             await _apiAuditLogRepository.AddAsync(log);
         }
     }

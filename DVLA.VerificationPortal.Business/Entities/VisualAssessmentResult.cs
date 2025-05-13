@@ -98,6 +98,8 @@ namespace DVLA.VerificationPortal.Domain.Entities
         public string? CreatedBy { get; set; }
 
         public bool IsVerified { get; set; }
+        public string? VerifiedBy { get; set; }
         public DateTime? VerifiedDate { get; set; }
+        public VerifyType? VerifyType { get; set; }
     }
 }

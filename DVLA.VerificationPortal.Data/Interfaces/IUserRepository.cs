@@ -29,5 +29,6 @@ namespace DVLA.VerificationPortal.Application.Interfaces
         Task SeedRoles();
         Task SeedSuperAdmin();
         Task<List<string>> GetRolesAsync(ApplicationUserDto user);
+
     }
 }

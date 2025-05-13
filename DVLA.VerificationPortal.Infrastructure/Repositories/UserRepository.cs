@@ -9,6 +9,7 @@ using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Enums;
 using DVLA.VerificationPortal.Shared.Requests;
 using DVLA.VerificationPortal.Shared.Responses;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -36,6 +38,10 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
 
 
         private readonly IMapper _mapper;
+
+        //public ApplicationUserDto? UserData => throw new NotImplementedException();
+
+        
 
         public UserRepository(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, IMapper mapper, IConfiguration configuration, IHttpContextAccessor contextAccessor, ApplicationDbContext context, IGenericRepository<EmailLog> emailLogRepository)
         {
@@ -207,13 +213,14 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 //
 
                 ApplicationUserDto userData = _mapper.Map<ApplicationUserDto>(user);
+                userData.Role = role;
 
                 string userDataJson = JsonConvert.SerializeObject(userData);
 
                 _contextAccessor.HttpContext.Response.Cookies.Append(AppConstants.CACHEUSERDATA, userDataJson, new CookieOptions
                 {
                     HttpOnly = true, // Prevents JavaScript access to the cookie
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(5) // Set an expiration
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(120) // Set an expiration
                 });
                 await _signInManager.SignInAsync(user, model.RememberMe);
 
@@ -233,10 +240,20 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 user.IsFirstLogin = false;
                 await _userManager.UpdateAsync(user);
                 ApplicationUserDto userData = _mapper.Map<ApplicationUserDto>(user);
+                userData.Role = role;
+                //string userDataJson = JsonConvert.SerializeObject(userData);
 
-                string userDataJson = JsonConvert.SerializeObject(userData);
-
-                _contextAccessor.HttpContext.Response.Cookies.Append(AppConstants.CACHEUSERDATA, userDataJson, new CookieOptions
+                _contextAccessor.HttpContext.Response.Cookies.Append("Id", userData.Id, new CookieOptions
+                {
+                    HttpOnly = true, // Prevents JavaScript access to the cookie
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(5) // Set an expiration
+                });
+                _contextAccessor.HttpContext.Response.Cookies.Append("Email", userData.Email, new CookieOptions
+                {
+                    HttpOnly = true, // Prevents JavaScript access to the cookie
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(5) // Set an expiration
+                });
+                _contextAccessor.HttpContext.Response.Cookies.Append("Role", userData.Role, new CookieOptions
                 {
                     HttpOnly = true, // Prevents JavaScript access to the cookie
                     Expires = DateTimeOffset.UtcNow.AddMinutes(5) // Set an expiration
@@ -248,6 +265,8 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             }
             throw new Exception("Invalid Email/Password");
         }
+
+        
 
         public async Task<MessageResponse> Logout()
         {

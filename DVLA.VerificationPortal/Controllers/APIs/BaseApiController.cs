@@ -11,6 +11,7 @@ namespace DVLA.VerificationPortal.Controllers.APIs
     public class BaseApiController : ControllerBase
     {
         private readonly IApiClientService _clientService;
+        
 
         protected string CurrentController => ControllerContext.RouteData.Values["controller"]?.ToString() ?? "Unknown";
         protected string CurrentAction => ControllerContext.RouteData.Values["action"]?.ToString() ?? "Unknown";
@@ -23,7 +24,7 @@ namespace DVLA.VerificationPortal.Controllers.APIs
         public async Task AuditLogAsync()
         {
 
-            await _clientService.AuditLogAsync(CurrentController, CurrentAction, _clientService.ApiId);
+            await _clientService.AuditLogAsync(CurrentController, CurrentAction, _clientService.ApiKey);
         }
     }
 }

@@ -44,7 +44,7 @@ namespace DVLA.VerificationPortal.Controllers
         [HttpGet]
         public async Task<JsonResult> VerifyResult(string token)
         {
-            MessageResponse response = await _searchService.VerifyResult(token);
+            MessageResponse response = await _searchService.VerifyResult(token, Shared.Enums.VerifyType.WEB);
             return Json(response);
         }
 

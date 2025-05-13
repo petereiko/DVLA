@@ -30,8 +30,10 @@ namespace DVLA.VerificationPortal.Application.Services
         private readonly ILogger<SearchResultService> _logger;
         private readonly IApiClientService _apiClientService;
         private readonly IConfiguration _configuration;
-
-        public SearchResultService(IGenericRepository<VisualAssessmentResult> visualAssessmentResultRepository, IMapper mapper, IHttpContextAccessor contextAccessor, IHostingEnvironment environment, ILogger<SearchResultService> logger, IApiClientService apiClientService, IConfiguration configuration)
+        private readonly IUserRepository _userRepository;
+        private readonly IUserService _userService;
+        private readonly IAuthUser _authUser;
+        public SearchResultService(IGenericRepository<VisualAssessmentResult> visualAssessmentResultRepository, IMapper mapper, IHttpContextAccessor contextAccessor, IHostingEnvironment environment, ILogger<SearchResultService> logger, IApiClientService apiClientService, IConfiguration configuration, IUserRepository userRepository, IUserService userService, IAuthUser authUser)
         {
             _visualAssessmentResultRepository = visualAssessmentResultRepository;
             _mapper = mapper;
@@ -40,6 +42,9 @@ namespace DVLA.VerificationPortal.Application.Services
             _logger = logger;
             _apiClientService = apiClientService;
             _configuration = configuration;
+            _userRepository = userRepository;
+            _userService = userService;
+            _authUser = authUser;
         }
 
         public async Task<IEnumerable<VisualAssessmentResultDto>> GetResultsAsync(string searchTerm)
@@ -142,7 +147,7 @@ namespace DVLA.VerificationPortal.Application.Services
             }
         }
 
-        public async Task<MessageResponse> VerifyResult(string token)
+        public async Task<MessageResponse> VerifyResult(string token, VerifyType verifyType)
         {
             MessageResponse response = new();
             try
@@ -161,6 +166,15 @@ namespace DVLA.VerificationPortal.Application.Services
                 }
                 assessment.IsVerified = true;
                 assessment.VerifiedDate = DateTime.UtcNow;
+                if (verifyType == VerifyType.API)
+                {
+                    assessment.VerifiedBy = _apiClientService.ApiKey;
+                }
+                else
+                {
+                    assessment.VerifiedBy = _authUser.GetCachedUserData()?.Id;
+                }
+                assessment.VerifyType = verifyType;
                 await _visualAssessmentResultRepository.UpdateAsync(assessment);
                 response.Success = true;
                 response.Message = "Result verified successfully";
@@ -173,7 +187,7 @@ namespace DVLA.VerificationPortal.Application.Services
             return response;
         }
 
-        public async Task<MessageResponse<string>> VerifyResultByReferenceAsync(string referenceNumber)
+        public async Task<MessageResponse<string>> VerifyResultByReferenceAsync(string referenceNumber, VerifyType verifyType)
         {
             MessageResponse<string> response = new();
             try
@@ -191,6 +205,15 @@ namespace DVLA.VerificationPortal.Application.Services
                 }
                 assessment.IsVerified = true;
                 assessment.VerifiedDate = DateTime.UtcNow;
+                if (verifyType == VerifyType.API)
+                {
+                    assessment.VerifiedBy = _apiClientService.ApiKey;
+                }
+                else
+                {
+                    assessment.VerifiedBy = _authUser.GetCachedUserData()?.Id;
+                }
+                assessment.VerifyType = verifyType;
                 await _visualAssessmentResultRepository.UpdateAsync(assessment);
                 response.Success = true;
                 response.Message = "Result verified successfully";

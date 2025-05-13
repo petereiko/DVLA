@@ -1,4 +1,5 @@
 ﻿using DVLA.VerificationPortal.Shared.DTOs;
+using DVLA.VerificationPortal.Shared.Enums;
 using DVLA.VerificationPortal.Shared.Responses;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace DVLA.VerificationPortal.Application.Interfaces
         Task<VisualAssessmentResultDto> GetResultAsync(int id);
         Task<MessageResponse> PushBulk(VisualAssessmentResultDto result);
         Task<MessageResponse> Push(VisualAssessmentResultDto model);
-        Task<MessageResponse> VerifyResult(string token);
-        Task<MessageResponse<string>> VerifyResultByReferenceAsync(string referenceNumber);
+        Task<MessageResponse> VerifyResult(string token, VerifyType verifyType);
+        Task<MessageResponse<string>> VerifyResultByReferenceAsync(string referenceNumber, VerifyType verifyType);
     }
 }
