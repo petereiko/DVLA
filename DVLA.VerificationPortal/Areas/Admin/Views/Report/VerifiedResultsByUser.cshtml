@@ -1,0 +1,108 @@
+﻿@using DVLA.VerificationPortal.Shared.DTOs
+@using DVLA.VerificationPortal.Shared.Enums
+@model IEnumerable<TestResultDto>
+@{
+	ViewBag.Title = "Applicant Search";
+	var counter = 0;
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="datatables">
+	<!-- start File export -->
+	<div class="card">
+		<div class="card-body">
+			<div class="section-wrapper">
+
+				<div class="section-wrapper">
+					<div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+						<div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+
+
+							<div>
+								<div class="table-responsive">
+
+									<table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+										<thead>
+											<tr>
+												<th>
+													#
+												</th>
+												<th>Full Name</th>
+												<th>Test Date</th>
+												<th>Pass Conclusion</th>
+												<th>Test Type</th>
+											</tr>
+										</thead>
+										<tbody>
+											@foreach (var item in Model)
+											{
+												counter = counter + 1;
+												<tr>
+													<td>
+														@counter
+													</td>
+													<td>
+														@item.FullName
+													</td>
+													<td>
+														@item.TestDate
+													</td>
+													<td>
+														@item.PassConclusion
+													</td>
+													<td>
+														@item.TestType
+													</td>
+												</tr>
+											}
+										</tbody>
+									</table>
+
+								</div>
+							</div>
+
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+<div class="modal fade" id="modal-reject-reason" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Reason</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-12">
+						<label>Reason:</label>
+
+						@Html.TextArea("Reason", new { @class = "form-control" })
+					</div>
+				</div>
+
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
+				<button type="button" onclick="DeleteRequestNow()" class="btn btn-primary"><i class="fa fa-save"></i> Submit</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section Scripts {
+	<script>
+	</script>
+}
+
+

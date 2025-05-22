@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using DVLA.VerificationPortal.Application.Interfaces;
@@ -20,28 +21,10 @@ namespace DVLA.VerificationPortal.Application.Services
             _contextAccessor = contextAccessor;
         }
 
-        public ApplicationUserDto? GetCachedUserData()
-        {
-            var httpContext = _contextAccessor.HttpContext;
+        public string Email  => _contextAccessor.HttpContext.Request.Cookies["Email"];
+        public string UserId => _contextAccessor.HttpContext.Request.Cookies["Id"];
+        public string Role => _contextAccessor.HttpContext.Request.Cookies["Role"];
 
-            if (httpContext == null)
-                return null;
-
-            var id = httpContext.Request.Cookies["Id"];
-            var email = httpContext.Request.Cookies["Email"];
-            var role = httpContext.Request.Cookies["Role"];
-
-            if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(role))
-            {
-                return new ApplicationUserDto
-                {
-                    Id = id,
-                    Email = email,
-                    Role = role
-                };
-            }
-
-            return null;
-        }
+        
     }
 }

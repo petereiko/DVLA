@@ -21,6 +21,7 @@ namespace DVLA.Business.ReportModule
         Task<List<OptometristFirmModel>> FetchAllOptometristFirms(int? regionId, int? district);
         Task<TransmissionGridDto> FetchDataAsync(TransmissionGridDto model);
         List<VisualAssessmentResultDto> FetchAllPendingTransmissions();
+        List<UpdateDocRequestDto> FetchAllPendingAuthDocUpdate();
         //Task<MessageResponse> PushDataAsync();
         Task<MessageResponse> PushDataAsync(long? id, string sourceConnString, string destConnString);
         byte[] WriteToExcel(string extension, DataTable dt);

@@ -109,5 +109,6 @@ namespace DVLA.DATA.Domains
         public Gender? Gender { get; set; }
         public string TransmissionError { get; set; }
         public bool HasTransmissionError { get; set; }
+        public bool? OptometristNameIsUpdate { get; set; }
     }
 }

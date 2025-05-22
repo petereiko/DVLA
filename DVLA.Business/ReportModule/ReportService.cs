@@ -656,6 +656,49 @@ namespace DVLA.Business.ReportModule
             return result;
         }
 
+        public List<UpdateDocRequestDto> FetchAllPendingAuthDocUpdate()
+        {
+            var result = new List<UpdateDocRequestDto>();
+            try
+            {
+
+                string SafeGetString(SqlDataReader r, string col) =>
+    r.IsDBNull(r.GetOrdinal(col)) ? null : r.GetString(col);
+
+                //string? SafeGetNullableDate(SqlDataReader r, string col) =>
+                //   r.IsDBNull(r.GetOrdinal(col)) ? null : r.GetDateTime(col).ToString();
+
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand("FetchPendingAuthDocUpdateTransmissions", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        conn.Open();
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                result.Add(new UpdateDocRequestDto
+                                {
+                                    VisualAssessmentResultId = reader.GetInt64(reader.GetOrdinal("Id")),
+                                    Id = reader.GetInt64(reader.GetOrdinal("Id")),
+                                    ReferenceNumber = SafeGetString(reader, "ReferenceNumber"),
+                                    OptometristName = SafeGetString(reader, "OptometristName")
+                                });
+                            }
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return result;
+        }
+
 
         public byte[] WriteToExcel(string extension, DataTable dt)
         {

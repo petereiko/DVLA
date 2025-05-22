@@ -147,6 +147,33 @@ namespace DVLA.VerificationPortal.Application.Services
             }
         }
 
+        public async Task<MessageResponse> UpdateAuthDoctor(UpdateDocRequestDto model)
+        {
+            try
+            {
+                if (model == null) return new() { Message = "No content" };
+
+                //List<VisualAssessmentResult> entities = new();
+                //VisualAssessmentResult entity = _mapper.Map<VisualAssessmentResult>(model);
+
+                VisualAssessmentResult record = await _visualAssessmentResultRepository.GetSingleAsync(x => x.VisualAssessmentResultId == model.VisualAssessmentResultId && x.ReferenceNumber == model.ReferenceNumber);
+                if (record != null)
+                {
+                    if (record.OptometristName != model.OptometristName)
+                    {
+                        record.OptometristName = model.OptometristName;
+                        await _visualAssessmentResultRepository.UpdateAsync(record);
+                    }
+                }
+                return new() { Message = "Visual Assessment Result update successfully", Success = true };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                return new() { Message = ex.Message, Success = false };
+            }
+        }
+
         public async Task<MessageResponse> VerifyResult(string token, VerifyType verifyType)
         {
             MessageResponse response = new();
@@ -172,7 +199,7 @@ namespace DVLA.VerificationPortal.Application.Services
                 }
                 else
                 {
-                    assessment.VerifiedBy = _authUser.GetCachedUserData()?.Id;
+                    assessment.VerifiedBy = _authUser.UserId;
                 }
                 assessment.VerifyType = verifyType;
                 await _visualAssessmentResultRepository.UpdateAsync(assessment);
@@ -211,7 +238,7 @@ namespace DVLA.VerificationPortal.Application.Services
                 }
                 else
                 {
-                    assessment.VerifiedBy = _authUser.GetCachedUserData()?.Id;
+                    assessment.VerifiedBy = _authUser.UserId;
                 }
                 assessment.VerifyType = verifyType;
                 await _visualAssessmentResultRepository.UpdateAsync(assessment);

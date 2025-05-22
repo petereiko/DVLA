@@ -9,6 +9,8 @@ namespace DVLA.VerificationPortal.Application.Interfaces
 {
     public interface IAuthUser
     {
-        ApplicationUserDto? GetCachedUserData();
+        string Email { get; }
+        string UserId { get; }
+        string Role { get; }
     }
 }

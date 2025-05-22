@@ -228,5 +228,64 @@ namespace DVLA.Business.BackgroundJobModule
             }
 
         }
+
+
+        [DisableConcurrentExecution(60)]
+        public void UpdateAuthDoc()
+        {
+            try
+            {
+                _logger.LogInformation($"Update Started");
+
+                //bool runPushAssessment = Convert.ToBoolean(_configuration["AppConstants:RunPushAssessmentResult"]);
+
+                //_logger.LogInformation($"Service Started: {runPushAssessment}");
+
+                //if (!runPushAssessment) { return; }
+
+                var visualAssessmentResults = _reportRepository.FetchAllPendingAuthDocUpdate();
+
+                _logger.LogInformation($"{visualAssessmentResults.Count} results found");
+
+                foreach (UpdateDocRequestDto item in visualAssessmentResults)
+                {
+                    try
+                    {
+                        using var client = new HttpClient();
+                        var request = new HttpRequestMessage(HttpMethod.Post, _configuration["AppConstants:ApiVerificationUpdateDocUrl"]);
+                        request.Headers.Add("X-API-KEY", _configuration["AppConstants:ApiKey"]);
+                        var requestBody = JsonConvert.SerializeObject(item);
+                        _logger.LogInformation($"Request Body {requestBody}");
+                        var content = new StringContent(requestBody, null, "application/json");
+                        request.Content = content;
+                        var response = client.SendAsync(request).GetAwaiter().GetResult();
+                        _logger.LogInformation($"Response Object: {JsonConvert.SerializeObject(response)}");
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var jsonSuccess = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            MessageResponse messageResponse = JsonConvert.DeserializeObject<MessageResponse>(jsonSuccess);
+                            if (messageResponse.Success)
+                            {
+                                VisualAssessmentResult visualAssessmentResult = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.VisualAssessmentResultId);
+
+                                visualAssessmentResult.OptometristNameIsUpdate = true;
+                                _context.SaveChanges();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogInformation("Could not reach the Push API");
+                        _logger.LogError(ex.Message, ex);
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+
+        }
     }
 }

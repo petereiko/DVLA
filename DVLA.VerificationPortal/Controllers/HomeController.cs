@@ -1,6 +1,7 @@
 using DVLA.VerificationPortal.Application.Interfaces;
 using DVLA.VerificationPortal.Models;
 using DVLA.VerificationPortal.Shared;
+using DVLA.VerificationPortal.Shared.Enums;
 using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,11 +15,13 @@ namespace DVLA.VerificationPortal.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ISearchResultService _searchService;
+        private readonly IAuthUser _authUser;
 
-        public HomeController(ILogger<HomeController> logger, ISearchResultService searchService)
+        public HomeController(ILogger<HomeController> logger, ISearchResultService searchService, IAuthUser authUser)
         {
             _logger = logger;
             _searchService = searchService;
+            _authUser = authUser;
         }
 
         public IActionResult Index()
@@ -44,7 +47,13 @@ namespace DVLA.VerificationPortal.Controllers
         [HttpGet]
         public async Task<JsonResult> VerifyResult(string token)
         {
-            MessageResponse response = await _searchService.VerifyResult(token, Shared.Enums.VerifyType.WEB);
+            MessageResponse response = new();
+            if (_authUser.Role != EnumHelper.GetEnumDescription(Role.Verifier))
+            {
+                response.Message = "You are not a Verifier";
+                return Json(response);
+            }
+            response = await _searchService.VerifyResult(token, VerifyType.WEB);
             return Json(response);
         }
 

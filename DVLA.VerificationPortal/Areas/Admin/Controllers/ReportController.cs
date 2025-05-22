@@ -1,0 +1,57 @@
+﻿using System.Threading.Tasks;
+using DVLA.VerificationPortal.Application.Interfaces;
+using DVLA.VerificationPortal.Shared.DTOs;
+using DVLA.VerificationPortal.Shared.Enums;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace DVLA.VerificationPortal.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    [Authorize(Roles = "Administrator, Super Admin")]
+    public class ReportController : Controller
+    {
+        private readonly IReportService _reportService;
+
+        public ReportController(IReportService reportService)
+        {
+            _reportService = reportService;
+        }
+
+        [HttpGet]
+        public IActionResult GetResults()
+        {
+            TestResultCountGridViewModel model = new();
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetResults(TestResultCountGridViewModel model)
+        {
+            model.Results = await _reportService.GetResults(model.StartDate, model.EndDate, model.PassOrFail);
+            return View(model);
+        }
+
+
+        [HttpGet]
+        public IActionResult GetVerifiedResults()
+        {
+            VerifiedItemGridViewModel model = new();
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetVerifiedResults(VerifiedItemGridViewModel model)
+        {
+            model.Results = await _reportService.GetVerifiedResults(model.StartDate, model.EndDate);
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerifiedResultsByUser(string token)
+        {
+            IEnumerable<TestResultDto> results = await _reportService.VerifiedResultsByUser(token);
+            return View(results);
+        }
+    }
+}

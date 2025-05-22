@@ -205,6 +205,7 @@ app.MapHub<NotificationHub>("/notification");
 RecurringJob.AddOrUpdate<BackgroundJobService>("SendBulkEmail", service => service.SendBulkEmail(), "*/2 * * * *");
 RecurringJob.AddOrUpdate<BackgroundJobService>("VerifyTransfers", service => service.VerifyPayments(), "*/1 * * * *");
 RecurringJob.AddOrUpdate<BackgroundJobService>("PushVisualAssessmentResult", service => service.PushVisualAssessmentResult(), "*/2 * * * *");//Every 1 minute
+RecurringJob.AddOrUpdate<BackgroundJobService>("UpdateAuthDoc", service => service.UpdateAuthDoc(), "*/2 * * * *");//Every 1 minute
 
 
 //Create a scope to resolve scoped services

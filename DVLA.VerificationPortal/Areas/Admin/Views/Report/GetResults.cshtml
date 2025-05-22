@@ -1,0 +1,142 @@
+﻿@using DVLA.VerificationPortal.Shared.DTOs
+@using DVLA.VerificationPortal.Shared.Enums
+@model TestResultCountGridViewModel
+@{
+    ViewBag.Title = "Results";
+    var counter = 0;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="datatables">
+    <!-- start File export -->
+    <div class="card">
+        <div class="card-body">
+            <div class="section-wrapper">
+
+                <div class="section-wrapper">
+                    <div id="class-of-company-module" class="vatebra-manage-component stackable-panel">
+                        <div class="panel manage-products-listing-panel" selected id="manage-products-listing-component">
+
+
+
+                            <div>
+                                @using (Html.BeginForm("GetResults", "Report", FormMethod.Post))
+                                {
+                                    <table style="width:80%">
+                                        <tr>
+                                            @*<td>@Html.TextBoxFor(x => x.SearchParameter.ApplicantName, new { placeholder = "Applicant Name", @class = "form-control" })</td>*@
+                                            <td>
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" asp-for="StartDate" autocomplete="off" data-date-format="dd/mm/yyyy" />
+                                                    <label for="StartDate">From</label>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" asp-for="EndDate" autocomplete="off" data-date-format="dd/mm/yyyy" />
+                                                    <label for="EndDate">To</label>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-floating mb-3">
+                                                    <select asp-for="PassOrFail" class="form-control" asp-items="Html.GetEnumSelectList<PassOrFail>()">
+                                                        <option value="">--ALL--</option>
+                                                    </select>
+                                                    <label for="PassOrFail">Pass Status</label>
+                                                </div>
+                                            </td>
+                                            <td><input type="submit" value="Search" class="btn btn-primary" /></td>
+                                        </tr>
+
+                                    </table>
+                                }
+                                <div class="table-responsive">
+
+                                    <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    #
+                                                </th>
+                                                <th>Count</th>
+                                                <th>Service Type</th>
+                                                <th>Pass Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.Results)
+                                            {
+                                                counter = counter + 1;
+                                                <tr>
+                                                    <td>
+                                                        @counter
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Count)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.ResultServiceType)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.PassOrFail)
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-reject-reason" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Reason</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label>Reason:</label>
+
+                        @Html.TextArea("Reason", new { @class = "form-control" })
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
+                <button type="button" onclick="DeleteRequestNow()" class="btn btn-primary"><i class="fa fa-save"></i> Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(function(){
+                $("#StartDate").datepicker({
+            dateFormat: "dd-mm-yyyy",
+        });
+        $("#EndDate").datepicker({
+            dateFormat: "dd-mm-yyyy",
+        });
+        })
+    </script>
+}
+
+

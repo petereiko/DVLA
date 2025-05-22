@@ -32,6 +32,17 @@ namespace DVLA.VerificationPortal.Controllers.APIs
             return BadRequest(result.Message);
         }
 
+        [HttpPost("update-auth-doc")]
+        public async Task<IActionResult> UpdateAuthDoctor(UpdateDocRequestDto model)
+        {
+            //_logger.LogInformation("Synchronization Endpoint started");
+            MessageResponse result = await _searchService.UpdateAuthDoctor(model);
+            //_logger.LogInformation("Synchronization Endpoint ended");
+            if (result.Success)
+                return Ok(result);
+            return BadRequest(result.Message);
+        }
+
         [HttpGet("test")]
         public IActionResult GetTest()
         {
