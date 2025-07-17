@@ -28,10 +28,8 @@
         <img src="~/bootstrapdemos.wrappixel.com/materialpro/dist/assets/images/logos/logo-icon.svg" alt="loader" class="lds-ripple img-fluid" />
     </div>
     <div id="main-wrapper">
-        <!-- Sidebar Start -->
-        <partial name="_GeneralLeftNav" />
-        <!--  Sidebar End -->
-        <div class="page-wrapper">
+        
+        <div>
             
             
            
@@ -41,7 +39,7 @@
                     <!-- -------------------------------------------------------------- -->
                     <!-- Breadcrumb -->
                     <!-- -------------------------------------------------------------- -->
-                    <div class="font-weight-medium shadow-none position-relative overflow-hidden mb-7">
+                    @* <div class="font-weight-medium shadow-none position-relative overflow-hidden mb-7">
                         <div class="card-body px-0">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
@@ -58,12 +56,13 @@
 
                             </div>
                         </div>
-                    </div>
+                    </div> *@
 
                     <!-- -------------------------------------------------------------- -->
                     <!-- Breadcrumb End -->
                     <!-- -------------------------------------------------------------- -->
                     @RenderBody()
+                   
                 </div>
             </div>
             <script>

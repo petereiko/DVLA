@@ -14,6 +14,7 @@ using DVLA.VerificationPortal.Infrastructure;
 using DVLA.VerificationPortal.Application;
 using DVLA.VerificationPortal.Middleware;
 using DVLA.VerificationPortal.Shared.MappingProfiles;
+using DVLA.VerificationPortal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,13 +47,18 @@ builder.Services.AddSignalR();
 //    });
 
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-    });
+
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
+    options.SlidingExpiration = true;
+    options.Cookie.Name = "AuthDemo.Cookie";
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+});
+
 // Add Identity
 builder.Services.AddScoped<UserManager<ApplicationUser>>();
 builder.Services.AddScoped<RoleManager<ApplicationRole>>();
@@ -87,6 +93,8 @@ builder.Services.AddSession(options =>
 });
 builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
+
+builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomClaimsPrincipalFactory>();
 
 builder.Services.AddInfrastructureServices();
 builder.Services.AddApplicationServices();

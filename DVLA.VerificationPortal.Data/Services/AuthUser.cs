@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using DVLA.VerificationPortal.Application.Interfaces;
@@ -21,10 +22,10 @@ namespace DVLA.VerificationPortal.Application.Services
             _contextAccessor = contextAccessor;
         }
 
-        public string Email  => _contextAccessor.HttpContext.Request.Cookies["Email"];
-        public string UserId => _contextAccessor.HttpContext.Request.Cookies["Id"];
-        public string Role => _contextAccessor.HttpContext.Request.Cookies["Role"];
-
-        
+        public string Email  => _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value!;
+        public string UserId => _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+        public string Role => _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value!;
+        public string UserName => _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value!;
+        public string CentreName => _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Country)?.Value!;
     }
 }

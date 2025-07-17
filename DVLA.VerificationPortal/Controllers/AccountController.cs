@@ -50,13 +50,13 @@ namespace DVLA.VerificationPortal.Controllers
                 string token = await _userService.GeneratePasswordResetTokenAsync(userModel.Id);
                 return RedirectToAction("ResetPassword", new { id = userModel.Id, token = token });
             }
-            ApplicationUserDto loginResult = await _userService.LoginAsync(model);
-            if (loginResult!=null)
+            MessageResponse loginResult = await _userService.LoginAsync(model);
+            if (loginResult.Success)
             {
-                TempData["SuccessMessage"] = "Login Successful";
+                TempData["SuccessMessage"] = loginResult.Message;
                     return RedirectToAction("Index", "Home");
             }
-            model.Errors.Add("Invalid Email/Password");
+            model.Errors.Add(loginResult.Message);
             return View(model);
         }
 

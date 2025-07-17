@@ -18,13 +18,13 @@ namespace DVLA.VerificationPortal.Application.Interfaces
         Task<ApplicationUserDto> GetUserById(string id);
         Task<PaginatedResponse<ApplicationUserDto>> GetUsersAsync(int pageIndex, int pageSize);
         List<RoleDto> GetAllRoles();
-        Task<ApplicationUserDto> Login(LoginRequest model);
+        Task<MessageResponse> Login(LoginRequest model);
         Task<MessageResponse> Logout();
         Task<MessageResponse> SendResetPasswordToken(ForgotPasswordRequest model);
-        Task<ApplicationUserDto> OnboardUserAsync(OnboardUserRequest model);
+        Task<MessageResponse> OnboardUserAsync(OnboardUserRequest model);
         Task<MessageResponse> ResetPasswordAsync(ResetPasswordRequest model);
         Task<MessageResponse> ChangePasswordAsync(ChangePasswordRequest model);
-        Task<ApplicationUserDto> EditUser(EditUserRequest model);
+        Task<MessageResponse> EditUser(EditUserRequest model);
         Task<List<ApplicationUserDto>> GetAllUsers();
         Task SeedRoles();
         Task SeedSuperAdmin();

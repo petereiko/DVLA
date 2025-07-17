@@ -287,5 +287,24 @@ namespace DVLA.Business.BackgroundJobModule
             }
 
         }
+
+
+        [DisableConcurrentExecution(60)]
+        public void HardDeleteVisualAssessmentResults()
+        {
+            try
+            {
+                _logger.LogInformation($"Delete Visual Assessment Result Started");
+
+                var visualAssessmentResults = _context.VisualAssessmentResults.Where(x => x.TestDate <= DateTime.UtcNow.AddMonths(-3) && x.IsTransmitted); //_reportRepository.FetchAllPendingTransmissions();
+                _context.VisualAssessmentResults.RemoveRange(visualAssessmentResults);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+
+        }
     }
 }

@@ -20,9 +20,9 @@ namespace DVLA.VerificationPortal.Application.Services
             _userRepository = userRepository;
         }
 
-        public async Task<ApplicationUserDto> OnboardUserAsync(OnboardUserRequest request)
+        public async Task<MessageResponse> OnboardUserAsync(OnboardUserRequest request)
         {
-            ApplicationUserDto result = await _userRepository.OnboardUserAsync(request);
+            MessageResponse result = await _userRepository.OnboardUserAsync(request);
             return result;
 
         }
@@ -68,15 +68,15 @@ namespace DVLA.VerificationPortal.Application.Services
         }
 
 
-        public async Task<ApplicationUserDto> UpdateAsync(EditUserRequest request)
+        public async Task<MessageResponse> UpdateAsync(EditUserRequest request)
         {
-            ApplicationUserDto result = await _userRepository.EditUser(request);
+            MessageResponse result = await _userRepository.EditUser(request);
             return result;
         }
 
-        public async Task<ApplicationUserDto> LoginAsync(LoginRequest request)
+        public async Task<MessageResponse> LoginAsync(LoginRequest request)
         {
-            ApplicationUserDto result = await _userRepository.Login(request);
+            MessageResponse result = await _userRepository.Login(request);
             return result;
         }
 

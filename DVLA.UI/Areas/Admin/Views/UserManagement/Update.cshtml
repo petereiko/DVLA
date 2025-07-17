@@ -102,7 +102,7 @@
 
 
                                 <button type="button" class="btn btn-danger" onclick="history.back()">Back</button>
-                                <button type="submit" class="btn btn-primary hstack gap-6">
+                                <button type="submit" class="btn btn-primary hstack gap-6" id="btn-submit">
 
                                     Submit
                                 </button>
@@ -148,7 +148,8 @@
 
 
                 let _roleName="";
-                let roles=[];
+                let roles=userRoles.split(',');
+                console.log(roles);
 
                 $('.role-name').change(function(){
                     let role = $(this).attr('data-rolename')
@@ -171,6 +172,10 @@
                     else{
                         $('#OptometristArea').hide();
                     }
+                    $('#btn-submit').prop('disabled',roles.length==0);
+                    
+
+                    console.log(roles);
                 });
             })
         </script>

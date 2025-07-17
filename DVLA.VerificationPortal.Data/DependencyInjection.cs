@@ -13,6 +13,7 @@ namespace DVLA.VerificationPortal.Application
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IAuthUser, AuthUser>();
             services.AddTransient<IReportService, ReportService>();
+            services.AddTransient<IAuditRepo, AuditRepo>();
             return services;
         }
     }

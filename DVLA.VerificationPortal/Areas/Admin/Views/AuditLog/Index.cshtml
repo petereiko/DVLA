@@ -1,8 +1,8 @@
 ﻿@using DVLA.VerificationPortal.Shared.DTOs
 @using DVLA.VerificationPortal.Shared.Enums
-@model VerifiedItemGridViewModel
+@model ActivityGridViewModel
 @{
-    ViewBag.Title = "Verified Results";
+    ViewBag.Title = "Audit Logs";
     var counter = 0;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -20,21 +20,21 @@
 
 
                             <div>
-                                @using (Html.BeginForm("GetVerifiedResults", "Report", FormMethod.Post))
+                                @using (Html.BeginForm("Index", "AuditLog", FormMethod.Post))
                                 {
-                                    <table>
+                                    <table style="width:80%">
                                         <tr>
                                             @*<td>@Html.TextBoxFor(x => x.SearchParameter.ApplicantName, new { placeholder = "Applicant Name", @class = "form-control" })</td>*@
                                             <td>
                                                 <div class="form-floating mb-3">
-                                                    <input type="text" class="form-control" asp-for="StartDate" autocomplete="off" data-date-format="dd/mm/yyyy" />
-                                                    <label for="StartDate">From</label>
+                                                    <input type="text" class="form-control" asp-for="Filter.StartDate" autocomplete="off" data-date-format="dd/mm/yyyy" />
+                                                    <label for="Filter_StartDate">From</label>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="form-floating mb-3">
-                                                    <input type="text" class="form-control" asp-for="EndDate" autocomplete="off" data-date-format="dd/mm/yyyy" />
-                                                    <label for="EndDate">To</label>
+                                                    <input type="text" class="form-control" asp-for="Filter.EndDate" autocomplete="off" data-date-format="dd/mm/yyyy" />
+                                                    <label for="Filter_EndDate">To</label>
                                                 </div>
                                             </td>
                                             <td><input type="submit" value="Search" class="btn btn-primary" /></td>
@@ -50,12 +50,14 @@
                                                 <th>
                                                     #
                                                 </th>
-                                                <th>Count</th>
-                                                <th>Verifier Email</th>
+                                                <th>Action</th>
+                                                <th>Description</th>
+                                                <th>Date</th>
+                                                <th>Initiator</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach (var item in Model.Results)
+                                            @foreach (var item in Model.Activities)
                                             {
                                                 counter = counter + 1;
                                                 <tr>
@@ -63,10 +65,16 @@
                                                         @counter
                                                     </td>
                                                     <td>
-                                                        <a asp-action="VerifiedResultsByUser" asp-controller="Report" asp-route-token="@item.UserId">@item.Count</a>
+                                                        @item.Action
                                                     </td>
                                                     <td>
-                                                        @Html.DisplayFor(modelItem => item.VerifierEmail)
+                                                        @item.Description
+                                                    </td>
+                                                    <td>
+                                                        @item.CreatedDate
+                                                    </td>
+                                                    <td>
+                                                        @item.UserName
                                                     </td>
                                                 </tr>
                                             }
@@ -126,5 +134,7 @@
         })
     </script>
 }
+
+
 
 

@@ -11,17 +11,19 @@ using System.Diagnostics;
 namespace DVLA.VerificationPortal.Controllers
 {
     [Authorize]
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ISearchResultService _searchService;
         private readonly IAuthUser _authUser;
+        private readonly IAuditRepo _auditRepo;
 
-        public HomeController(ILogger<HomeController> logger, ISearchResultService searchService, IAuthUser authUser)
+        public HomeController(ILogger<HomeController> logger, ISearchResultService searchService, IAuthUser authUser, IAuditRepo auditRepo) : base(auditRepo)
         {
             _logger = logger;
             _searchService = searchService;
             _authUser = authUser;
+            _auditRepo = auditRepo;
         }
 
         public IActionResult Index()
@@ -33,6 +35,7 @@ namespace DVLA.VerificationPortal.Controllers
         public async Task<PartialViewResult> SearchResults(string searchTerm)
         {
             var results = await _searchService.GetResultsAsync(searchTerm);
+            await LogAuditAsync("Search Visual Assessment Results");
             return PartialView("~/Views/Shared/_Result.cshtml", results);
         }
 
@@ -41,6 +44,7 @@ namespace DVLA.VerificationPortal.Controllers
         {
             int id = Utility.DecryptUrlID(key);
             var result = await _searchService.GetResultAsync(id);
+            await LogAuditAsync("Fetch Visual Assessment Details");
             return View(result);
         }
 
@@ -48,12 +52,14 @@ namespace DVLA.VerificationPortal.Controllers
         public async Task<JsonResult> VerifyResult(string token)
         {
             MessageResponse response = new();
-            if (_authUser.Role != EnumHelper.GetEnumDescription(Role.Verifier))
+            if (_authUser.Role != EnumHelper.GetEnumDescription(Role.Verifier))//274556
+
             {
                 response.Message = "You are not a Verifier";
                 return Json(response);
             }
             response = await _searchService.VerifyResult(token, VerifyType.WEB);
+            
             return Json(response);
         }
 

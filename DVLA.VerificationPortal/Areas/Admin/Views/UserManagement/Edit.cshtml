@@ -32,6 +32,12 @@
                         </div>
                         <div class="col-md-12">
                             <div class="form-floating mb-3">
+                                <input type="text" class="form-control" asp-for="CentreName" placeholder="Enter Centre Name here" required />
+                                <label for="CentreName">Centre</label>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
                                 <select asp-for="Role" class="form-control" asp-items="@Model.Roles" required>
                                     <option value="">Select User Role</option>
                                 </select>

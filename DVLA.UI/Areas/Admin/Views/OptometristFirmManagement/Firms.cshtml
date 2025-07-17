@@ -8,7 +8,8 @@
     ViewData["Title"] = "Optometrist Firm";
     int selectedRegion = Convert.ToInt32(ViewBag.Region);
     var sn = 0;
-    
+    Layout = "~/Views/Shared/_GeneralLayout.cshtml";
+
 }
 
 <div class="datatables">
@@ -28,15 +29,15 @@
                 <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
             }
 
-            <p class="card-subtitle mb-3">
+            @* <p class="card-subtitle mb-3">
                 <a asp-action="Create" class="btn btn-primary">Create New @ViewData["Title"].ToString()</a>
                 @if (Model.Count > 0)
                 {
                     <a asp-action="ExportOptometristFirms" class="btn btn-primary">Export to Excel</a>
                 }
-            </p>
+            </p> *@
 
-            <form method="post" class="row g-3 align-items-center" asp-action="Index">
+            <form method="post" class="row g-3 align-items-center" asp-action="Firms">
                 <div class="col-auto">
                     <label for="Region" class="col-form-label">Region</label>
                 </div>
@@ -71,13 +72,12 @@
                         <tr>
                             <th>#</th>
                             <th>Practice Name</th>
-                            <th>Slot Balance</th>
-                            @* <th>Business Tel.</th> *@
+                            @* <th>Slot Balance</th> *@
+                            <th>Business Tel.</th>
                             <th>Accreditation #</th>
                             <th>Region</th>
                             @* <th>Town</th> *@
                             <th>Digital Addr.</th>
-                            <th></th>
                         </tr>
                         <!-- end row -->
                     </thead>
@@ -89,13 +89,13 @@
                             <tr>
                                 <td>@sn</td>
                                 <td>@item.BusinessName</td>
-                                <td>@item.SlotBalance</td>
-                                @* <td>@item.ContactPhoneNumber</td> *@
+                                @* <td>@item.SlotBalance</td> *@
+                                <td>@item.ContactPhoneNumber</td>
                                 <td>@item.AccreditationNumber</td>
                                 <td>@item.RegionName</td>
                                 @* <td>@item.Town</td> *@
                                 <td>@item.DigitalAddress</td>
-                                <td>
+                                @* <td>
                                     <div class="btn-group">
                                         <button class="btn btn-primary dropdown-toggle show" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="true">
                                             Action
@@ -110,13 +110,14 @@
                                         </ul>
                                     </div>
 
-                                </td>
+                                </td> *@
                             </tr>
                             <!-- end row -->
                         }
                     </tbody>
                 </table>
-
+                <br />
+                <a asp-action="Login" asp-controller="Account" asp-area="" class="btn btn-danger">Back</a>
             </div>
         </div>
     </div>

@@ -206,6 +206,7 @@ RecurringJob.AddOrUpdate<BackgroundJobService>("SendBulkEmail", service => servi
 RecurringJob.AddOrUpdate<BackgroundJobService>("VerifyTransfers", service => service.VerifyPayments(), "*/1 * * * *");
 RecurringJob.AddOrUpdate<BackgroundJobService>("PushVisualAssessmentResult", service => service.PushVisualAssessmentResult(), "*/2 * * * *");//Every 1 minute
 RecurringJob.AddOrUpdate<BackgroundJobService>("UpdateAuthDoc", service => service.UpdateAuthDoc(), "*/2 * * * *");//Every 1 minute
+RecurringJob.AddOrUpdate<BackgroundJobService>("HardDeleteVisualAssessmentResults", service => service.HardDeleteVisualAssessmentResults(), "0 0 * * *"); // Cron: minute hour day month day-of-week
 
 
 //Create a scope to resolve scoped services

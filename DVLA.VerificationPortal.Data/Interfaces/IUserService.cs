@@ -11,16 +11,16 @@ namespace DVLA.VerificationPortal.Application.Interfaces
 {
     public interface IUserService
     {
-        Task<ApplicationUserDto> OnboardUserAsync(OnboardUserRequest request);
+        Task<MessageResponse> OnboardUserAsync(OnboardUserRequest request);
         Task<MessageResponse> SendResetPasswordTokenAsync(ForgotPasswordRequest request);
         Task<bool> ConfirmEmailAsync(string encodedToken, string userid);
         Task<MessageResponse> ResetPasswordAsync(ResetPasswordRequest request);
         Task<MessageResponse> ChangePasswordAsync(ChangePasswordRequest request);
         Task<MessageResponse> LogoutAsync();
-        Task<ApplicationUserDto> UpdateAsync(EditUserRequest request);
+        Task<MessageResponse> UpdateAsync(EditUserRequest request);
         Task<PaginatedResponse<ApplicationUserDto>> GetAllAsync(int pageIndex, int pageSize);
         List<RoleDto> GetAllRoles();
-        Task<ApplicationUserDto> LoginAsync(LoginRequest request);
+        Task<MessageResponse> LoginAsync(LoginRequest request);
         Task SeedRolesAsync();
         Task<ApplicationUserDto> GetUserByEmailAsync(string email);
         Task<string> GeneratePasswordResetTokenAsync(string id);

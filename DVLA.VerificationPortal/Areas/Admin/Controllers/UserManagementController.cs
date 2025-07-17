@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Azure.Core;
 using DVLA.VerificationPortal.Application.Interfaces;
+using DVLA.VerificationPortal.Controllers;
 using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Enums;
 using DVLA.VerificationPortal.Shared.Requests;
@@ -12,12 +13,12 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = "Super Admin")]
-    public class UserManagementController : Controller
+    public class UserManagementController : BaseController
     {
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public UserManagementController(IUserService userService, IMapper mapper)
+        public UserManagementController(IUserService userService, IMapper mapper, IAuditRepo auditRepo):base(auditRepo)
         {
             _userService = userService;
             _mapper = mapper;
@@ -26,6 +27,7 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
         public async Task<IActionResult> Index(int pageIndex = 1, int pageSize = 10)
         {
             PaginatedResponse<ApplicationUserDto> response = await _userService.GetAllAsync(pageIndex, pageSize);
+            await LogAuditAsync("Fetched Users");
             return View(response);
         }
 
@@ -69,14 +71,16 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
                 return View(model);
             }
 
-            userDto = await _userService.OnboardUserAsync(model);
-
-
-
-            TempData["SuccessMessage"] = "Record saved successfully";
-            //_AuditRepo.AddAudit(Activities.CREATE_USER, "Added User Details");
-            return RedirectToAction("Index");
-
+            MessageResponse response = await _userService.OnboardUserAsync(model);
+            if (response.Success)
+            {
+                TempData["SuccessMessage"] = "Record saved successfully";
+                //_AuditRepo.AddAudit(Activities.CREATE_USER, "Added User Details");
+                await LogAuditAsync("Created Users");
+                return RedirectToAction("Index");
+            }
+            model.Errors.Add(response.Message);
+            return View(model);
         }
 
         [HttpGet]
@@ -103,10 +107,11 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
             }
 
             EditUserRequest request = _mapper.Map<EditUserRequest>(model);
-            ApplicationUserDto user = await _userService.UpdateAsync(request);
-            if (user != null)
+            MessageResponse response = await _userService.UpdateAsync(request);
+            if (response.Success)
             {
-                TempData["SuccessMessage"] = "Record saved successfully";
+                await LogAuditAsync("Edited Users");
+                TempData["SuccessMessage"] = response.Message;
                 return RedirectToAction("Index");
             }
             model.Roles = _userService.GetAllRoles().Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem

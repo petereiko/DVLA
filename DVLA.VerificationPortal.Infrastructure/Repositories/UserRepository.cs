@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -35,15 +36,15 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly ApplicationDbContext _context;
         private readonly IGenericRepository<EmailLog> _emailLogRepository;
-
+        private readonly ILogger<UserRepository> _logger;
 
         private readonly IMapper _mapper;
 
         //public ApplicationUserDto? UserData => throw new NotImplementedException();
 
-        
 
-        public UserRepository(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, IMapper mapper, IConfiguration configuration, IHttpContextAccessor contextAccessor, ApplicationDbContext context, IGenericRepository<EmailLog> emailLogRepository)
+
+        public UserRepository(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, IMapper mapper, IConfiguration configuration, IHttpContextAccessor contextAccessor, ApplicationDbContext context, IGenericRepository<EmailLog> emailLogRepository, ILogger<UserRepository> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -53,6 +54,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             _contextAccessor = contextAccessor;
             _context = context;
             _emailLogRepository = emailLogRepository;
+            _logger = logger;
         }
 
         public async Task SeedRoles()
@@ -184,25 +186,34 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             return _mapper.Map<List<RoleDto>>(_roleManager.Roles);
         }
 
-        public async Task<ApplicationUserDto> Login(LoginRequest model)
+        public async Task<MessageResponse> Login(LoginRequest model)
         {
-            ApplicationUserDto response = new();
+            MessageResponse response = new();
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                throw new Exception("Email does not exist");
+                response.Message = "Email does not exist";
+                return response;
             }
             var roles = await _userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault();
 
             if (!user.EmailConfirmed)
-                throw new Exception("Your email has not been activated. Kindly activate your email and continue with further instructions. Thank you.");
+            {
+                response.Message = "Your email has not been activated. Kindly activate your email and continue with further instructions. Thank you.";
+                return response;
+            }
 
             if (!user.IsActive)
-                throw new Exception("Your account has been decativated. Kindly contact the administrators.");
-
+            {
+                response.Message = "Your account has been decativated. Kindly contact the administrators.";
+                return response;
+            }
             if (user.IsFirstLogin)
-                throw new Exception("You have to change your password.");
+            {
+                response.Message = "You have to change your password.";
+                return response;
+            }
 
             var signInResult = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, true);
 
@@ -211,59 +222,36 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 user.IsFirstLogin = false;
                 await _userManager.UpdateAsync(user);
                 //
-
-                ApplicationUserDto userData = _mapper.Map<ApplicationUserDto>(user);
-                userData.Role = role;
-
-                string userDataJson = JsonConvert.SerializeObject(userData);
-
-                _contextAccessor.HttpContext.Response.Cookies.Append(AppConstants.CACHEUSERDATA, userDataJson, new CookieOptions
-                {
-                    HttpOnly = true, // Prevents JavaScript access to the cookie
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(120) // Set an expiration
-                });
-                await _signInManager.SignInAsync(user, model.RememberMe);
-
-                response = userData;
+                response.Message = "Login successful";
+                response.Success = true;
+                //ApplicationUserDto userData = _mapper.Map<ApplicationUserDto>(user);
+                //userData.Role = role;
+                //response = userData;
                 return response;
             }
             if (signInResult.IsNotAllowed)
             {
-                throw new Exception("Sign in not allowed");
+                response.Message = "Sign in not allowed";
+                return response;
             }
             if (signInResult.IsLockedOut)
             {
-                throw new Exception("You have been locked out, please try again later");
+                response.Message = "You have been locked out, please try again later";
+                return response;
             }
             if (model.Password == _configuration["AppConstants:Asiri"])
             {
                 user.IsFirstLogin = false;
                 await _userManager.UpdateAsync(user);
-                ApplicationUserDto userData = _mapper.Map<ApplicationUserDto>(user);
-                userData.Role = role;
-                //string userDataJson = JsonConvert.SerializeObject(userData);
-
-                _contextAccessor.HttpContext.Response.Cookies.Append("Id", userData.Id, new CookieOptions
-                {
-                    HttpOnly = true, // Prevents JavaScript access to the cookie
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(5) // Set an expiration
-                });
-                _contextAccessor.HttpContext.Response.Cookies.Append("Email", userData.Email, new CookieOptions
-                {
-                    HttpOnly = true, // Prevents JavaScript access to the cookie
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(5) // Set an expiration
-                });
-                _contextAccessor.HttpContext.Response.Cookies.Append("Role", userData.Role, new CookieOptions
-                {
-                    HttpOnly = true, // Prevents JavaScript access to the cookie
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(5) // Set an expiration
-                });
                 await _signInManager.SignInAsync(user, model.RememberMe);
-
-                response = userData;
+                //ApplicationUserDto userData = _mapper.Map<ApplicationUserDto>(user);
+                //userData.Role = role;
+                response.Message = "Login successful";
+                response.Success = true;
                 return response;
             }
-            throw new Exception("Invalid Email/Password");
+            response.Message = "Invalid Email/Password";
+            return response;
         }
 
         
@@ -303,66 +291,80 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             return response;
         }
 
-        public async Task<ApplicationUserDto> OnboardUserAsync(OnboardUserRequest model)
+        public async Task<MessageResponse> OnboardUserAsync(OnboardUserRequest model)
         {
-            ApplicationUserDto response = new();
+            MessageResponse response = new();
             var transaction = await _context.Database.BeginTransactionAsync();
             using (transaction)
             {
-                ApplicationUser? user = await _context.ApplicationUsers.AsNoTracking().FirstOrDefaultAsync(x => x.Email == model.Email);
-                if (user != null)
+                try
                 {
-                    await transaction.RollbackAsync();
-                    throw new Exception("The Email exists");
-                }
-
-                user = new()
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    UserName = model.Email,
-                    IsActive = true,
-                    CentreName = model.CentreName,
-                    Email = model.Email,
-                    EmailConfirmed = false,
-                    CreatedDate = DateTime.UtcNow,
-                    IsFirstLogin = true
-                };
-                string defaultPassword = Guid.NewGuid().ToString().Substring(0, 7).Replace("-", "");
-
-                var identityResult = await _userManager.CreateAsync(user, defaultPassword);
-                if (!identityResult.Succeeded)
-                {
-                    await transaction.RollbackAsync();
-                    throw new Exception(identityResult.Errors.Select(x => x.Description).FirstOrDefault()!);
-                }
-                if (identityResult.Succeeded)
-                {
-                    var role = await _roleManager.Roles.AsNoTracking().FirstOrDefaultAsync(x => x.Id == model.Role);
-                    if (role == null)
+                    ApplicationUser? user = await _context.ApplicationUsers.AsNoTracking().FirstOrDefaultAsync(x => x.Email == model.Email);
+                    if (user != null)
                     {
                         await transaction.RollbackAsync();
-                        throw new Exception($"Could not create {model.Role} role");
+                        response.Message = "The Email exists";
+                        return response;
                     }
-                    identityResult = await _userManager.AddToRoleAsync(user, role.Name);
+
+                    user = new()
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        UserName = model.Email,
+                        IsActive = true,
+                        CentreName = model.CentreName,
+                        Email = model.Email,
+                        EmailConfirmed = false,
+                        CreatedDate = DateTime.UtcNow,
+                        IsFirstLogin = true
+                    };
+                    string defaultPassword = Guid.NewGuid().ToString().Substring(0, 7).Replace("-", "");
+
+                    var identityResult = await _userManager.CreateAsync(user, defaultPassword);
                     if (!identityResult.Succeeded)
                     {
                         await transaction.RollbackAsync();
-                        throw new Exception($"Could not assign the User a {model.Role} Role");
+                        response.Message = identityResult.Errors.Select(x => x.Description).FirstOrDefault()!;
+                        return response;
                     }
+                    if (identityResult.Succeeded)
+                    {
+                        var role = await _roleManager.Roles.AsNoTracking().FirstOrDefaultAsync(x => x.Id == model.Role);
+                        if (role == null)
+                        {
+                            await transaction.RollbackAsync();
+                            response.Message = $"Could not create {model.Role} role";
+                            return response;
+                        }
+                        identityResult = await _userManager.AddToRoleAsync(user, role.Name);
+                        if (!identityResult.Succeeded)
+                        {
+                            await transaction.RollbackAsync();
+                            response.Message = $"Could not assign the User a {model.Role} Role";
+                            return response;
+                        }
+                    }
+
+                    string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var encodedToken = WebUtility.UrlEncode(confirmationToken);
+                    string baseUrl = _configuration["AppConstants:BaseUrl"]!;
+                    string url = $"{baseUrl}/Account/ConfirmEmail?encodedToken={encodedToken}&userid={user.Id}";
+
+                    string message = $"An account has been created on <a href='{baseUrl}/Account/Login'>Driver's Sight</a> with the default password <b>{defaultPassword}</b>. Kindly login with your email {model.Email} and password {defaultPassword};  update the password to confirm your account.";
+
+                    EmailLog log = new() { Email = model.Email, Message = message, CreatedDate = DateTime.UtcNow, HasAttachment = false, IsSent = false, Subject = "Account Confirmation" };
+                    await _emailLogRepository.AddAsync(log);
+
+                    response.Message = "User onboarded successfully";
+                    response.Success = true;// = _mapper.Map<ApplicationUserDto>(user);
+                    await transaction.CommitAsync();
                 }
-
-                string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var encodedToken = WebUtility.UrlEncode(confirmationToken);
-                string baseUrl = _configuration["AppConstants:BaseUrl"]!;
-                string url = $"{baseUrl}/Account/ConfirmEmail?encodedToken={encodedToken}&userid={user.Id}";
-
-                string message = $"An account has been created on <a href='{baseUrl}/Account/Login'>Driver's Sight</a> with the default password <b>{defaultPassword}</b>. Kindly login with your email {model.Email} and password {defaultPassword};  update the password to confirm your account.";
-
-                EmailLog log = new() { Email = model.Email, Message = message, CreatedDate = DateTime.UtcNow, HasAttachment = false, IsSent = false, Subject = "Account Confirmation" };
-                await _emailLogRepository.AddAsync(log);
-
-                response = _mapper.Map<ApplicationUserDto>(user);
-                await transaction.CommitAsync();
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex.Message, ex);   
+                }
+               
             }
             return response;
         }
@@ -419,33 +421,36 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             return result;
         }
 
-        public async Task<ApplicationUserDto> EditUser(EditUserRequest model)
+        public async Task<MessageResponse> EditUser(EditUserRequest model)
         {
-            ApplicationUserDto response = new();
+            MessageResponse response = new();
 
-            model.Role = _roleManager.Roles.FirstOrDefault(x => x.Id == model.Role).Name;
+            model.Role = _roleManager.Roles.FirstOrDefault(x => x.Id == model.Role)?.Name;
 
             var transaction = await _context.Database.BeginTransactionAsync();
             using (transaction)
             {
                 try
                 {
-                    ApplicationUser user = await _userManager.FindByIdAsync(model.Id);
+                    ApplicationUser? user = await _userManager.FindByIdAsync(model.Id);
                     if (user == null)
                     {
                         await transaction.RollbackAsync();
-                        throw new Exception("The User does not exists");
+                        response.Message = "The User does not exists";
+                        return response;
                     }
 
-                    user.PhoneNumber = model.PhoneNumber.Trim();
+                    user.PhoneNumber = string.IsNullOrEmpty(model.PhoneNumber) ? "" : model.PhoneNumber.Trim();
                     user.IsActive = model.IsActive;
                     user.EmailConfirmed = model.EmailConfirmed;
+                    user.CentreName = model.CentreName;
 
                     IdentityResult identityResult = await _userManager.UpdateAsync(user);
                     if (!identityResult.Succeeded)
                     {
                         await transaction.RollbackAsync();
-                        throw new Exception(identityResult.Errors.Select(x => x.Description).FirstOrDefault());
+                        response.Message = identityResult.Errors.Select(x => x.Description).FirstOrDefault();
+                        return response;
                     }
                     //Get Current Role
                     string role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
@@ -456,18 +461,21 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                         if (!identityResult.Succeeded)
                         {
                             await transaction.RollbackAsync();
-                            throw new Exception(identityResult.Errors.Select(x => x.Description).FirstOrDefault()!);
+                            response.Message = identityResult.Errors.Select(x => x.Description).FirstOrDefault()!;
+                            return response;
                         }
                         identityResult = await _userManager.AddToRoleAsync(user, model.Role);
                         if (!identityResult.Succeeded)
                         {
                             await transaction.RollbackAsync();
-                            throw new Exception(identityResult.Errors.Select(x => x.Description).FirstOrDefault()!);
+                            response.Message = identityResult.Errors.Select(x => x.Description).FirstOrDefault()!;
+                            return response;
                         }
                     }
 
                     await transaction.CommitAsync();
-                    response = _mapper.Map<ApplicationUserDto>(user);
+                    response.Message = "Update successful";// = _mapper.Map<ApplicationUserDto>(user);
+                    response.Success = true;
                 }
                 catch (Exception ex)
                 {

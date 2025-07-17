@@ -26,7 +26,7 @@
 </style>
 <div>
     <a asp-action="Create" asp-controller="VisualAssessmentResult" asp-area="Customer" class="btn btn-primary btn-sm left">New Assessment Result</a>
-    <button id="btn-print" class="btn btn-success btn-sm right">Print</button>
+    <button id="btn-print" onclick="PrintDocument()" type="button" class="btn btn-success btn-sm right">Print</button>
 </div>
 <br />
 <div class="datatables">
@@ -109,7 +109,7 @@
 
 
 
-@section scripts {
+@* @section scripts {
           <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
     <script>
@@ -132,9 +132,25 @@
 
 
     </script>
+} *@
+
+
+@section Scripts {
+   <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+    <script>
+
+        function PrintDocument(){
+            const printContent = document.getElementById("DivIdToPrint").outerHTML;
+            const win = window.open("", "_blank", "width=800,height=600");
+            win.document.write(printContent);
+            win.print();
+            win.document.close();
+        }
+
+       
+    </script>
 }
-
-
 
 
 

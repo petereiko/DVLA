@@ -33,7 +33,8 @@ namespace DVLA.VerificationPortal.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IUserService _userService;
         private readonly IAuthUser _authUser;
-        public SearchResultService(IGenericRepository<VisualAssessmentResult> visualAssessmentResultRepository, IMapper mapper, IHttpContextAccessor contextAccessor, IHostingEnvironment environment, ILogger<SearchResultService> logger, IApiClientService apiClientService, IConfiguration configuration, IUserRepository userRepository, IUserService userService, IAuthUser authUser)
+        private readonly IAuditRepo _auditRepo;
+        public SearchResultService(IGenericRepository<VisualAssessmentResult> visualAssessmentResultRepository, IMapper mapper, IHttpContextAccessor contextAccessor, IHostingEnvironment environment, ILogger<SearchResultService> logger, IApiClientService apiClientService, IConfiguration configuration, IUserRepository userRepository, IUserService userService, IAuthUser authUser, IAuditRepo auditRepo)
         {
             _visualAssessmentResultRepository = visualAssessmentResultRepository;
             _mapper = mapper;
@@ -45,6 +46,7 @@ namespace DVLA.VerificationPortal.Application.Services
             _userRepository = userRepository;
             _userService = userService;
             _authUser = authUser;
+            _auditRepo = auditRepo;
         }
 
         public async Task<IEnumerable<VisualAssessmentResultDto>> GetResultsAsync(string searchTerm)
@@ -54,6 +56,7 @@ namespace DVLA.VerificationPortal.Application.Services
             {
                 Expression<Func<VisualAssessmentResult, bool>> expression = v => v.ReferenceNumber.Contains(searchTerm) || v.FirstName.Contains(searchTerm) || v.Surname.Contains(searchTerm) || v.ContactNumber.Contains(searchTerm);
                 IEnumerable<VisualAssessmentResult> results = await _visualAssessmentResultRepository.FilterAsync(expression, false);
+                results = results.Take(20);
                 items = _mapper.Map<List<VisualAssessmentResultDto>>(results);
 
                 //foreach (var item in items)
@@ -203,6 +206,7 @@ namespace DVLA.VerificationPortal.Application.Services
                 }
                 assessment.VerifyType = verifyType;
                 await _visualAssessmentResultRepository.UpdateAsync(assessment);
+                await _auditRepo.AddAuditAsync("Verify Result", $"Verified {assessment.ReferenceNumber}");
                 response.Success = true;
                 response.Message = "Result verified successfully";
                 return response;
@@ -239,6 +243,7 @@ namespace DVLA.VerificationPortal.Application.Services
                 else
                 {
                     assessment.VerifiedBy = _authUser.UserId;
+                    await _auditRepo.AddAuditAsync("Verify Result", $"Verified {assessment.ReferenceNumber}");
                 }
                 assessment.VerifyType = verifyType;
                 await _visualAssessmentResultRepository.UpdateAsync(assessment);
