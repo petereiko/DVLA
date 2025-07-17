@@ -13,6 +13,7 @@ namespace DVLA.VerificationPortal.Application.Interfaces
         Task<IEnumerable<VerifiedItemDto>> GetVerifiedResults(DateTime StartDate, DateTime EndDate);
 
         Task<IEnumerable<TestResultCountDto>> GetResults(DateTime StartDate, DateTime EndDate, PassOrFail? passOrFail);
+        Task<int> GetUsedSlot(int? optometristFirmId);
 
         Task<IEnumerable<TestResultDto>> VerifiedResultsByUser(string userId);
     }

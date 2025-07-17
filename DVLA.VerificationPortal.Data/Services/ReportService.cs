@@ -133,5 +133,21 @@ namespace DVLA.VerificationPortal.Application.Services
                 Verified = x.IsVerified
             });
         }
+
+        public async Task<int> GetUsedSlot(int? optometristFirmId)
+        {
+            DateTime endDate = DateTime.UtcNow.AddMonths(-3);
+            int usedSlots = 0;
+            try
+            {
+                IEnumerable<VisualAssessmentResult> results = await _visualAssessmentResultRepository.FilterAsync(x => x.OptometristFirmId == optometristFirmId && x.TestDate <= endDate, false);
+                usedSlots = results.Count();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return usedSlots;
+        }
     }
 }

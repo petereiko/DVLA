@@ -1,5 +1,6 @@
 ﻿using DVLA.VerificationPortal.Application.Interfaces;
 using DVLA.VerificationPortal.CustomAttributes;
+using DVLA.VerificationPortal.Models;
 using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.AspNetCore.Http;
@@ -14,11 +15,13 @@ namespace DVLA.VerificationPortal.Controllers.APIs
     {
         private readonly ISearchResultService _searchResultService;
         private IApiClientService _apiClientService;
+        private readonly IReportService _reportService;
 
-        public TestResultController(ISearchResultService searchResultService, IApiClientService apiClientService):base(apiClientService)
+        public TestResultController(ISearchResultService searchResultService, IApiClientService apiClientService, IReportService reportService) : base(apiClientService)
         {
             _searchResultService = searchResultService;
             _apiClientService = apiClientService;
+            _reportService = reportService;
         }
 
 
@@ -46,6 +49,14 @@ namespace DVLA.VerificationPortal.Controllers.APIs
             var apiClient = _apiClientService;
             var response = await _searchResultService.VerifyResultByReferenceAsync(reference, Shared.Enums.VerifyType.API);
             return Ok(new { resultConclusion = response.Result, success = response.Success, message = response.Message });
+        }
+
+        [HttpGet("get-used-slot/{optometristFirmId}")]
+        public async Task<IActionResult> GetUsedSlot(int optometristFirmId)
+        {
+            await AuditLogAsync();
+            int usedSlots = await _reportService.GetUsedSlot(optometristFirmId);
+            return Ok(new { status = true, data = usedSlots });
         }
     }
 }

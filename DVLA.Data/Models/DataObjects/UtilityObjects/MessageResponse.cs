@@ -12,6 +12,12 @@ namespace DVLA.Data.Models.DataObjects.UtilityObjects
         public string Message { get; set; }
     }
 
+    public class MessageResult
+    {
+        public bool Success { get; set; }
+        public int Data { get; set; }
+    }
+
     public class MessageResponse<T>
     {
         public T Result { get; set; }

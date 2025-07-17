@@ -2,20 +2,20 @@
 using DVLA.Data;
 using DVLA.Data.Models.Auth;
 using DVLA.Data.Models.DataObjects.DTOs;
+using DVLA.Data.Models.DataObjects.UtilityObjects;
 using DVLA.Data.Models.DataObjects.ViewModels;
 using DVLA.Data.Models.Enumerables;
-using DVLA.DATA.Domains;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using NPOI.SS.Formula.Functions;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,10 +29,12 @@ namespace DVLA.Business.SlotModule
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserService _userService;
         private readonly IAuthUser _authUser;
+        private readonly IConfiguration _configuration;
         public SlotUsageRepository(DVLADbContext context, ILogger<SlotUsageRepository> logger, IConfiguration configuration, UserManager<ApplicationUser> userManager, IUserService userService, IAuthUser authUser)
         {
             _context = context;
             _logger = logger;
+            _configuration = configuration;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
             _userManager = userManager;
             _userService = userService;
@@ -304,6 +306,8 @@ namespace DVLA.Business.SlotModule
                     }
                 }
                 model.TotalQuantity = model.Items.Sum(x => x.Quantity);
+
+                model.TotalQuantity += await GetMigratedUsedSlotUsageCount(model.OptometristFirmId.GetValueOrDefault());
             }
             catch (Exception ex)
             {
@@ -311,6 +315,30 @@ namespace DVLA.Business.SlotModule
 
             }
             return model;
+        }
+
+        private async Task<int> GetMigratedUsedSlotUsageCount(int optometristFirmId) 
+        {
+            int count = 0;
+            try
+            {
+                var client = new HttpClient();
+                var request = new HttpRequestMessage(HttpMethod.Get, $"{_configuration["AppConstants:VerificationPortal"]}/api/TestResult/get-used-slot/{optometristFirmId}");
+                request.Headers.Add("X-API-KEY", _configuration["AppConstants:ApiKey"]);
+                var content = new StringContent("", null, "text/plain");
+                request.Content = content;
+                var response = await client.SendAsync(request);
+                string json = await response.Content.ReadAsStringAsync();
+                MessageResult result = JsonConvert.DeserializeObject<MessageResult>(json);
+
+                count = result.Data;
+                
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return count;
         }
 
         public async Task<SlotStatisticsViewModel> SlotBalanceAsync(SlotStatisticsViewModel model)
