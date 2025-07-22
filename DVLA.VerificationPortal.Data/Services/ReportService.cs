@@ -59,7 +59,10 @@ namespace DVLA.VerificationPortal.Application.Services
                                 {
                                     Count = reader.GetInt32("Count"),
                                     PassOrFail = (PassOrFail)reader.GetInt32("PassOrFail"),
-                                    ResultServiceType = (ResultServiceType)reader.GetInt32("ResultServiceType")
+                                    ResultServiceType = (ResultServiceType)reader.GetInt32("ResultServiceType"),
+                                    OptometristFirmName = reader.IsDBNull(reader.GetOrdinal("OptometristFirmName"))
+            ? null
+            : reader.GetString(reader.GetOrdinal("OptometristFirmName"))
                                 });
                             }
                         }

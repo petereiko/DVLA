@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DVLA.VerificationPortal.Domain.Entities
+namespace DVLA.Data.Models.DataObjects.DTOs
 {
-    public class OptometristFirm
+    public class OptometristFirmTransmissionDto
     {
         public int Id { get; set; }
 
@@ -68,7 +68,7 @@ namespace DVLA.VerificationPortal.Domain.Entities
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public DateTime? ModifiedDate { get; set; }
         public string CreatedBy { get; set; }
-        public string? ModifiedBy { get; set; }
+        public string ModifiedBy { get; set; }
         public bool IsActive { get; set; } = true;
         public bool IsDeleted { get; set; } = false;
 

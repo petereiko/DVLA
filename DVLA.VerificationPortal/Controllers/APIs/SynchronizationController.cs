@@ -1,5 +1,6 @@
 ﻿using DVLA.VerificationPortal.Application.Interfaces;
 using DVLA.VerificationPortal.CustomAttributes;
+using DVLA.VerificationPortal.Domain.Entities;
 using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.AspNetCore.Http;
@@ -14,11 +15,13 @@ namespace DVLA.VerificationPortal.Controllers.APIs
     {
         private readonly ISearchResultService _searchService;
         private readonly ILogger<SynchronizationController> _logger;
+        private readonly IOptometristFirmSynchronization _optometristFirmSyncService;
 
-        public SynchronizationController(ISearchResultService searchService, ILogger<SynchronizationController> logger)
+        public SynchronizationController(ISearchResultService searchService, ILogger<SynchronizationController> logger, IOptometristFirmSynchronization optometristFirmSyncService)
         {
             _searchService = searchService;
             _logger = logger;
+            _optometristFirmSyncService = optometristFirmSyncService;
         }
 
         [HttpPost("push-visual-assessment")]
@@ -49,7 +52,27 @@ namespace DVLA.VerificationPortal.Controllers.APIs
             return Ok("Working");
         }
 
-        
+
+        [HttpPost("sync-optometrist-firm")]
+        public async Task<IActionResult> SyncOptometristFirm([FromBody] OptometristFirm model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            MessageResponse response = await _optometristFirmSyncService.SyncOptometristFirm(model);
+            return Ok(response);
+        }
+
+
+        [HttpPost("sync-optometrist-firms")]
+        public async Task<IActionResult> SyncOptometristFirms([FromBody] List<OptometristFirm> model)
+        {
+            List<int> response = await _optometristFirmSyncService.SyncOptometristFirms(model);
+            return Ok(response);
+        }
+
+
 
     }
 }

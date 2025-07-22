@@ -50,6 +50,9 @@
 
                                     </table>
                                 }
+
+                                <div style="font-weight:bold">Total Results: @Model.Results.Sum(x=>x.Count)</div>
+
                                 <div class="table-responsive">
 
                                     <table id="file_export" class="table w-100 table-striped table-bordered display text-nowrap">
@@ -61,6 +64,7 @@
                                                 <th>Count</th>
                                                 <th>Service Type</th>
                                                 <th>Pass Status</th>
+                                                <th>Optometrist Firm</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -79,6 +83,9 @@
                                                     </td>
                                                     <td>
                                                         @Html.DisplayFor(modelItem => item.PassOrFail)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.OptometristFirmName)
                                                     </td>
                                                 </tr>
                                             }

@@ -12,5 +12,6 @@ namespace DVLA.VerificationPortal.Shared.DTOs
         public int Count { get; set; }
         public ResultServiceType ResultServiceType { get; set; }
         public PassOrFail PassOrFail { get; set; }
+        public string? OptometristFirmName { get; set; }
     }
 }

@@ -237,12 +237,6 @@ namespace DVLA.Business.BackgroundJobModule
             {
                 _logger.LogInformation($"Update Started");
 
-                //bool runPushAssessment = Convert.ToBoolean(_configuration["AppConstants:RunPushAssessmentResult"]);
-
-                //_logger.LogInformation($"Service Started: {runPushAssessment}");
-
-                //if (!runPushAssessment) { return; }
-
                 var visualAssessmentResults = _reportRepository.FetchAllPendingAuthDocUpdate();
 
                 _logger.LogInformation($"{visualAssessmentResults.Count} results found");
@@ -299,6 +293,83 @@ namespace DVLA.Business.BackgroundJobModule
                 var visualAssessmentResults = _context.VisualAssessmentResults.Where(x => x.TestDate <= DateTime.UtcNow.AddMonths(-3) && x.IsTransmitted); //_reportRepository.FetchAllPendingTransmissions();
                 _context.VisualAssessmentResults.RemoveRange(visualAssessmentResults);
                 _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+
+        }
+
+
+
+        [DisableConcurrentExecution(60)]
+        public void SyncOptometristFirms()
+        {
+            try
+            {
+                _logger.LogInformation($"Update Started");
+
+                var optometristFirms = _context.OptometristFirms.AsNoTracking().Where(x => x.IsSynchronized != true).ToList();
+
+                if (optometristFirms.Count == 0) return;
+
+                _logger.LogInformation($"{optometristFirms.Count} results found");
+
+                IEnumerable<OptometristFirmTransmissionDto> transmissions = optometristFirms
+                    .Select(x => new OptometristFirmTransmissionDto
+                    {
+                        AccreditationNumber = x.AccreditationNumber,
+                        BusinessAddress = x.BusinessAddress,
+                        BusinessName = x.BusinessName,
+                        CentreCode = x.CentreCode,
+                        ContactEmail = x.ContactEmail,
+                        ContactFirstName = x.ContactFirstName,
+                        ContactLastName = x.ContactLastName,
+                        ContactPhoneNumber = x.ContactPhoneNumber,
+                        CreatedBy = x.CreatedBy,
+                        CreatedDate = x.CreatedDate,
+                        DigitalAddress = x.DigitalAddress,
+                        DistrictId = x.DistrictId,
+                        IsActive = x.IsActive,
+                        IsDeleted = x.IsDeleted,
+                        IsSynchronized = true,
+                        MobileNumber = x.MobileNumber,
+                        ModifiedBy = string.IsNullOrEmpty(x.ModifiedBy)?"":x.ModifiedBy,
+                        ModifiedDate = x.ModifiedDate,
+                        OptometristFirmId = x.Id,
+                        RegionId = x.RegionId,
+                        RegistrationNumber = x.RegistrationNumber,
+                        ReorderLevel = x.ReorderLevel,
+                        TelephoneNumber = x.TelephoneNumber,
+                        Town = x.Town
+                    });
+
+                using var client = new HttpClient();
+                var request = new HttpRequestMessage(HttpMethod.Post, _configuration["AppConstants:ApiVerificationTransmitOpometristFirmsUrl"]);
+                request.Headers.Add("X-API-KEY", _configuration["AppConstants:ApiKey"]);
+                var requestBody = JsonConvert.SerializeObject(transmissions);
+                _logger.LogInformation($"Request Body {requestBody}");
+                var content = new StringContent(requestBody, null, "application/json");
+                request.Content = content;
+                var response = client.SendAsync(request).GetAwaiter().GetResult();
+                _logger.LogInformation($"Response Object: {JsonConvert.SerializeObject(response)}");
+                var jsonSuccess = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                if (response.IsSuccessStatusCode)
+                {
+                    
+                    List<int> returnedOptometristIds = JsonConvert.DeserializeObject<List<int>>(jsonSuccess);
+                    if (returnedOptometristIds.Count > 0)
+                    {
+
+                        foreach (var id in returnedOptometristIds)
+                        {
+                            var opt = _context.OptometristFirms.FirstOrDefault(x => x.Id == id);
+                            opt.IsSynchronized = true;
+                            _context.SaveChanges();
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {

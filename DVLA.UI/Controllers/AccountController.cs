@@ -20,6 +20,7 @@ using DVLA.DATA.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using DVLA.Business.TempPasswordModule;
+using DVLA.Business.BackgroundJobModule;
 
 namespace DVLA.UI.Controllers
 {
@@ -34,6 +35,7 @@ namespace DVLA.UI.Controllers
         private readonly DVLADbContext _context;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly ITempPasswordService _tempPasswordService;
+
 
         public AccountController(IUserService userService, ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, DVLADbContext context, IHttpContextAccessor contextAccessor, ITempPasswordService tempPasswordService)
         {

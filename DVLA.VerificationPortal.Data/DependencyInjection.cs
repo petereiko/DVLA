@@ -14,6 +14,7 @@ namespace DVLA.VerificationPortal.Application
             services.AddTransient<IAuthUser, AuthUser>();
             services.AddTransient<IReportService, ReportService>();
             services.AddTransient<IAuditRepo, AuditRepo>();
+            services.AddTransient<IOptometristFirmSynchronization, OptometristFirmSynchronization>();
             return services;
         }
     }
