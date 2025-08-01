@@ -1,3 +1,4 @@
+using DVLA.Business.BackgroundJobModule;
 using DVLA.Business.SlotModule;
 using DVLA.UI.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +14,7 @@ namespace DVLA.UI.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ISlotUsageRepository _slotUsageRepository;
+        
 
         public HomeController(ILogger<HomeController> logger, ISlotUsageRepository slotUsageRepository)
         {

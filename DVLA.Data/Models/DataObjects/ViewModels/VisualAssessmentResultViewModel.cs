@@ -1,5 +1,6 @@
 ﻿using DVLA.Data.Models.Enumerables;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -15,6 +16,13 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
         {
             //PassportImageUrl = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Vw8AAoEBfymqrywAAAAASUVORK5CYII=";
             Status = Enumerables.Status.InProgress;
+            IdentityTypes = Enum.GetValues(typeof(IdentityType))
+            .Cast<IdentityType>()
+            .Select(e => new SelectListItem
+            {
+                Value = ((int)e).ToString(),
+                Text = EnumHelper.GetDescription(e)
+            }).ToList();
         }
 
         [Required(ErrorMessage ="Gender is required")]
@@ -64,5 +72,16 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
         public Status? Action { get; set; }
         public bool? IsRegistration { get; set; }
         public string Filename { get; set; }
+        //public string NationalID { get; set; }
+        //public string PassportNumber { get; set; }
+
+        [Required(ErrorMessage = "Please select an Identity Type.")] 
+        public IdentityType IdentityType { get; set; }
+
+        [Required(ErrorMessage = "Please enter identity number.")] 
+        public string IdentityNumber { get; set; }
+
+        public List<SelectListItem> IdentityTypes { get; set; }
+        public string DvlaLicenseNumber { get; set; }
     }
 }

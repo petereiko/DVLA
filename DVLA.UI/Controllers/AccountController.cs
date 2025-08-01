@@ -37,6 +37,7 @@ namespace DVLA.UI.Controllers
         private readonly ITempPasswordService _tempPasswordService;
 
 
+
         public AccountController(IUserService userService, ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, DVLADbContext context, IHttpContextAccessor contextAccessor, ITempPasswordService tempPasswordService)
         {
             _userService = userService;
@@ -54,6 +55,7 @@ namespace DVLA.UI.Controllers
         public IActionResult Login()
         {
             LoginViewModel model = new();
+            //_backgroundJobService.BackupVisualAssessmentResults();
             return View(model);
         }
 

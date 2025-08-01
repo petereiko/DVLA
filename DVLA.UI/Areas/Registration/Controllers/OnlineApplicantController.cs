@@ -128,9 +128,24 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     ModelState.AddModelError("ContactNumber", "Please enter contact number");
                 }
 
+                if (string.IsNullOrEmpty(model.IdentityNumber))
+                {
+                    ModelState.AddModelError("IdentityNumber", "Please enter either either Passport Number or National ID");
+                }
+
                 if (model.Gender == null)
                 {
                     ModelState.AddModelError("Gender", "Gender is required");
+                }
+
+                if (model.ResultServiceType != ResultServiceType.LearnerDriversLicence)
+                {
+                    if (string.IsNullOrEmpty(model.DvlaLicenseNumber))
+                    {
+                        model.Errors.Add($"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
+                        ModelState.AddModelError("DvlaLicenseNumber", $"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
+                        return View(model);
+                    }
                 }
 
                 //if (string.IsNullOrEmpty(model.TaxIdentificationNumber))
@@ -215,7 +230,10 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     Nationality = model.Nationality,
                     Email = model.Email,
                     IsRegistration = true,
-                    CreatedBy = null
+                    CreatedBy = null,
+                    PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
+                    NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
+                    DvlaLicenseNumber = model.DvlaLicenseNumber
                 };
 
                 _visualAssessmentResultQuery.Add(applicant);
@@ -320,59 +338,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
             return resultService;
         }
 
-        //[HttpPost]
-        //public async Task<JsonResult> GetApplicantDetailAsync(string refno)
-        //{
-        //    ApplicantModel applicant = new ApplicantModel();
-        //    try
-        //    {
-                
-
-        //        GenesysClient g = new GenesysClient();
-        //        var msg = await g.GetApplicantDetail(refno);
-
-
-
-        //        if (msg != null && msg.code == "00")
-        //        {
-        //            string filename = Guid.NewGuid().ToString() + ".png";
-        //            string path = Server.MapPath("~/Passports/") + filename;
-        //            //flpPassport.PostedFile.SaveAs(Server.MapPath("~/passports/temp/") + filename);
-        //            //Uri myUri = new Uri(msg.data.photo, UriKind.Absolute);
-        //            using (WebClient webClient = new WebClient())
-        //            {
-        //                byte[] dataArr = webClient.DownloadData(msg.data.photo);
-        //                //save file to local
-        //                var contents = new MemoryStream(dataArr);
-        //                BUSINESS.BusinessUtility.Utility.ResizePicture(contents, path);
-        //            }
-
-        //            string[] fullname = msg.data.fullName.Split(' ');
-
-        //            byte[] imageArray = System.IO.File.ReadAllBytes(path);
-                    
-
-        //            applicant = new ApplicantModel
-        //            {
-        //                DriversLicence = refno,                        
-        //                Surname = fullname[1],
-        //                FirstName = fullname[0], 
-        //                PassportImageUrl = Convert.ToBase64String(imageArray),
-        //                Filename = filename
-        //            };
-
-                   
-
-        //            return Json(applicant, JsonRequestBehavior.AllowGet);
-        //        }               
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ErrorLogManager.Error(ex);
-        //    }
-        //    return Json(applicant, JsonRequestBehavior.AllowGet);
-        //}
+        
 
      
     }

@@ -101,5 +101,8 @@ namespace DVLA.VerificationPortal.Domain.Entities
         public string? VerifiedBy { get; set; }
         public DateTime? VerifiedDate { get; set; }
         public VerifyType? VerifyType { get; set; }
+        public string? NationalID { get; set; }
+        public string? PassportNumber { get; set; }
+        public string? DvlaLicenseNumber { get; set; }
     }
 }

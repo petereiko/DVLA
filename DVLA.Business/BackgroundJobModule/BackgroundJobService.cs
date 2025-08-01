@@ -6,6 +6,7 @@ using DVLA.Business.SlotModule;
 using DVLA.Data;
 using DVLA.Data.Models.DataObjects.DTOs;
 using DVLA.Data.Models.DataObjects.UtilityObjects;
+using DVLA.Data.Models.Domains;
 using DVLA.Data.Models.Enumerables;
 using DVLA.DATA.Domains;
 using Hangfire;
@@ -290,9 +291,106 @@ namespace DVLA.Business.BackgroundJobModule
             {
                 _logger.LogInformation($"Delete Visual Assessment Result Started");
 
-                var visualAssessmentResults = _context.VisualAssessmentResults.Where(x => x.TestDate <= DateTime.UtcNow.AddMonths(-3) && x.IsTransmitted); //_reportRepository.FetchAllPendingTransmissions();
+                var visualAssessmentResults = _context.VisualAssessmentResults.Where(x => x.TestDate <= DateTime.UtcNow.AddMonths(-12) && x.IsTransmitted); //_reportRepository.FetchAllPendingTransmissions();
                 _context.VisualAssessmentResults.RemoveRange(visualAssessmentResults);
                 _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+
+        }
+
+
+        [DisableConcurrentExecution(60)]
+        public void BackupVisualAssessmentResults()
+        {
+            try
+            {
+                _logger.LogInformation($"Back up Visual Assessment Result Started");
+
+                IQueryable<VisualAssessmentResult> visualAssessmentResults = _context.VisualAssessmentResults.Where(x => x.TestDate <= DateTime.UtcNow.AddMonths(-3) && x.IsTransmitted); //_reportRepository.FetchAllPendingTransmissions();
+                foreach (VisualAssessmentResult item in visualAssessmentResults)
+                {
+                    try
+                    {
+                        VisualAssessmentResultBackup backup = new VisualAssessmentResultBackup
+                        {
+                            OptometristFirmId = item.OptometristFirmId,
+                            AccessType = item.AccessType,
+                            ReferenceNumber = item.ReferenceNumber,
+                            ResultServiceType = item.ResultServiceType,
+                            TestType = item.TestType,
+                            PassOrFail = item.PassOrFail,
+                            Surname = item.Surname,
+                            FirstName = item.FirstName,
+                            OtherName = item.OtherName,
+                            DOB = item.DOB,
+                            BCV_OD = item.BCV_OD,
+                            BCV_OS = item.BCV_OS,
+                            BCV_OU = item.BCV_OU,
+                            HX_BCV_OD = item.HX_BCV_OD,
+                            HX_BCV_OS = item.HX_BCV_OS,
+                            HX_BCV_OU = item.HX_BCV_OU,
+                            SingleImage_BCV_OU = item.SingleImage_BCV_OU,
+                            Unaided_OD = item.Unaided_OD,
+                            Unaided_OS = item.Unaided_OS,
+                            Unaided_OU = item.Unaided_OU,
+                            PostalAddress = item.PostalAddress,
+                            ContactNumber = item.ContactNumber,
+                            ColourVision_BCV_OU = item.ColourVision_BCV_OU,
+                            ContrastSensitivity_BCV = item.ContrastSensitivity_BCV,
+                            GlareTest_BCV_OD = item.GlareTest_BCV_OD,
+                            GlareTest_BCV_OS = item.GlareTest_BCV_OS,
+                            GlareTest_BCV_OU = item.GlareTest_BCV_OU,
+                            CreatedBy = item.CreatedBy,
+                            CreatedDate = item.CreatedDate,
+                            Email = item.Email,
+                            Gender = item.Gender,
+                            HasTransmissionError = item.HasTransmissionError,
+                            IsActive = item.IsActive,
+                            IsDeleted = item.IsDeleted,
+                            IsTransmitted = item.IsTransmitted,
+                            ModifiedBy = item.ModifiedBy,
+                            ModifiedDate = item.ModifiedDate,
+                            IsRegistration = item.IsRegistration,
+                            IsSynchronized = item.IsSynchronized,
+                            Nationality = item.Nationality,
+                            TestDate = item.TestDate,
+                            VisualAssessmentResultId = item.Id,
+                            OptometristNameIsUpdate = item.OptometristNameIsUpdate,
+                            ResultConclusion = item.ResultConclusion,
+                            PassportImageUrl = item.PassportImageUrl,
+                            PathologicalRemarks = item.PathologicalRemarks,
+                            PassResult = item.PassResult,
+                            Status = item.Status,
+                            TransmissionError = item.TransmissionError,
+                            TransmittedDate = item.TransmittedDate,
+                            NationalID = item.NationalID,
+                            PassportNumber = item.PassportNumber,
+                            DvlaLicenseNumber = item.DvlaLicenseNumber
+                        };
+                        _context.VisualAssessmentResultBackups.Add(backup);
+                        _context.SaveChanges();
+
+                        VisualAssessmentResult result = _context.VisualAssessmentResults.FirstOrDefault(x => x.Id == item.Id);
+                        if (result != null)
+                        {
+                            result.IsBackedUp = true;
+                            result.BackupDate = DateTime.UtcNow;
+                            _context.SaveChanges();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex.Message, ex);
+                        continue;
+                    }
+                    
+                }
+
+                _logger.LogInformation($"Back up Visual Assessment Result Ended");
             }
             catch (Exception ex)
             {

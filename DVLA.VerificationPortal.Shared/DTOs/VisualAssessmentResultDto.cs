@@ -87,5 +87,7 @@ namespace DVLA.VerificationPortal.Shared.DTOs
 
         public bool IsVerified { get; set; }
         public DateTime? VerifiedDate { get; set; }
+        public string? NationalID { get; set; }
+        public string? PassportNumber { get; set; }
     }
 }

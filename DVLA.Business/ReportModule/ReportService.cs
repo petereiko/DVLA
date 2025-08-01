@@ -642,6 +642,9 @@ namespace DVLA.Business.ReportModule
                                     SingleImage_BCV_OU = SafeGetString(reader, "SingleImage_BCV_OU"),
                                     PassportImageUrl = SafeGetString(reader, "PassportImageUrl"),
                                     Unaided_OU = SafeGetString(reader, "Unaided_OU"),
+                                    PassportNumber = SafeGetString(reader, "PassportNumber"),
+                                    NationalID = SafeGetString(reader, "NationalID"),
+                                    DvlaLicenseNumber = SafeGetString(reader, "DvlaLicenseNumber")
                                 });
                             }
                         }

@@ -55,6 +55,7 @@ namespace DVLA.Data
 
         public virtual DbSet<VisualAcuityScore> VisualAcuityScores { get; set; }
         public virtual DbSet<VisualAssessmentResult> VisualAssessmentResults { get; set; }
+        public virtual DbSet<VisualAssessmentResultBackup> VisualAssessmentResultBackups { get; set; }
         public virtual DbSet<VisualAssessmentTransmission> VisualAssessmentTransmissions { get; set; }
         public virtual DbSet<VisualFieldScore> VisualFieldScores { get; set; }
 

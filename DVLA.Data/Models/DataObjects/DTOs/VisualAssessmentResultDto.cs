@@ -82,5 +82,8 @@ namespace DVLA.Data.Models.DataObjects.DTOs
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public string CreatedBy { get; set; }
+        public string NationalID { get; set; }
+        public string PassportNumber { get; set; }
+        public string DvlaLicenseNumber { get; set; }
     }
 }

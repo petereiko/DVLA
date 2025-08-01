@@ -1,50 +1,51 @@
-﻿using DVLA.Data.Models.Enumerables;
+﻿using DVLA.Data.Models.BaseFolder;
+using DVLA.Data.Models.Enumerables;
+using DVLA.DATA.Domains;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DVLA.Data.Models.DataObjects.DTOs
+namespace DVLA.Data.Models.Domains
 {
-    public class VisualAssessmentTransmissionModel
+    public class VisualAssessmentResultBackup: BaseObjectInt64
     {
-        public long Id { get; set; }
-
+        public long VisualAssessmentResultId { get; set; }
         public int OptometristFirmId { get; set; }
+        public virtual OptometristFirm OptometristFirm { get; set; }
 
+        [StringLength(50)]
         public string ReferenceNumber { get; set; }
 
-        public string FormNumber { get; set; }
+        public ResultServiceType? ResultServiceType { get; set; }
 
-        public int? ResultServiceType { get; set; }
-
-        public byte TestType { get; set; }
-
-        public int? NameTitle { get; set; }
+        public TestType TestType { get; set; }
 
         public PassOrFail? PassOrFail { get; set; }
 
+        [StringLength(50)]
         public string Surname { get; set; }
 
-        public string DriversLicence { get; set; }
-
-        public string DVLAReferenceNo { get; set; }
-
-        public string OldDVLAReferenceNo { get; set; }
-
+        [StringLength(50)]
         public string FirstName { get; set; }
 
+        [StringLength(50)]
         public string OtherName { get; set; }
 
         public DateTime? DOB { get; set; }
 
+        [StringLength(500)]
         public string PostalAddress { get; set; }
 
+        [StringLength(50)]
         public string ContactNumber { get; set; }
 
-        public string TaxIdentificationNumber { get; set; }
+        [StringLength(50)]
+        public string Nationality { get; set; }
 
+        [StringLength(50)]
         public string Email { get; set; }
 
         public string Unaided_OD { get; set; }
@@ -74,6 +75,8 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public string GlareTest_BCV_OU { get; set; }
 
         public string ColourVision_BCV_OU { get; set; }
+
+        [StringLength(500)]
         public string ContrastSensitivity_BCV { get; set; }
 
         public string PathologicalRemarks { get; set; }
@@ -85,29 +88,16 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public DateTime? TestDate { get; set; }
 
         public string PassportImageUrl { get; set; }
-        public string PassportBase64 { get; set; }
-
         public Status? Status { get; set; }
-
-        public int? LearnerDriversLicence { get; set; }
-
         public bool? IsRegistration { get; set; }
-
-        public int? AccessType { get; set; }
-
-        public DateTime CreatedDate { get; set; }
-        public string CreatedBy { get; set; }
-
-        public string ModifiedBy { get; set; }
-
-        public bool IsActive { get; set; }
-
-        public bool IsDeleted { get; set; }
-
-        public int? PassResult { get; set; }
-
+        public AccessType? AccessType { get; set; }
+        public PassResult? PassResult { get; set; }
         public bool IsTransmitted { get; set; }
-
+        public DateTime? TransmittedDate { get; set; }
+        public Gender? Gender { get; set; }
+        public string TransmissionError { get; set; }
+        public bool HasTransmissionError { get; set; }
+        public bool? OptometristNameIsUpdate { get; set; }
         public string NationalID { get; set; }
         public string PassportNumber { get; set; }
         public string DvlaLicenseNumber { get; set; }

@@ -88,7 +88,10 @@ namespace DVLA.VerificationPortal.Application.Services
                         PassConclusion = EnumHelper.GetEnumDescription(item.PassResult),
                         Verified = item.IsVerified,
                         TestDate = item.TestDate,
-                        TestType = EnumHelper.GetEnumDescription(item.ResultServiceType)
+                        TestType = EnumHelper.GetEnumDescription(item.ResultServiceType),
+                        DvlaLicenseNumber = item.DvlaLicenseNumber,
+                        IdentityNumber = string.IsNullOrEmpty(item.PassportNumber) ? item.NationalID : item.PassportNumber,
+                        IdentityType = string.IsNullOrEmpty(item.PassportNumber) ? "National ID" : "Passport Number"
                     };
                     try
                     {

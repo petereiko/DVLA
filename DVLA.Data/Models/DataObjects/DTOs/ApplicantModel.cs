@@ -1,6 +1,7 @@
 ﻿using DVLA.Data.Models.DataObjects.ViewModels;
 using DVLA.Data.Models.Enumerables;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +14,16 @@ namespace DVLA.Data.Models.DataObjects.DTOs
 {
     public class ApplicantModel:BaseViewModel
     {
+        public ApplicantModel()
+        {
+            IdentityTypes = Enum.GetValues(typeof(IdentityType))
+            .Cast<IdentityType>()
+            .Select(e => new SelectListItem
+            {
+                Value = ((int)e).ToString(),
+                Text = EnumHelper.GetDescription(e)
+            }).ToList();
+        }
         public long Id { get; set; }
 
         [Required(ErrorMessage ="Gender is required")]
@@ -53,6 +64,16 @@ namespace DVLA.Data.Models.DataObjects.DTOs
 
         public string DisplayImageUrl { get; set; }
         public bool VideoCapture { get; set; }
+
+        [Required(ErrorMessage = "Please select an Identity Type.")]
+        public IdentityType IdentityType { get; set; }
+
+        [Required(ErrorMessage = "Please enter identity number.")]
+        public string IdentityNumber { get; set; }
+
+        public List<SelectListItem> IdentityTypes { get; set; }
+
+        public string DvlaLicenseNumber { get; set; }
 
     }
 }

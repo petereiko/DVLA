@@ -169,6 +169,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 {
                     ModelState.AddModelError("TaxIdentificationNumber", "Please enter tax identification number");
                 }
+                if(string.IsNullOrEmpty(model.IdentityNumber))
+                {
+                    ModelState.AddModelError("IdentityNumber", "Please enter National ID or Passport Number");
+                }
 
                 if (!ModelState.IsValid)
                 {
@@ -207,6 +211,8 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     Email = model.Email,
                     IsRegistration = true,
                     CreatedBy = _authUser.UserId,
+                    PassportNumber = model.IdentityType==IdentityType.InternationalPassport? model.IdentityNumber:null,
+                    NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null
                 };
 
                 await _applicantQuery.AddAsync(applicant);

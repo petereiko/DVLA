@@ -105,12 +105,34 @@
                                 <div class="row row-xs mg-b-10">
 
 
-                                    <div class="col-sm">
+                                    <div class="col-4">
                                         Service Type
                                         <select asp-for="ResultServiceType" class="form-control" asp-items="Html.GetEnumSelectList<ResultServiceType>()" required>
                                             <option>Select Service Type</option>
                                         </select>
                                         @Html.ValidationMessageFor(model => model.ResultServiceType, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-4">
+
+                                        @if(Model.ResultServiceType==ResultServiceType.RenewalOfDriverLicence||Model.ResultServiceType==ResultServiceType.AccidentReport||Model.ResultServiceType==ResultServiceType.UpgradeOfDriverLicence|| Model.ResultServiceType == ResultServiceType.ReplacementOfDriverLicence)
+                                        {
+                                            <div id="dvla-licensenumber-area">
+                                            <span>DVLA License Number</span>
+                                            <input type = "text" class= "form-control" asp-for= "DvlaLicenseNumber" />
+                                            @Html.ValidationMessageFor(Model => Model.DvlaLicenseNumber, "", new { @class = "text-danger" })
+                                          </div>
+                                        }
+                                        else
+                                        {
+                                            <div style="display:none" id="dvla-licensenumber-area">
+                                                <span>DVLA License Number</span>
+                                                <input type="text" class="form-control" asp-for="DvlaLicenseNumber" />
+                                                @Html.ValidationMessageFor(Model => Model.DvlaLicenseNumber, "", new { @class = "text-danger" })
+                                            </div>
+                                        }
+
+                                        
+
                                     </div>
                                 </div>
                                 <br />
@@ -194,6 +216,29 @@
                                                 <div class="col-sm">
                                                     Email (if applicable)
                                                     @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @autocomplete = "off" })
+
+                                                </div>
+
+                                                <div class="col-sm">
+                                                    <label>Identity Type</label><br />
+                                                    @foreach (var item in Model.IdentityTypes)
+                                                    {
+                                                        <label>
+                                                            <input type="radio"
+                                                                   name="IdentityType"
+                                                                   value="@item.Value"
+                                                                   @(item.Value == ((int?)Model.IdentityType)?.ToString() ? "checked" : "") />
+                                                            @item.Text
+                                                        </label>
+                                                        <br />
+                                                    }
+                                                    <span asp-validation-for="IdentityType" class="text-danger"></span>
+                                                </div>
+                                                
+                                                <div class="col-sm">
+                                                    Identity Number
+                                                    @Html.TextBoxFor(model => model.IdentityNumber, new { @class = "form-control", @autocomplete = "off" })
+                                                    @Html.ValidationMessageFor(model => model.IdentityNumber, "", new { @class = "text-danger" })
 
                                                 </div>
 
@@ -514,5 +559,22 @@
 
         function PreSubmit(){
         }
+
+    <script>
+        $(function(){
+            $('#ResultServiceType').change(function(){
+                let serviceType=$(this).val();
+
+                serviceType=Number(serviceType);
+                if(serviceType===2||serviceType===3||serviceType===4||serviceType===5){
+                    $('#dvla-licensenumber-area').show();
+                }
+                else{
+                    $('#dvla-licensenumber-area').hide();
+                }
+                
+            });
+        })
+    </script>
 }
 

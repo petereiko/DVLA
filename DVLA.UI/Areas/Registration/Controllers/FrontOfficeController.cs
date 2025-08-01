@@ -12,6 +12,7 @@ using DVLA.DATA.Domains;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Numerics;
 using System.Threading.Tasks;
 using System.Transactions;
 
@@ -176,6 +178,20 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     ModelState.AddModelError("ContactNumber", "Please enter contact number");
                 }
 
+                if (string.IsNullOrEmpty(model.IdentityNumber))
+                {
+                    ModelState.AddModelError("IdentityNumber", "Please enter either Passport Number or National ID");
+                }
+
+                if (model.ResultServiceType != ResultServiceType.LearnerDriversLicence)
+                {
+                    if (string.IsNullOrEmpty(model.DvlaLicenseNumber))
+                    {
+                        model.Errors.Add($"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
+                        ModelState.AddModelError("DvlaLicenseNumber", $"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
+                    }
+                }
+
                 //if (string.IsNullOrEmpty(model.TaxIdentificationNumber))
                 //{
                 //    ModelState.AddModelError("TaxIdentificationNumber", "Please enter tax identification number");
@@ -192,28 +208,31 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 else model.TestType = TestType.ReTest;
 
 
-                    var applicant = new VisualAssessmentResult()
-                    {
-                        CreatedDate = DateTime.Now,
-                        Id = model.Id,
-                        Surname = model.Surname,
-                        OptometristFirmId = model.OptometristFirmId,
-                        ResultServiceType = model.ResultServiceType,
-                        AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
-                        PassportImageUrl = model.Filename,
-                        TestType = model.TestType,
-                        Status = Status.InProgress,
-                        FirstName = model.FirstName,
-                        OtherName = model.OtherName,
-                        DOB = (DateTime)model.DOB,
-                        PostalAddress = model.PostalAddress,
-                        ContactNumber = model.ContactNumber,
-                        Nationality = model.Nationality,
-                        Email = model.Email,
-                        IsRegistration = true,
-                        CreatedBy = currentUserId,
-                        Gender = model.Gender
-                    };
+                var applicant = new VisualAssessmentResult()
+                {
+                    CreatedDate = DateTime.Now,
+                    Id = model.Id,
+                    Surname = model.Surname,
+                    OptometristFirmId = model.OptometristFirmId,
+                    ResultServiceType = model.ResultServiceType,
+                    AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
+                    PassportImageUrl = model.Filename,
+                    TestType = model.TestType,
+                    Status = Status.InProgress,
+                    FirstName = model.FirstName,
+                    OtherName = model.OtherName,
+                    DOB = (DateTime)model.DOB,
+                    PostalAddress = model.PostalAddress,
+                    ContactNumber = model.ContactNumber,
+                    Nationality = model.Nationality,
+                    Email = model.Email,
+                    IsRegistration = true,
+                    CreatedBy = currentUserId,
+                    Gender = model.Gender,
+                    NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
+                    PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
+                    DvlaLicenseNumber = model.DvlaLicenseNumber
+                };
 
                 await _applicantQuery.AddAsync(applicant);
 
@@ -288,6 +307,9 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 model.IsDeleted = applicant.IsDeleted;
                 model.UpdatedBy = applicant.ModifiedBy;
                 model.PassportImageUrl = applicant.PassportImageUrl;
+                model.IdentityNumber = string.IsNullOrEmpty(applicant.PassportNumber) ? applicant.NationalID : applicant.PassportNumber;
+                model.DvlaLicenseNumber = applicant.DvlaLicenseNumber;
+                model.IdentityType = string.IsNullOrEmpty(applicant.PassportNumber) ? IdentityType.NationalIDCard : IdentityType.InternationalPassport;
 
                 if (!string.IsNullOrEmpty(model.PassportImageUrl))
                 {

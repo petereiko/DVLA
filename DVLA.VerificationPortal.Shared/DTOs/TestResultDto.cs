@@ -17,5 +17,8 @@ namespace DVLA.VerificationPortal.Shared.DTOs
         public string? Passport { get; set; }
         public string? TestType { get; set; }
         public DateTime? TestDate { get; set; }
+        public string? IdentityType { get; set; }
+        public string? IdentityNumber { get; set; }
+        public string? DvlaLicenseNumber { get; set; }
     }
 }

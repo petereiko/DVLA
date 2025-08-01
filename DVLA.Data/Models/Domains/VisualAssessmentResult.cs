@@ -8,33 +8,20 @@ namespace DVLA.DATA.Domains
 
     public partial class VisualAssessmentResult : BaseObjectInt64
     {
-        //FormNumber, NameTitle, DriversLicense, DVLAReferenceNo, OldDVLAReferenceNo
-
-
         public int OptometristFirmId { get; set; }
         public virtual OptometristFirm OptometristFirm { get; set; }
        
         [StringLength(50)]
         public string ReferenceNumber { get; set; }
-        //[StringLength(50)]
-        //public string FormNumber { get; set; }
+
         public ResultServiceType? ResultServiceType { get; set; }
+
         public TestType TestType { get; set; }
 
-        //public NameTitle? NameTitle { get; set; }
         public PassOrFail? PassOrFail { get; set; }
 
         [StringLength(50)]
         public string Surname { get; set; }
-
-        //[StringLength(50)]
-        //public string DriversLicence { get; set; }
-
-        //[StringLength(50)]
-        //public string DVLAReferenceNo { get; set; }
-
-        //[StringLength(50)]
-        //public string OldDVLAReferenceNo { get; set; }
 
         [StringLength(50)]
         public string FirstName { get; set; }
@@ -87,20 +74,16 @@ namespace DVLA.DATA.Domains
         [StringLength(500)]
         public string ContrastSensitivity_BCV { get; set; }
 
-        //[StringLength(500)]
         public string PathologicalRemarks { get; set; }
 
-        //[StringLength(500)]
         public string ResultConclusion { get; set; }
 
         public bool? IsSynchronized { get; set; }
-        //public bool? IsGHDriveSynchronized { get; set; }
 
         public DateTime? TestDate { get; set; }
 
         public string PassportImageUrl { get; set; }
         public Status? Status { get; set; }
-        //public LearnerDriversLicenceType? LearnerDriversLicence { get; set; }
         public bool? IsRegistration { get; set; }
         public AccessType? AccessType { get; set; }
         public PassResult? PassResult { get; set; }
@@ -110,5 +93,12 @@ namespace DVLA.DATA.Domains
         public string TransmissionError { get; set; }
         public bool HasTransmissionError { get; set; }
         public bool? OptometristNameIsUpdate { get; set; }
+        public bool? IsBackedUp { get; set; } = false;
+        public DateTime? BackupDate { get; set; } = DateTime.UtcNow;
+
+        public string NationalID { get; set; }
+        public string PassportNumber { get; set; }
+        public string DvlaLicenseNumber { get; set; }
+
     }
 }

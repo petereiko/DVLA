@@ -243,6 +243,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     string PassOrFail = workSheet.Cells[rowIndex, 32].Text.Trim().ToUpper(); //required
                     string PassType = workSheet.Cells[rowIndex, 33].Text.Trim().ToUpper(); //required if pass
                     string LearnerServiceType = workSheet.Cells[rowIndex, 34].Text.Trim().ToUpper();
+                    string NationalID = workSheet.Cells[rowIndex,35].Text.Trim().ToUpper();
+                    string PassportNumber = workSheet.Cells[rowIndex, 36].Text.Trim().ToUpper();
+                    string DvlaLicenseNumber = workSheet.Cells[rowIndex, 37].Text.Trim().ToUpper();
                     //Validation
                     if (string.IsNullOrEmpty(TestType))
                     {
@@ -398,6 +401,13 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         }
                     }
 
+                    if (string.IsNullOrEmpty(NationalID) && string.IsNullOrEmpty(PassportNumber))
+                    {
+                        model.Errors.Add("National ID or Password Number is required for row: " + rowIndex);
+                        return View(model);
+                    }
+
+
                     int optometristFirmId = _optometristFirmUserRepositoryQuery.Filter(x => x.ApplicationUserId == _authUser.UserId).FirstOrDefault().OptometristFirmId;
 
                     string referenceNumber = _visualAssessmentResultRepository.GenerateReferenceNo(optometristFirmId, Status.Complete);
@@ -456,7 +466,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         Status = Status.InProgress,
                         IsSynchronized = false,
                         TestType = TestType == "NEW" ? Data.Models.Enumerables.TestType.NewTest : Data.Models.Enumerables.TestType.ReTest,
-                        //OldDVLAReferenceNo = OldDVLAReferenceNumber
+                        NationalID = NationalID,
+                        PassportNumber = PassportNumber,
+                        DvlaLicenseNumber = DvlaLicenseNumber
                     };
 
                     list.Add(newEntry);
@@ -579,7 +591,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         Status = y.Status,
                         TestType = y.TestType,
                         ActionType = "Modify",
-                        Gender = y.Gender
+                        Gender = y.Gender,
+                        DvlaLicenseNumber = y.DvlaLicenseNumber,
+                        IdentityNumber = string.IsNullOrEmpty(y.PassportNumber) ? y.NationalID : y.PassportNumber,
+                        IdentityType = string.IsNullOrEmpty(y.PassportNumber) ? IdentityType.NationalIDCard : IdentityType.InternationalPassport
                     }).FirstOrDefault();
 
                     if (!string.IsNullOrEmpty(model.PassportImageUrl) && model.PassportImageUrl.Contains(".png"))
@@ -825,6 +840,13 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     }
                 }
 
+                if (string.IsNullOrEmpty(model.IdentityNumber))
+                {
+                    ModelState.AddModelError("IdentityNumber", "Please enter National ID or Passport Number");
+                    model.Errors.Add("Please enter National ID or Passport Number");
+                    return View(model);
+                }
+
                 model.PassportImageUrl = await SaveImage(model);
 
                 var optometristUser = _optometristFirmUserRepositoryQuery.FilterAsync(x => x.ApplicationUserId == _authUser.UserId).Result.FirstOrDefault();
@@ -833,6 +855,16 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 {
                     model.Errors.Add("Sorry! You have not been mapped to an Optometrist Firm");
                     return View(model);
+                }
+
+                if (model.ResultServiceType != ResultServiceType.LearnerDriversLicence)
+                {
+                    if (string.IsNullOrEmpty(model.DvlaLicenseNumber))
+                    {
+                        model.Errors.Add($"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
+                        ModelState.AddModelError("DvlaLicenseNumber", $"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
+                        return View(model);
+                    }
                 }
 
                 Slot slot = _slotRepositoryQuery.FilterAsync(x => x.OptometristFirmId == optometristUser.OptometristFirmId && x.AccessType == (model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory)).Result.FirstOrDefault();
@@ -881,6 +913,8 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                     return View(model);
                                 }
                             }
+
+                            
 
                             if (model.ResultServiceType == ResultServiceType.LearnerDriversLicence) model.TestType = TestType.NewTest;
                             else model.TestType = TestType.ReTest;
@@ -934,7 +968,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 IsRegistration = false,
                                 ContrastSensitivity_BCV = model.ContrastSensitivity_BCV,
                                 AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
-
+                                PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
+                                NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
+                                DvlaLicenseNumber = model.DvlaLicenseNumber
                             };
                             context.VisualAssessmentResults.Add(visualAssessmentResult);
                             await context.SaveChangesAsync();

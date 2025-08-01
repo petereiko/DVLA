@@ -45,7 +45,7 @@
                                     <div class="row">
                                         <div class="col-sm-4" style="padding:0px">
                                             <video id="video" autoplay style="height: 200px;clip-path: inset(0px 20px 0px 20px); border:1px solid black"></video>
-                                            <button onclick="Capture()" style="margin-left:20px" id="capture" class="btn btn-primary">Capture</button>
+                                            <button type="button" onclick="Capture()" style="margin-left:20px" id="capture" class="btn btn-primary">Capture</button>
                                         </div>
                                         <div class="col-sm-4" style="padding:0px">
                                             <canvas id="canvas" width="200" height="200" />
@@ -84,13 +84,35 @@
                                 </div>
                                 <div class="row">
                                     
-                                    <div class="col-md-4">
+                                    <div class="col-4">
                                         <div class="form-floating mb-3">
                                             <select asp-for="ResultServiceType" class="form-control" required asp-items="@Html.GetEnumSelectList<ResultServiceType>()">
                                                 <option value="">Select Test Type</option>
                                             </select>
                                             <label for="ResultServiceType">Service Type</label>
                                         </div>
+                                    </div>
+                                    <div class="col-4">
+
+                                        @if (Model.ResultServiceType == ResultServiceType.RenewalOfDriverLicence || Model.ResultServiceType == ResultServiceType.AccidentReport || Model.ResultServiceType == ResultServiceType.UpgradeOfDriverLicence || Model.ResultServiceType == ResultServiceType.ReplacementOfDriverLicence)
+                                        {
+                                            <div id="dvla-licensenumber-area">
+                                                <span>DVLA License Number</span>
+                                                <input type="text" class="form-control" asp-for="DvlaLicenseNumber" />
+                                                @Html.ValidationMessageFor(Model => Model.DvlaLicenseNumber, "", new { @class = "text-danger" })
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div style="display:none" id="dvla-licensenumber-area">
+                                                <span>DVLA License Number</span>
+                                                <input type="text" class="form-control" asp-for="DvlaLicenseNumber" />
+                                                @Html.ValidationMessageFor(Model => Model.DvlaLicenseNumber, "", new { @class = "text-danger" })
+                                            </div>
+                                        }
+
+
+
                                     </div>
                                 </div>
                                 <div class="row">
@@ -165,7 +187,6 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-floating mb-3">
-                                            Nationality
                                             <select asp-for="Nationality" class="form-control" asp-items="@((List<SelectListItem>)ViewBag.Countries)">
                                                 <option value="">--Select Nationality--</option>
                                             </select>
@@ -179,6 +200,42 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <table style="width:100%">
+                                            <tr>
+                                                <td style="padding-right:50px">
+                                                    <label>Identity Type</label><br />
+                                                    @foreach (var item in Model.IdentityTypes)
+                                                    {
+                                                        <label>
+                                                            <input type="radio"
+                                                                   name="IdentityType"
+                                                                   value="@item.Value"
+                                                                   @(item.Value == ((int?)Model.IdentityType)?.ToString() ? "checked" : "") />
+                                                            @item.Text
+                                                        </label>
+                                                        <br />
+                                                    }
+                                                    <span asp-validation-for="IdentityType" class="text-danger"></span>
+                                                </td>
+                                                <td>
+                                                    Identity Number
+                                                    @Html.TextBoxFor(model => model.IdentityNumber, new { @class = "form-control", @autocomplete = "off" })
+                                                    @Html.ValidationMessageFor(model => model.IdentityNumber, "", new { @class = "text-danger" })
+                                                </td>
+                                            </tr>
+                                        </table>
+                                                    
+                                                </div>
+                                                
+                                                <div class="col-md-3">
+                                                    
+                                                </div>
+                                </div>
+
+
                                 <div class="col-12">
                                     <div class="d-md-flex align-items-center">
                                         @* <div class="form-check">
@@ -188,7 +245,11 @@
                                         </label>
                                         </div> *@
                                         <div class="ms-auto mt-3 mt-md-0">
-                                            <button type="submit" class="btn btn-primary hstack gap-6">
+                                            <a asp-action="Login" asp-controller="Account" asp-area="" class="btn btn-danger">
+                                                @* <i class="ti ti-send fs-4"></i> *@
+                                                Back
+                                            </a>
+                                            <button type="submit" class="btn btn-primary">
                                                 @* <i class="ti ti-send fs-4"></i> *@
                                                 Submit
                                             </button>
@@ -403,6 +464,24 @@
             img.src = URL.createObjectURL(this.files[0]);
         };
 
+    </script>
+
+
+    <script>
+        $(function(){
+            $('#ResultServiceType').change(function(){
+                let serviceType=$(this).val();
+
+                serviceType=Number(serviceType);
+                if(serviceType===2||serviceType===3||serviceType===4||serviceType===5){
+                    $('#dvla-licensenumber-area').show();
+                }
+                else{
+                    $('#dvla-licensenumber-area').hide();
+                }
+
+            });
+        })
     </script>
 }
 

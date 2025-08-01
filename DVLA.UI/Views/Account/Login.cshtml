@@ -29,17 +29,23 @@
     </div>
     <button type="submit" class="btn btn-primary w-100 py-8 mb-4 ">Sign In</button>
     <div class="d-flex align-items-center justify-content-center">
-        <p class="fs-4 mb-0 fw-medium">Register a Facility?</p>
-        <a class="text-primary fw-medium ms-2" asp-action="Create" asp-controller="OnlineApplicant" asp-area="Registration" >
+        <a class="btn btn-sm btn-primary" asp-action="Firms" asp-controller="OptometristFirmManagement" asp-area="Admin" target="_blank">Facility Verification</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a class="btn btn-sm btn-primary" asp-action="Create" asp-controller="OnlineApplicant" asp-area="Registration">
             Applicant Registration
         </a>
+        @* <p class="fs-4 mb-0 fw-medium">Facility Verification</p> *@
+        @* <a class="text-primary fw-medium ms-2" asp-action="Create" asp-controller="OnlineApplicant" asp-area="Registration" >
+            Applicant Registration
+        </a> *@
     </div>
 
     <div class="d-flex align-items-center justify-content-center">
        @*  <p class="fs-4 mb-0 fw-medium">Verification Portal</p> *@
-        <a class="text-primary fw-medium ms-2" href="@_configuration["AppConstants:VerificationPortal"]">
+
+        @* <a class="text-primary fw-medium ms-2" href="@_configuration["AppConstants:VerificationPortal"]">
             Verification Portal
-        </a>
+        </a> *@
     </div>
 </form>
 
