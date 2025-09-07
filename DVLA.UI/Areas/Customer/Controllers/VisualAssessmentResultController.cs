@@ -840,12 +840,12 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     }
                 }
 
-                if (string.IsNullOrEmpty(model.IdentityNumber))
-                {
-                    ModelState.AddModelError("IdentityNumber", "Please enter National ID or Passport Number");
-                    model.Errors.Add("Please enter National ID or Passport Number");
-                    return View(model);
-                }
+                //if (string.IsNullOrEmpty(model.IdentityNumber))
+                //{
+                //    ModelState.AddModelError("IdentityNumber", "Please enter National ID or Passport Number");
+                //    model.Errors.Add("Please enter National ID or Passport Number");
+                //    return View(model);
+                //}
 
                 model.PassportImageUrl = await SaveImage(model);
 

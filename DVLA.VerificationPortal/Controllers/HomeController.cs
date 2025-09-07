@@ -1,6 +1,7 @@
 using DVLA.VerificationPortal.Application.Interfaces;
 using DVLA.VerificationPortal.Models;
 using DVLA.VerificationPortal.Shared;
+using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Enums;
 using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.AspNetCore.Authorization;
@@ -43,7 +44,7 @@ namespace DVLA.VerificationPortal.Controllers
         public async Task<ActionResult> Details(string key)
         {
             int id = Utility.DecryptUrlID(key);
-            var result = await _searchService.GetResultAsync(id);
+            VisualAssessmentResultDto result = await _searchService.GetResultAsync(id);
             await LogAuditAsync("Fetch Visual Assessment Details");
             return View(result);
         }

@@ -21,58 +21,58 @@
 
     <style>
         body {
-        background-color: #f8f9fa;
-        font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            font-family: 'Roboto', sans-serif;
         }
 
         .card {
-        margin-top: 20px;
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .btn {
-        background-color: #34495E;
-        color: white;
+            background-color: #34495E;
+            color: white;
         }
 
-        .btn-danger{
-        background-color:red;
-        color:white;
-        border:1px solid red;
-        width:100px;
+        .btn-danger {
+            background-color: red;
+            color: white;
+            border: 1px solid red;
+            width: 100px;
         }
 
         .btn:hover {
-        background-color: white;
-        color: #34495E;
+            background-color: white;
+            color: #34495E;
         }
 
         .card-header {
-        background-color: #34495E;
-        color: white;
-        border-radius: 10px 10px 0 0;
+            background-color: #34495E;
+            color: white;
+            border-radius: 10px 10px 0 0;
         }
 
         .card-body {
-        padding: 20px;
+            padding: 20px;
         }
 
         .result-section {
-        margin-bottom: 20px;
+            margin-bottom: 20px;
         }
 
-        .result-section h5 {
-        color: #34495E;
-        }
+            .result-section h5 {
+                color: #34495E;
+            }
 
         h1 {
-        font-weight: 700;
+            font-weight: 700;
         }
 
         p {
-        font-weight: 400;
+            font-weight: 400;
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -122,6 +122,36 @@
                                             <td>Address:</td>
                                             <td>@Model.PostalAddress</td>
                                         </tr>
+                                        @if (!string.IsNullOrEmpty(Model.NationalID))
+                                        {
+                                            <tr>
+                                                <td>National ID:</td>
+                                                <td>@Model.NationalID</td>
+                                            </tr>
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.PassportNumber))
+                                        {
+                                            <tr>
+                                                <td>Passport Number:</td>
+                                                <td>@Model.PassportNumber</td>
+                                            </tr>
+                                        }
+
+                                        <tr>
+                                            <td>DVLA License Number:</td>
+                                            <td>
+                                                @{
+                                                    string licenseNumber="N/A";
+                                                    if (!string.IsNullOrEmpty(Model.DvlaLicenseNumber))
+                                                    {
+                                                        licenseNumber = Model.DvlaLicenseNumber;
+                                                    }
+                                                    <span>@licenseNumber</span>
+                                                }
+                                            </td>
+                                        </tr>
+
+
                                     </table>
                                 </div>
                             </div>
@@ -279,8 +309,8 @@
                         </div>
                     </div>
 
-                   
-                   <br />
+
+                    <br />
                 </div>
             </div>
         </div>

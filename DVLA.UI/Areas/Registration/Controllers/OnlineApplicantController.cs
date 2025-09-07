@@ -128,10 +128,10 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     ModelState.AddModelError("ContactNumber", "Please enter contact number");
                 }
 
-                if (string.IsNullOrEmpty(model.IdentityNumber))
-                {
-                    ModelState.AddModelError("IdentityNumber", "Please enter either either Passport Number or National ID");
-                }
+                //if (string.IsNullOrEmpty(model.IdentityNumber))
+                //{
+                //    ModelState.AddModelError("IdentityNumber", "Please enter either either Passport Number or National ID");
+                //}
 
                 if (model.Gender == null)
                 {

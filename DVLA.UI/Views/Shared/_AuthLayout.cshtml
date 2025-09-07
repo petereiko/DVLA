@@ -46,7 +46,9 @@
 
                                             <a href="@_configuration["AppConstants:VerificationPortal"]" target="_blank" class="btn btn-rounded btn-primary w-30 py-9 mb-3 " style="background-color: #4690AD;"><i class="ti ti-send fs-4 me-2"></i>VERIFY APPLICANT</a>
                                             <a asp-action="Firms" asp-controller="OptometristFirmManagement" asp-area="Admin" target="_blank" class="btn btn-rounded btn-primary w-30 py-9 mb-3 " style="background-color: #4690AD;"><i class="ti ti-send fs-4 me-2"></i>FACILITY VERIFICATION</a>
-                                            <p style="font-size: 16px !important;">© Copyright @DateTime.UtcNow.Year. All Rights Reserved. Powered by Ingtech LLC <a href="https://www.ingtechllc.com"> <img src="https://ingtechllc.com/wp-content/uploads/2024/07/it-logo.png" width="20px"></a></p>
+                                            <p style="font-size: 16px !important;">© Copyright @DateTime.UtcNow.Year. All Rights Reserved.</p>
+@*                                             <p style="font-size: 16px !important;">© Copyright @DateTime.UtcNow.Year. All Rights Reserved. Powered by Ingtech LLC <a href="https://www.ingtechllc.com"> <img src="https://ingtechllc.com/wp-content/uploads/2024/07/it-logo.png" width="20px"></a></p>
+ *@
                                         </div>
                                         <div class="col-md-12">
                                             <img src="~/dist/assets/images/backgrounds/Federal-Ministry-of-health-Colour-Version-2.webp" alt="" class="img-fluid">
@@ -306,7 +308,10 @@
         });
 
     </script>
-    <footer style="text-align:center">copyright @DateTime.Now.Year, In Partnership with DVLA and Ghana Optometric Association. Powered by Ingtech LLC.</footer>
+@*     <footer style="text-align:center">copyright @DateTime.Now.Year, In Partnership with DVLA and Ghana Optometric Association. Powered by Ingtech LLC.</footer>
+ *@        
+ <footer style="text-align:center">copyright @DateTime.Now.Year, In Partnership with DVLA and Ghana Optometric Association.</footer>
+
 </body>
 
 </html>

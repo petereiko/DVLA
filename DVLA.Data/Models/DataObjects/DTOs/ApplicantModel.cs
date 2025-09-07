@@ -65,10 +65,10 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public string DisplayImageUrl { get; set; }
         public bool VideoCapture { get; set; }
 
-        [Required(ErrorMessage = "Please select an Identity Type.")]
+        //[Required(ErrorMessage = "Please select an Identity Type.")]
         public IdentityType IdentityType { get; set; }
 
-        [Required(ErrorMessage = "Please enter identity number.")]
+        //[Required(ErrorMessage = "Please enter identity number.")]
         public string IdentityNumber { get; set; }
 
         public List<SelectListItem> IdentityTypes { get; set; }

@@ -169,10 +169,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 {
                     ModelState.AddModelError("TaxIdentificationNumber", "Please enter tax identification number");
                 }
-                if(string.IsNullOrEmpty(model.IdentityNumber))
-                {
-                    ModelState.AddModelError("IdentityNumber", "Please enter National ID or Passport Number");
-                }
+                //if(string.IsNullOrEmpty(model.IdentityNumber))
+                //{
+                //    ModelState.AddModelError("IdentityNumber", "Please enter National ID or Passport Number");
+                //}
 
                 if (!ModelState.IsValid)
                 {

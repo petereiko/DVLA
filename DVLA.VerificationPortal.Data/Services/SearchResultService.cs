@@ -54,7 +54,16 @@ namespace DVLA.VerificationPortal.Application.Services
             IEnumerable<VisualAssessmentResultDto> items = Enumerable.Empty<VisualAssessmentResultDto>();
             try
             {
-                Expression<Func<VisualAssessmentResult, bool>> expression = v => v.ReferenceNumber.Contains(searchTerm) || v.FirstName.Contains(searchTerm) || v.Surname.Contains(searchTerm) || v.ContactNumber.Contains(searchTerm);
+    //            var result = people
+    //.Where(p => (p.Firstname + " " + p.Surname)
+    //    .ToLower()
+    //    .Contains(fullNameToSearch.ToLower()))
+    //.ToList();
+                string trimmedServedSearchTerm = searchTerm.Trim(); 
+
+
+                Expression<Func<VisualAssessmentResult, bool>> expression = v => v.ReferenceNumber.Contains(searchTerm) || v.FirstName.Contains(searchTerm) || v.Surname.Contains(searchTerm) || v.ContactNumber.Contains(searchTerm)
+                || (v.FirstName + " " + v.Surname).ToLower().Contains(trimmedServedSearchTerm.ToLower()) || (v.Surname.ToLower() + " " + v.FirstName.ToLower()).Contains(trimmedServedSearchTerm.ToLower());
                 IEnumerable<VisualAssessmentResult> results = await _visualAssessmentResultRepository.FilterAsync(expression, false);
                 results = results.Take(20);
                 items = _mapper.Map<List<VisualAssessmentResultDto>>(results);
