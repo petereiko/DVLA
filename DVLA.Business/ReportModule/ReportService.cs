@@ -32,7 +32,6 @@ namespace DVLA.Business.ReportModule
         private readonly ILogger<ReportService> _logger;
         private readonly string _connectionString;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IConfiguration _configuration;
         
         public ReportService(DVLADbContext context, ILogger<ReportService> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
@@ -40,7 +39,6 @@ namespace DVLA.Business.ReportModule
             _logger = logger;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
             _httpContextAccessor = httpContextAccessor;
-            _configuration = configuration;
         }
 
         public void Dispose()

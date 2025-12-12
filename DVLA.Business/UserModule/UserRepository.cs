@@ -25,7 +25,6 @@ namespace DVLA.Business.UserModule
     {
         private readonly DVLADbContext _context;
         private readonly ILogger<UserRepository> _logger;
-        private readonly IConfiguration _configuration;
         private readonly string _connectionString;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
@@ -35,7 +34,6 @@ namespace DVLA.Business.UserModule
         {
             _context = context;
             _logger = logger;
-            _configuration = configuration;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
             _userManager = userManager;
             _roleManager = roleManager;
@@ -232,14 +230,21 @@ namespace DVLA.Business.UserModule
                     }
                     if (model.Email != userDetails.Email)
                     {
-                        scope.Rollback();
-                        result.Message = "Email address cannot be changed.";
-                        return result;
+                        //Check is model.Email is already in use
+                        bool newEmailExist = await _context.ApplicationUsers.AnyAsync(x => x.Email.ToLower() == model.Email);
+                        if (newEmailExist)
+                        {
+                            scope.Rollback();
+                            result.Message = $"{model.Email} is in use.";
+                            return result;
+                        }
                     }
+
+
 
                     userDetails.Id = model.Id;
                     userDetails.DateUpdated = DateTime.Now;
-                    //userDetails.Email = model.Email;
+                    userDetails.Email = model.Email;
                     userDetails.FirstName = model.FirstName;
                     userDetails.LastName = model.LastName;
                     userDetails.MobileNumber = model.MobileNumber;
@@ -247,6 +252,9 @@ namespace DVLA.Business.UserModule
                     userDetails.ModifiedBy = _authUser.UserId;
                     userDetails.IsActive = model.IsActive;
                     userDetails.EmailConfirmed = model.IsActive;
+                    userDetails.NormalizedEmail = model.Email;
+                    userDetails.NormalizedUserName = model.Email;
+                    userDetails.UserName = model.Email;
                     //userDetails.DefaultRole = model.DefaultRole;
                     userDetails.PhoneNumber = model.Phone;
                     userDetails.Pin = model.PIN;

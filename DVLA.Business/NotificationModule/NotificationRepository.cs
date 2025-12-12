@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using DVLA.Business.Repository;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DVLA.Business.NotificationModule
 {
@@ -20,31 +21,31 @@ namespace DVLA.Business.NotificationModule
         private readonly IRepositoryQuery<EmailLog> _emailQuery;
         private readonly IRepositoryQuery<EmailLogAttachment> _emailLogAttachment;
         private readonly IRepositoryQuery<EmailTemplate> _emailTemplate;
-        private readonly IConfiguration _configuration;
+        private readonly AppSettings _appSettings;
+        private readonly EmailSettings _emailSettings;
         private readonly ILogger<NotificationRepository> _logger;
-        private readonly string BaseUrl;
 
         private readonly DVLADbContext _context;
         public NotificationRepository(IRepositoryQuery<EmailLogAttachment> emailLogAttachment,
-            IRepositoryQuery<EmailTemplate> emailTemplate, DVLADbContext context, IRepositoryQuery<EmailLog> emailQuery, IConfiguration configuration, ILogger<NotificationRepository> logger)
+            IRepositoryQuery<EmailTemplate> emailTemplate, DVLADbContext context, IRepositoryQuery<EmailLog> emailQuery, IOptions<AppSettings> options, IOptions<EmailSettings>emailOptions, ILogger<NotificationRepository> logger)
         {
             _emailQuery = emailQuery;
             _emailLogAttachment = emailLogAttachment;
             _emailTemplate = emailTemplate;
             _context = context;
-            _configuration = configuration;
+            _appSettings = options.Value;
+            _emailSettings = emailOptions.Value;
             _logger = logger;
-            BaseUrl = configuration["AppConstants:BaseUrl"];
         }
 
-        public void SendNewAccountCreated(ApplicationUser model, string password, string callbackUrl, DVLADbContext context = null)
+        public void SendNewAccountCreated(ApplicationUser model, string password,  DVLADbContext context = null)
         {
             try
             {
                 context = context == null ? _context : context;
-                string from = _configuration["EmailSettings:FromEmail"];
+                string from = _emailSettings.FromEmail;
 
-                string message = $"An account has been created on <a href='{BaseUrl}/Account/Login'>{_configuration["AppConstants:AppNameName"]}</a> with the default password <b>{password}</b>. Kindly login with your email {model.Email} and password {password};  update the password to confirm your account.";
+                string message = $"An account has been created on <a href='{_appSettings.BaseUrl}/Account/Login'>{_appSettings.AppName}</a> with the default password <b>{password}</b>. Kindly login with your email {model.Email} and password {password};  update the password to confirm your account.";
 
 
                 //format email and attachment to entity
@@ -149,7 +150,7 @@ namespace DVLA.Business.NotificationModule
                 emailBody.AppendLine($"<div>Date:{DateTime.UtcNow.ToString("dddd, dd MMMM yyyy hh:mm tt")}</div>");
                 emailBody.AppendLine($"<div>Result: {assessmentResult}</div>");
 
-                string _emailSetting_EmailFrom = _configuration["EmailSettings:SmtpUser"].ToString();
+                string _emailSetting_EmailFrom = _emailSettings.SmtpUser;
 
                 EmailLog email = new EmailLog
                 {
@@ -195,7 +196,7 @@ namespace DVLA.Business.NotificationModule
 
 
                     string emailMessage = emailBody.ToString();
-                    string _emailSetting_EmailFrom = _configuration["EmailSettings:SmtpUser"].ToString();
+                    string _emailSetting_EmailFrom = _emailSettings.SmtpUser;
 
                     EmailLog email = new EmailLog
                     {
@@ -269,7 +270,7 @@ namespace DVLA.Business.NotificationModule
                 emailModel.Subject = emailSubject;
             }
 
-            string _emailSetting_EmailFrom = _configuration["EmailSettings:SmtpUser"].ToString();
+            string _emailSetting_EmailFrom = _emailSettings.SmtpUser;
 
             //format email and attachment to entity
 
@@ -315,7 +316,7 @@ namespace DVLA.Business.NotificationModule
                             emailBody.Replace("[[TESTDATE]]", item.TestDate.ToString("dddd, dd MMMM yyyy"));
 
                             string emailMessage = emailBody.ToString();
-                            string _emailSetting_EmailFrom = _configuration["EmailSettings:SmtpUser"].ToString();
+                            string _emailSetting_EmailFrom = _emailSettings.SmtpUser;
 
                             EmailLog email = new EmailLog
                             {

@@ -11,7 +11,7 @@ namespace DVLA.Business.NotificationModule
 {
     public interface INotificationRepository
     {
-        void SendNewAccountCreated(ApplicationUser model, string password, string callbackUrl, DVLADbContext context = null);
+        void SendNewAccountCreated(ApplicationUser model, string password, DVLADbContext context = null);
         void SendPasswordReset(ApplicationUser model, string callbackUrl);
 
         void SendForgotPassword(ApplicationUser model, string callbackUrl);

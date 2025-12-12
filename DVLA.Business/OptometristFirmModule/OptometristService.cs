@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -33,15 +34,15 @@ namespace DVLA.Business.OptometristFirmModule
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IUserService _userService;
-        private readonly IConfiguration _configuration;
-        public OptometristService(DVLADbContext context, ILogger<OptometristService> logger, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IUserService userService, IConfiguration configuration, IEmailService emailService, IAuthUser authUser)
+        private readonly AppSettings _appSettings;
+        public OptometristService(DVLADbContext context, ILogger<OptometristService> logger, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IUserService userService, IOptions<AppSettings> options, IEmailService emailService, IAuthUser authUser)
         {
             _context = context;
             _logger = logger;
             _userManager = userManager;
             _roleManager = roleManager;
             _userService = userService;
-            _configuration = configuration;
+            _appSettings = options.Value;
             _emailService = emailService;
             _authUser = authUser;
         }
@@ -163,7 +164,7 @@ namespace DVLA.Business.OptometristFirmModule
                         string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
 
                         var encodedToken = WebUtility.UrlEncode(confirmationToken);
-                        string baseUrl = _configuration["AppConstants:BaseUrl"];
+                        string baseUrl = _appSettings.BaseUrl;
                         string url = $"{baseUrl}/Account/ConfirmEmail?encodedToken={encodedToken}&userid={applicationUser.Id}";
 
                         string message = $"An account has been created on <a href='{baseUrl}/Account/Login'>HEFRA</a> with the default password <b>{password}</b>. Kindly login with your email {model.ContactEmail} and password {password};  update the password to confirm your account.";
@@ -365,10 +366,9 @@ namespace DVLA.Business.OptometristFirmModule
                             string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
 
                             var encodedToken = WebUtility.UrlEncode(confirmationToken);
-                            string baseUrl = _configuration["AppConstants:BaseUrl"];
-                            string url = $"{baseUrl}/Account/ConfirmEmail?encodedToken={encodedToken}&userid={applicationUser.Id}";
+                            string url = $"{_appSettings.BaseUrl}/Account/ConfirmEmail?encodedToken={encodedToken}&userid={applicationUser.Id}";
 
-                            string message = $"An account has been created on <a href='{baseUrl}/Account/Login'>HEFRA</a> with the default password <b>{password}</b>. Kindly login with your email {model.ContactEmail} and password {password};  update the password to confirm your account.";
+                            string message = $"An account has been created on <a href='{_appSettings.BaseUrl}/Account/Login'>HEFRA</a> with the default password <b>{password}</b>. Kindly login with your email {model.ContactEmail} and password {password};  update the password to confirm your account.";
 
                             bool EmailLogSuccess = await _emailService.LogEmail(new EmailLogDto
                             {

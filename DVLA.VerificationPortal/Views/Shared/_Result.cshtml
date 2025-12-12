@@ -40,7 +40,10 @@
                                 <td>@item.TestDate?.ToString("yyyy-MM-dd")</td>
                                 <td>@item.AccessType</td>
                                 <td>@item.ResultConclusion</td>
-                                <td><a class="btn btn-primary" asp-action="Details" asp-route-key="@Utility.EncryptUrlID((int)item.Id)">Details</a></td>
+                                <td>
+                                    @* <a class="btn btn-primary" asp-action="Details" asp-route-key="@Utility.EncryptUrlID((int)item.Id)">Details</a> *@
+                                    <a class="btn btn-primary" asp-action="Details" asp-route-key="@item.Id">Details</a>
+                                </td>
                             </tr>
                         }
                     </tbody>

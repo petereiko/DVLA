@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using DVLA.Data.Models.DataObjects.ViewModels;
+using Microsoft.Extensions.Options;
 
 namespace DVLA.Business.NotificationModule
 {
@@ -22,13 +23,13 @@ namespace DVLA.Business.NotificationModule
     {
         private readonly DVLADbContext _context;
         private readonly IRepositoryQuery<SmsTemplate> _templateQuery;
-        private readonly IConfiguration _configuration;
+        private readonly SmsSettings _smsSettings;
         private readonly ILogger<SmsRepository> _logger;
-        public SmsRepository(DVLADbContext context, IRepositoryQuery<SmsTemplate> templateQuery, IConfiguration configuration, ILogger<SmsRepository> logger)
+        public SmsRepository(DVLADbContext context, IRepositoryQuery<SmsTemplate> templateQuery, IOptions<SmsSettings> options, ILogger<SmsRepository> logger)
         {
             _context = context;
             _templateQuery = templateQuery;
-            _configuration = configuration;
+            _smsSettings = options.Value;
             _logger = logger;
         }
 
@@ -39,9 +40,9 @@ namespace DVLA.Business.NotificationModule
             if (!mobileNumber.StartsWith("233")) mobileNumber = "233" + mobileNumber;
             try
             {
-                string encodedAuthKey = WebUtility.UrlEncode(_configuration["SmsSettings:smsAuthKey"]);
+                string encodedAuthKey = WebUtility.UrlEncode(_smsSettings.smsAuthKey);
                 message = WebUtility.UrlEncode(message);
-                string endPoint = _configuration["SmsSettings:smsEndpoint"];
+                string endPoint = _smsSettings.smsEndpoint;
                 string uri = $"{endPoint}/?key={encodedAuthKey}&type=0&destination={mobileNumber}&dlr=1&source=NALO&message={message}";
 
                 var client = new HttpClient();

@@ -124,6 +124,10 @@ builder.Services.AddTransient<IAuthUser, AuthUser>();
 builder.Services.AddTransient<ITempPasswordService, TempPasswordService>();
 builder.Services.AddTransient<BackgroundJobService>();
 
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppConstants"));
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.Configure<SmsSettings>(builder.Configuration.GetSection("SmsSettings"));
+
 
 builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)

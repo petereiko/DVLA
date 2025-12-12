@@ -484,12 +484,12 @@ namespace DVLA.UI.Areas.Admin.Controllers
                             var userId = applicationUser.Id;
                             _userManager.AddToRoleAsync(applicationUser, AppRoles.FACILITYOWNER).GetAwaiter().GetResult();
 
-                            var code = _userManager.GeneratePasswordResetTokenAsync(applicationUser).GetAwaiter().GetResult();
+                            //var code = _userManager.GeneratePasswordResetTokenAsync(applicationUser).GetAwaiter().GetResult();
 
-                            var callbackUrl = Url.Action("ResetPassword", "Account", new { area = "", userId = userId, code = code });
-                            string mPre = $"{_configuration["AppConstants:BaseUrl"]}{callbackUrl}";
+                            //var callbackUrl = Url.Action("ResetPassword", "Account", new { area = "", userId = userId, code = code });
+                            //string mPre = $"{_configuration["AppConstants:BaseUrl"]}{callbackUrl}";
 
-                            _notificationRepository.SendNewAccountCreated(applicationUser, pwd, mPre, context);
+                            _notificationRepository.SendNewAccountCreated(applicationUser, pwd, context);
                             scope.Commit();
                         }
                         else

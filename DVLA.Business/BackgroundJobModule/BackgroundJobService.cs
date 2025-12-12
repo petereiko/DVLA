@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -34,18 +35,18 @@ namespace DVLA.Business.BackgroundJobModule
         private readonly IEmailService _emailService;
         private readonly ISmsRepository _smsRepository;
         private readonly IPaymentService _paymentService;
-        private readonly IConfiguration _configuration;
+        private readonly AppSettings _appSettings;
         private readonly IHostingEnvironment _hostEnvironment;
         private readonly ILogger<BackgroundJobService> _logger;
         private readonly IReportRepository _reportRepository;
 
-        public BackgroundJobService(DVLADbContext context, IEmailService emailService, IPaymentService paymentService, ISmsRepository smsRepository, IConfiguration configuration, IHostingEnvironment hostEnvironment, ILogger<BackgroundJobService> logger, IReportRepository reportRepository)
+        public BackgroundJobService(DVLADbContext context, IEmailService emailService, IPaymentService paymentService, ISmsRepository smsRepository, IOptions<AppSettings> options, IHostingEnvironment hostEnvironment, ILogger<BackgroundJobService> logger, IReportRepository reportRepository)
         {
             _context = context;
             _emailService = emailService;
             _paymentService = paymentService;
             _smsRepository = smsRepository;
-            _configuration = configuration;
+            _appSettings = options.Value;
             _hostEnvironment = hostEnvironment;
             _logger = logger;
             _reportRepository = reportRepository;
@@ -161,7 +162,7 @@ namespace DVLA.Business.BackgroundJobModule
             {
                 _logger.LogInformation($"Push Visuai Assessment Result Started");
 
-                bool runPushAssessment = Convert.ToBoolean(_configuration["AppConstants:RunPushAssessmentResult"]);
+                bool runPushAssessment = Convert.ToBoolean(_appSettings.RunPushAssessmentResult);
 
                 _logger.LogInformation($"Service Started: {runPushAssessment}");
 
@@ -176,8 +177,8 @@ namespace DVLA.Business.BackgroundJobModule
                     try
                     {
                         using var client = new HttpClient();
-                        var request = new HttpRequestMessage(HttpMethod.Post, _configuration["AppConstants:ApiVerificationPushUrl"]);
-                        request.Headers.Add("X-API-KEY", _configuration["AppConstants:ApiKey"]);
+                        var request = new HttpRequestMessage(HttpMethod.Post, _appSettings.ApiVerificationPushUrl);
+                        request.Headers.Add("X-API-KEY", _appSettings.ApiKey);
                         var requestBody = JsonConvert.SerializeObject(item);
                         _logger.LogInformation($"Request Body {requestBody}");
                         var content = new StringContent(requestBody, null, "application/json");
@@ -247,8 +248,8 @@ namespace DVLA.Business.BackgroundJobModule
                     try
                     {
                         using var client = new HttpClient();
-                        var request = new HttpRequestMessage(HttpMethod.Post, _configuration["AppConstants:ApiVerificationUpdateDocUrl"]);
-                        request.Headers.Add("X-API-KEY", _configuration["AppConstants:ApiKey"]);
+                        var request = new HttpRequestMessage(HttpMethod.Post, _appSettings.ApiVerificationUpdateDocUrl);
+                        request.Headers.Add("X-API-KEY", _appSettings.ApiKey);
                         var requestBody = JsonConvert.SerializeObject(item);
                         _logger.LogInformation($"Request Body {requestBody}");
                         var content = new StringContent(requestBody, null, "application/json");
@@ -444,8 +445,8 @@ namespace DVLA.Business.BackgroundJobModule
                     });
 
                 using var client = new HttpClient();
-                var request = new HttpRequestMessage(HttpMethod.Post, _configuration["AppConstants:ApiVerificationTransmitOpometristFirmsUrl"]);
-                request.Headers.Add("X-API-KEY", _configuration["AppConstants:ApiKey"]);
+                var request = new HttpRequestMessage(HttpMethod.Post, _appSettings.ApiVerificationTransmitOpometristFirmsUrl);
+                request.Headers.Add("X-API-KEY", _appSettings.ApiKey);
                 var requestBody = JsonConvert.SerializeObject(transmissions);
                 _logger.LogInformation($"Request Body {requestBody}");
                 var content = new StringContent(requestBody, null, "application/json");

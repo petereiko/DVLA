@@ -10,18 +10,19 @@ using System.Text;
 using System.Threading.Tasks;
 using DVLA.Data;
 using DVLA.Data.Models.DataObjects.DTOs;
+using Microsoft.Extensions.Options;
 
 namespace DVLA.Business.EmailModule
 {
     public class EmailService : IEmailService
     {
-        private readonly IConfiguration _configuration;
+        private readonly EmailSettings _emailSettings;
         private readonly ILogger<EmailService> _logger;
         private readonly DVLADbContext _context;
 
-        public EmailService(IConfiguration configuration, DVLADbContext context, ILogger<EmailService> logger)
+        public EmailService(IOptions<EmailSettings> options, DVLADbContext context, ILogger<EmailService> logger)
         {
-            _configuration = configuration;
+            _emailSettings = options.Value;
             _context = context;
             _logger = logger;
         }
@@ -74,18 +75,18 @@ namespace DVLA.Business.EmailModule
             bool isSent = false;
             if (string.IsNullOrEmpty(email)) return false;
 
-            var smtpSettings = _configuration.GetSection("EmailSettings");
+            var smtpSettings = _emailSettings;
 
-            var smtpClient = new SmtpClient(smtpSettings["SmtpServer"])
+            var smtpClient = new SmtpClient(_emailSettings.SmtpServer)
             {
-                Port = int.Parse(smtpSettings["SmtpPort"]),
-                Credentials = new NetworkCredential(smtpSettings["SmtpUser"], smtpSettings["SmtpPass"]),
+                Port = _emailSettings.SmtpPort,
+                Credentials = new NetworkCredential(smtpSettings.SmtpUser, smtpSettings.SmtpPass),
                 EnableSsl = false
             };
 
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(smtpSettings["SmtpUser"], smtpSettings["SenderName"]),
+                From = new MailAddress(smtpSettings.SmtpUser, smtpSettings.SenderName),
                 Subject = subject,
                 Body = message,
                 IsBodyHtml = true,
@@ -129,18 +130,18 @@ namespace DVLA.Business.EmailModule
                 throw new ArgumentException("Invalid email address");
             }
 
-            var smtpSettings = _configuration.GetSection("EmailSettings");
+            var smtpSettings = _emailSettings;
 
-            var smtpClient = new SmtpClient(smtpSettings["SmtpServer"])
+            var smtpClient = new SmtpClient(smtpSettings.SmtpServer)
             {
-                Port = int.Parse(smtpSettings["SmtpPort"]),
-                Credentials = new NetworkCredential(smtpSettings["SmtpUser"], smtpSettings["SmtpPass"]),
+                Port = smtpSettings.SmtpPort,
+                Credentials = new NetworkCredential(smtpSettings.SmtpUser, smtpSettings.SmtpPass),
                 EnableSsl = false
             };
 
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(smtpSettings["FromEmail"], smtpSettings["SenderName"]),
+                From = new MailAddress(smtpSettings.FromEmail, smtpSettings.SenderName),
                 Subject = subject,
                 Body = message,
                 IsBodyHtml = true,

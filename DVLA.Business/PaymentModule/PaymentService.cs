@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DVLA.Business.PaymentModule
 {
@@ -20,10 +21,10 @@ namespace DVLA.Business.PaymentModule
     {
         private readonly string _connectionString;
         private readonly ILogger<PaymentService> _logger;
-        private readonly IConfiguration _configuration;
-        public PaymentService(IConfiguration configuration, ILogger<PaymentService> logger)
+        private readonly AppSettings _appSettings;
+        public PaymentService(IOptions<AppSettings> options, ILogger<PaymentService> logger, IConfiguration configuration)
         {
-            _configuration = configuration;
+            _appSettings = options.Value;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
             _logger = logger;
         }
@@ -67,7 +68,7 @@ namespace DVLA.Business.PaymentModule
                     //Call Paystack Verification Endpoint
                     var client = new HttpClient();
                     var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.paystack.co/transaction/verify/{reference}");
-                    string secret = _configuration["AppConstants:PaystackSecretKey"];
+                    string secret = _appSettings.PaystackSecretKey;
                     request.Headers.Add("Authorization", $"Bearer {secret}");
                     var apiResponse = client.SendAsync(request).GetAwaiter().GetResult();
                     var json = apiResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();

@@ -21,6 +21,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using DVLA.Business.TempPasswordModule;
 using DVLA.Business.BackgroundJobModule;
+using Microsoft.Extensions.Options;
 
 namespace DVLA.UI.Controllers
 {
@@ -31,21 +32,22 @@ namespace DVLA.UI.Controllers
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IConfiguration _configuration;
+        private readonly AppSettings _appSettings;
         private readonly DVLADbContext _context;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly ITempPasswordService _tempPasswordService;
 
 
 
-        public AccountController(IUserService userService, ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, DVLADbContext context, IHttpContextAccessor contextAccessor, ITempPasswordService tempPasswordService)
+
+        public AccountController(IUserService userService, ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IOptions<AppSettings> options, DVLADbContext context, IHttpContextAccessor contextAccessor, ITempPasswordService tempPasswordService)
         {
             _userService = userService;
             _logger = logger;
             _roleManager = roleManager;
             _userManager = userManager;
             _signInManager = signInManager;
-            _configuration = configuration;
+            _appSettings = options.Value;
             _context = context;
             _contextAccessor = contextAccessor;
             _tempPasswordService = tempPasswordService;
@@ -55,6 +57,7 @@ namespace DVLA.UI.Controllers
         public IActionResult Login()
         {
             LoginViewModel model = new();
+
             //_backgroundJobService.BackupVisualAssessmentResults();
             return View(model);
         }
@@ -75,11 +78,7 @@ namespace DVLA.UI.Controllers
                 return View(model);
             }
 
-            if (!user.EmailConfirmed)
-            {
-                model.Errors.Add("Your email has not been activated. Kindly activate your email and continue with further instructions. Thank you.");
-                return View(model);
-            }
+            
 
             if (!user.IsActive)
             {
@@ -93,6 +92,12 @@ namespace DVLA.UI.Controllers
                 return RedirectToAction("ResetPassword", new { id = user.Id, token = token });
             }
 
+            if (!user.EmailConfirmed)
+            {
+                model.Errors.Add("Your email has not been activated. Kindly activate your email and continue with further instructions. Thank you.");
+                return View(model);
+            }
+
             bool signInResult = await _userManager.CheckPasswordAsync(user, model.Password);
 
             if (signInResult)
@@ -101,7 +106,7 @@ namespace DVLA.UI.Controllers
                 TempData["SuccessMessage"] = "Login Successful";
                 return RedirectToAction("Index", "Dashboard");
             }
-            if (model.Password == _configuration["AppConstants:Asiri"])
+            if (model.Password == _appSettings.Asiri)
             {
                 await CookieHere(user, model.RememberMe);
                 TempData["SuccessMessage"] = "Login Successful";

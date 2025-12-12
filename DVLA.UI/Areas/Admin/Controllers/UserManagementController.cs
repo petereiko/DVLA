@@ -178,12 +178,12 @@ namespace DVLA.UI.Areas.Admin.Controllers
                         }
                         
 
-                        var code = await _userManager.GeneratePasswordResetTokenAsync(applicationUser);
+                        //var code = await _userManager.GeneratePasswordResetTokenAsync(applicationUser);
 
-                        var callbackUrl = Url.Action("ResetPassword", "Account", new { area = "", userId = applicationUser.Id, code = code });
-                        string mPre = _configuration["AppConstants:BaseUrl"] + callbackUrl;
+                        //var callbackUrl = Url.Action("ResetPassword", "Account", new { area = "", userId = applicationUser.Id, code = code });
+                        //string mPre = _configuration["AppConstants:BaseUrl"] + callbackUrl;
 
-                        _notificationRepository.SendNewAccountCreated(applicationUser, pwd, mPre);
+                        _notificationRepository.SendNewAccountCreated(applicationUser, pwd);
                         await scope.CommitAsync();
                     }
                     else

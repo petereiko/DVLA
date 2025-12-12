@@ -10,6 +10,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -29,12 +30,12 @@ namespace DVLA.Business.SlotModule
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserService _userService;
         private readonly IAuthUser _authUser;
-        private readonly IConfiguration _configuration;
-        public SlotUsageRepository(DVLADbContext context, ILogger<SlotUsageRepository> logger, IConfiguration configuration, UserManager<ApplicationUser> userManager, IUserService userService, IAuthUser authUser)
+        private readonly AppSettings _appSettings;
+        public SlotUsageRepository(DVLADbContext context, IConfiguration configuration, ILogger<SlotUsageRepository> logger, IOptions<AppSettings> options, UserManager<ApplicationUser> userManager, IUserService userService, IAuthUser authUser)
         {
             _context = context;
             _logger = logger;
-            _configuration = configuration;
+            _appSettings = options.Value;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
             _userManager = userManager;
             _userService = userService;
@@ -323,8 +324,8 @@ namespace DVLA.Business.SlotModule
             try
             {
                 var client = new HttpClient();
-                var request = new HttpRequestMessage(HttpMethod.Get, $"{_configuration["AppConstants:VerificationPortal"]}/api/TestResult/get-used-slot/{optometristFirmId}");
-                request.Headers.Add("X-API-KEY", _configuration["AppConstants:ApiKey"]);
+                var request = new HttpRequestMessage(HttpMethod.Get, $"{_appSettings.VerificationPortal}/api/TestResult/get-used-slot/{optometristFirmId}");
+                request.Headers.Add("X-API-KEY", _appSettings.ApiKey);
                 var content = new StringContent("", null, "text/plain");
                 request.Content = content;
                 var response = await client.SendAsync(request);

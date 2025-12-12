@@ -13,7 +13,7 @@ namespace DVLA.VerificationPortal.Application.Interfaces
     {
         Task<IEnumerable<VisualAssessmentResultDto>> GetResultsAsync(string searchTerm);
         Task<TestResultDto> GetResultAsync(string? reference);
-        Task<VisualAssessmentResultDto> GetResultAsync(int id);
+        Task<VisualAssessmentResultDto> GetResultAsync(long id);
         Task<MessageResponse> PushBulk(VisualAssessmentResultDto result);
         Task<MessageResponse> Push(VisualAssessmentResultDto model);
         Task<MessageResponse> VerifyResult(string token, VerifyType verifyType);

@@ -35,20 +35,6 @@ builder.Services.AddSignalR();
 
 
 
-//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-//    .AddCookie(options =>
-//    {
-//        options.Cookie.HttpOnly = true;
-//        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Ensure cookies are only sent over HTTPS
-//        options.ExpireTimeSpan = TimeSpan.FromMinutes(10); // Set cookie expiration time
-//        options.LoginPath = "/Account/Login";
-//        options.AccessDeniedPath = "/Account/AccessDenied";
-//        options.SlidingExpiration = true; // Enables sliding expiration
-//    });
-
-
-
-
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.ExpireTimeSpan = TimeSpan.FromMinutes(120);

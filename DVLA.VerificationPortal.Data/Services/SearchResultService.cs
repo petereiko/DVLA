@@ -120,7 +120,7 @@ namespace DVLA.VerificationPortal.Application.Services
 
         }
 
-        public async Task<VisualAssessmentResultDto> GetResultAsync(int id)
+        public async Task<VisualAssessmentResultDto> GetResultAsync(long id)
         {
             VisualAssessmentResult result = await _visualAssessmentResultRepository.GetSingleAsync(x => x.Id == id, false);
             var model = _mapper.Map<VisualAssessmentResultDto>(result);

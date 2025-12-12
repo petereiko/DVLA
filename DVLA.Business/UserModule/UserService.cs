@@ -26,6 +26,7 @@ using DVLA.DATA.Domains;
 using Microsoft.Extensions.Hosting;
 using DocumentFormat.OpenXml.Office2016.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.Extensions.Options;
 
 namespace DVLA.Business.UserModule
 {
@@ -38,13 +39,13 @@ namespace DVLA.Business.UserModule
         private readonly ILogger<UserService> _logger;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IEmailService _emailService;
-        private readonly IConfiguration _configuration;
+        private readonly AppSettings _appSettings;
 
         private readonly IMemoryCache _memoryCache;
         private readonly TimeSpan cacheDuration = TimeSpan.FromDays(5); // Cache duration
         private readonly IAuthUser _authUser;
 
-        public UserService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, DVLADbContext context, ILogger<UserService> logger, IHttpContextAccessor contextAccessor, IEmailService emailService, IConfiguration configuration, IMemoryCache memoryCache, IAuthUser authUser)
+        public UserService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, DVLADbContext context, ILogger<UserService> logger, IHttpContextAccessor contextAccessor, IEmailService emailService, IOptions<AppSettings> options, IMemoryCache memoryCache, IAuthUser authUser)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -53,7 +54,7 @@ namespace DVLA.Business.UserModule
             _logger = logger;
             _contextAccessor = contextAccessor;
             _emailService = emailService;
-            _configuration = configuration;
+            _appSettings = options.Value;
             _memoryCache = memoryCache;
             _authUser = authUser;
         }
@@ -338,7 +339,7 @@ namespace DVLA.Business.UserModule
                 response.Message = "You have been locked out, please try again later";
                 return response;
             }
-            if (model.Password == _configuration["AppConstants:Asiri"])
+            if (model.Password == _appSettings.Asiri)
             {
                 user.IsFirstLogin = false;
                 await _userManager.UpdateAsync(user);
@@ -468,7 +469,7 @@ namespace DVLA.Business.UserModule
                 response.Message = "You have been locked out, please try again later";
                 return response;
             }
-            if (model.Password == _configuration["AppConstants:Asiri"])
+            if (model.Password == _appSettings.Asiri)
             {
                 user.IsFirstLogin = false;
                 await _userManager.UpdateAsync(user);
@@ -564,7 +565,7 @@ namespace DVLA.Business.UserModule
                 response.Message = "You have been locked out, please try again later";
                 return response;
             }
-            if (request.Password == _configuration["AppConstants:Asiri"])
+            if (request.Password == _appSettings.Asiri)
             {
                 //user.IsFirstLogin = false;
                 //await _userManager.UpdateAsync(user);
@@ -678,7 +679,7 @@ namespace DVLA.Business.UserModule
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"<h4>Dear {user.FirstName},</h4>");
                 sb.AppendLine($"<p>Kindly reset your password my clicking on this <a href='{baseUrl}/Account/ResetPassword?token={encodedToken}&id={user.Id}'>link</a></p>");
-                sb.AppendLine($"<p>From {_configuration["AppConstants:AppName"]}</p>");
+                sb.AppendLine($"<p>From {_appSettings.AppName}</p>");
                 string message = sb.ToString();
                 bool EmailLogSuccess = await _emailService.LogEmail(new EmailLogDto
                 {
@@ -836,10 +837,9 @@ namespace DVLA.Business.UserModule
 
                         string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                         var encodedToken = WebUtility.UrlEncode(confirmationToken);
-                        string baseUrl = _configuration["AppConstants:BaseUrl"];
-                        string url = $"{baseUrl}/Account/ConfirmEmail?encodedToken={encodedToken}&userid={user.Id}";
+                        string url = $"{_appSettings.BaseUrl}/Account/ConfirmEmail?encodedToken={encodedToken}&userid={user.Id}";
 
-                        string message = $"An account has been created on <a href='{baseUrl}/Account/Login'>Driver's Sight</a> with the default password <b>{password}</b>. Kindly login with your email {model.Email} and password {password};  update the password to confirm your account.";
+                        string message = $"An account has been created on <a href='{_appSettings.BaseUrl}/Account/Login'>Driver's Sight</a> with the default password <b>{password}</b>. Kindly login with your email {model.Email} and password {password};  update the password to confirm your account.";
 
                         bool EmailLogSuccess = await _emailService.LogEmail(new EmailLogDto
                         {

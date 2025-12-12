@@ -133,10 +133,10 @@ namespace DVLA.UI.Areas.Customer.Controllers
 
                         var code = _userManager.GeneratePasswordResetTokenAsync(applicationUser);
 
-                        var callbackUrl = Url.Action("ResetPassword", "Account", new { area = "", userId = userId, code = code });
-                        string mPre = $"{_configuration["AppConstants:BaseUrl"]}/{callbackUrl}";
+                        //var callbackUrl = Url.Action("ResetPassword", "Account", new { area = "", userId = userId, code = code });
+                        //string mPre = $"{_configuration["AppConstants:BaseUrl"]}/{callbackUrl}";
 
-                        _notificationRepository.SendNewAccountCreated(applicationUser, pwd, mPre);
+                        _notificationRepository.SendNewAccountCreated(applicationUser, pwd);
                     }
                     else
                     {

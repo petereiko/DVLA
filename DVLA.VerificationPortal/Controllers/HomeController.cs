@@ -43,7 +43,7 @@ namespace DVLA.VerificationPortal.Controllers
         [HttpGet]
         public async Task<ActionResult> Details(string key)
         {
-            int id = Utility.DecryptUrlID(key);
+            long id = Convert.ToInt64(key);
             VisualAssessmentResultDto result = await _searchService.GetResultAsync(id);
             await LogAuditAsync("Fetch Visual Assessment Details");
             return View(result);

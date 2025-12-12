@@ -15,6 +15,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -34,17 +35,17 @@ namespace DVLA.Business.VisualAssessmentResultModule
         private readonly IRepositoryQuery<Slot> _slotRepositoryQuery;
         static readonly object transactionLock = new object();
         private readonly string _connectionString;
-        private readonly IConfiguration _configuration;
+        private readonly AppSettings _appSettings;
         private readonly ISmsRepository _smsRepository;
         private readonly INotificationRepository _notificationRepository;
         private readonly IRepositoryQuery<VisualAssessmentResult> _visualAssessmentResultRepository;
 
 
-        public VisualAssessmentResultService(DVLADbContext context, ILogger<VisualAssessmentResultService> logger, IConfiguration configuration, IHostingEnvironment environment, IRepositoryQuery<Slot> slotRepositoryQuery, ISmsRepository smsRepository, INotificationRepository notificationRepository, IRepositoryQuery<VisualAssessmentResult> visualAssessmentResultRepository)
+        public VisualAssessmentResultService(DVLADbContext context, ILogger<VisualAssessmentResultService> logger, IOptions<AppSettings> options, IConfiguration configuration, IHostingEnvironment environment, IRepositoryQuery<Slot> slotRepositoryQuery, ISmsRepository smsRepository, INotificationRepository notificationRepository, IRepositoryQuery<VisualAssessmentResult> visualAssessmentResultRepository)
         {
             _context = context;
             _logger = logger;
-            _configuration = configuration;
+            _appSettings = options.Value;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
             _environment = environment;
             _slotRepositoryQuery = slotRepositoryQuery;
@@ -815,7 +816,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                     _context.VisualAssessmentResults.Add(visualAssessmentResult);
                     await _context.SaveChangesAsync();
 
-                    if (Convert.ToBoolean(_configuration["AppConstants:Online"]))
+                    if (_appSettings.Online)
                     {
                         Slot slot = _slotRepositoryQuery.FilterAsync(x => x.OptometristFirmId == model.OptometristFirmId && x.AccessType == ((ResultServiceType)model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory)).Result.FirstOrDefault();
                         if (slot == null)

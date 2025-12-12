@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using NPOI.HSSF.Record;
 using System;
@@ -38,20 +39,20 @@ namespace DVLA.Business.SlotModule
         private readonly ILogger<SlotRepository> _logger;
         private readonly IHostingEnvironment _environment;
         private readonly IUserService _userService;
-        private readonly IConfiguration _configuration;
+        private readonly AppSettings _appSettings;
         private readonly IEmailService _emailService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly string _connectionString;
         private readonly IAuthUser _authUser;
         private static readonly object _lock = new object();
 
-        public SlotRepository(DVLADbContext context, ILogger<SlotRepository> logger, IHostingEnvironment environment, IUserService userService, IConfiguration configuration, IEmailService emailService, UserManager<ApplicationUser> userManager, IAuthUser authUser)
+        public SlotRepository(DVLADbContext context, IConfiguration configuration, ILogger<SlotRepository> logger, IHostingEnvironment environment, IUserService userService, IOptions<AppSettings> options, IEmailService emailService, UserManager<ApplicationUser> userManager, IAuthUser authUser)
         {
             _context = context;
             _logger = logger;
             _environment = environment;
             _userService = userService;
-            _configuration = configuration;
+            _appSettings = options.Value;
             _emailService = emailService;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
             _userManager = userManager;
@@ -271,16 +272,15 @@ namespace DVLA.Business.SlotModule
 
                     IList<ApplicationUser> slotManagetUsers = _userManager.GetUsersInRoleAsync(AppRoles.SLOTMANAGER).GetAwaiter().GetResult();
                     slotRequest = _context.SlotRequests.AsNoTracking().Include(x => x.OptometristFirm).FirstOrDefault(x => x.Id == slotRequest.Id);
-                    string callbackUrl = _configuration["AppConstants:BaseUrl"];
 
                     foreach (var slotManagerUser in slotManagetUsers)
                     {
                         _emailService.LogEmail(new()
                         {
                             Email = slotManagerUser.Email,
-                            Message = $"<h3>Dear {slotManagerUser.FullName},</h3><p>A Slot Request from {slotRequest.OptometristFirm.BusinessName} by {currentUser.FullName} has been initiated. Kindly attend.</p><p>Kindly visit <a href='{callbackUrl}'>DVLA</a></p>.<p>Best regards.</p>",
+                            Message = $"<h3>Dear {slotManagerUser.FullName},</h3><p>A Slot Request from {slotRequest.OptometristFirm.BusinessName} by {currentUser.FullName} has been initiated. Kindly attend.</p><p>Kindly visit <a href='{_appSettings.BaseUrl}'>DVLA</a></p>.<p>Best regards.</p>",
                             Subject = "New Slot Request Notification",
-                            Url = callbackUrl
+                            Url = _appSettings.BaseUrl
                         }).GetAwaiter().GetResult();
                     }
                 }
@@ -711,7 +711,6 @@ namespace DVLA.Business.SlotModule
                 _context.SaveChanges();
 
                 var user = _context.ApplicationUsers.FirstOrDefault(x => x.Id == slotRequest.CreatedBy);
-                string callbackUrl = _configuration["AppConstants:BaseUrl"];
                 // _notificationRepository.SlotDeclineNotification(user, slotRequest.Quantity, callbackUrl);
 
 

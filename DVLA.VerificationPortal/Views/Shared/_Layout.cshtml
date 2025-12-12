@@ -1775,7 +1775,7 @@
 
 
 
-    @* @if (TempData["SuccessMessage"] != null)
+     @if (TempData["SuccessMessage"] != null)
     {
         <script>
             Swal.fire({
@@ -1786,7 +1786,7 @@
         </script>
 
         TempData["SuccessMessage"] = null;
-    } *@
+    }
 
     @if (TempData["ErrorMessage"] != null)
     {

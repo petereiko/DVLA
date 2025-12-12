@@ -158,11 +158,10 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
 
 
 
-        public async Task<PaginatedResponse<ApplicationUserDto>> GetUsersAsync(int pageIndex, int pageSize)
+        public async Task<PaginatedResponse<ApplicationUserDto>> GetUsersAsync(int pageIndex1, int pageSize1)
         {
             PaginatedResponse<ApplicationUserDto> result = new();
-            List<ApplicationUser> query = await _userManager.Users.AsNoTracking().Skip((pageIndex - 1) * pageSize)
-            .Take(pageSize).ToListAsync();
+            List<ApplicationUser> query = await _userManager.Users.AsNoTracking().ToListAsync();
 
             List<ApplicationUserDto> Items = new();
 
@@ -170,8 +169,8 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
 
             foreach (var item in query)
             {
-                ApplicationUser applicationUser = _userManager.FindByIdAsync(item.Id).GetAwaiter().GetResult();
-                string roleName = _userManager.GetRolesAsync(applicationUser).Result.FirstOrDefault();
+                //ApplicationUser? applicationUser = _userManager.FindByIdAsync(item.Id).GetAwaiter().GetResult();
+                string? roleName = _userManager.GetRolesAsync(item).GetAwaiter().GetResult().FirstOrDefault();
                 ApplicationUserDto user = _mapper.Map<ApplicationUserDto>(item);
                 user.Role = roleName;
                 Items.Add(user);

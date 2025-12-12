@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using Azure.Core;
 using DVLA.VerificationPortal.Application.Interfaces;
 using DVLA.VerificationPortal.Controllers;
@@ -8,6 +9,7 @@ using DVLA.VerificationPortal.Shared.Requests;
 using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace DVLA.VerificationPortal.Areas.Admin.Controllers
 {
@@ -24,7 +26,7 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
             _mapper = mapper;
         }
 
-        public async Task<IActionResult> Index(int pageIndex = 1, int pageSize = 10)
+        public async Task<IActionResult> Index(int pageIndex = 1, int pageSize = 1000)
         {
             PaginatedResponse<ApplicationUserDto> response = await _userService.GetAllAsync(pageIndex, pageSize);
             await LogAuditAsync("Fetched Users");
@@ -120,6 +122,29 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
                 Value = x.Id
             }).OrderBy(x => x.Text).ToList();
             return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword(string id)
+        {
+            ResetPasswordRequest model = new ResetPasswordRequest();
+            model.ResetToken = await _userService.GeneratePasswordResetTokenAsync(id);
+            model.Id = id;
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
+        {
+            model.ConfirmPassword = model.Password;
+            MessageResponse result = await _userService.ResetPasswordAsync(model);
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = result.Message;
+                return RedirectToAction("Index");
+            }
+            TempData["ErrorMessage"] = result.Message;
+            return RedirectToAction("Index");
         }
     }
 }
