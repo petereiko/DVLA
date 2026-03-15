@@ -1,4 +1,4 @@
-﻿using DVLA.VerificationPortal.Application.Interfaces;
+﻿using DVLA.VerificationPortal.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DVLA.VerificationPortal.Controllers

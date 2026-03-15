@@ -1,12 +1,9 @@
-﻿using AutoMapper;
-using DVLA.VerificationPortal.Application.Interfaces;
-using DVLA.VerificationPortal.Domain.Entities;
-using DVLA.VerificationPortal.Domain.Interfaces;
-using DVLA.VerificationPortal.Infrastructure.Database.Context;
+﻿using DVLA.VerificationPortal.Infrastructure.Database.Context;
 using DVLA.VerificationPortal.Infrastructure.Database.Entities;
+using DVLA.VerificationPortal.Infrastructure.Enums;
+using DVLA.VerificationPortal.Infrastructure.Models;
 using DVLA.VerificationPortal.Shared.Constants;
 using DVLA.VerificationPortal.Shared.DTOs;
-using DVLA.VerificationPortal.Shared.Enums;
 using DVLA.VerificationPortal.Shared.Requests;
 using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.AspNetCore.Authentication;
@@ -38,18 +35,16 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
         private readonly IGenericRepository<EmailLog> _emailLogRepository;
         private readonly ILogger<UserRepository> _logger;
 
-        private readonly IMapper _mapper;
 
         //public ApplicationUserDto? UserData => throw new NotImplementedException();
 
 
 
-        public UserRepository(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, IMapper mapper, IConfiguration configuration, IHttpContextAccessor contextAccessor, ApplicationDbContext context, IGenericRepository<EmailLog> emailLogRepository, ILogger<UserRepository> logger)
+        public UserRepository(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, IHttpContextAccessor contextAccessor, ApplicationDbContext context, IGenericRepository<EmailLog> emailLogRepository, ILogger<UserRepository> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
-            _mapper = mapper;
             _configuration = configuration;
             _contextAccessor = contextAccessor;
             _context = context;
@@ -57,51 +52,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             _logger = logger;
         }
 
-        public async Task SeedRoles()
-        {
-            string[] roles = { EnumHelper.GetEnumDescription(Role.Administrator), EnumHelper.GetEnumDescription(Role.Verifier), EnumHelper.GetEnumDescription(Role.SuperAdmin), EnumHelper.GetEnumDescription(Role.PinVendor) };
-            foreach (string role in roles)
-            {
-                bool roleExists = await _roleManager.RoleExistsAsync(role);
-                if (!roleExists)
-                {
-                    await _roleManager.CreateAsync(new() { Id = Guid.NewGuid().ToString(), Name = role });
-                }
-            }
-        }
 
-        public async Task SeedSuperAdmin()
-        {
-            string email = "peterayebhere@gmail.com";
-            ApplicationUser? user = await _userManager.FindByEmailAsync(email);
-            if (user != null) return;
-
-            user = new()
-            {
-                CreatedDate = DateTime.Now,
-                Email = email,
-                EmailConfirmed = true,
-                IsActive = true,
-                PhoneNumber = "07068352430",
-                PhoneNumberConfirmed = true,
-                UserName = email,
-                IsFirstLogin = false,
-                Id = Guid.NewGuid().ToString()
-            };
-
-            IdentityResult result = await _userManager.CreateAsync(user, "Securityr&d1");
-            if (result.Succeeded)
-            {
-                var roleName = EnumHelper.GetEnumDescription(Role.SuperAdmin);
-                var roleExists = await _roleManager.RoleExistsAsync(roleName);
-                if (!roleExists)
-                {
-                    await _roleManager.CreateAsync(new ApplicationRole { Name = roleName, Id = Guid.NewGuid().ToString() });
-                }
-
-                await _userManager.AddToRoleAsync(user, roleName);
-            }
-        }
 
         public async Task<List<ApplicationUserDto>> GetUsersInRole(string roleName)
         {
@@ -141,49 +92,49 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
         {
             ApplicationUser? user = await _userManager.FindByEmailAsync(email);
             if (user == null) return null;
-            ApplicationUserDto? model = _mapper.Map<ApplicationUserDto>(user);
+            ApplicationUserDto? model = new()
+            {
+                CentreName = user.CentreName,
+                CreatedDate = user.CreatedDate,
+                Email = email,
+                EmailConfirmed = user.EmailConfirmed,
+                Id = user.Id,
+                IsActive = user.IsActive,
+                IsFirstLogin = user.IsFirstLogin
+            };
             IList<string> roles = await _userManager.GetRolesAsync(user);
             model.Role = roles.FirstOrDefault();
             return model;
         }
 
-        public async Task<ApplicationUserDto> GetUserById(string id)
-        {
-            ApplicationUser? user = await _userManager.FindByIdAsync(id);
-            if (user == null) throw new Exception("User not found");
-            ApplicationUserDto? model = _mapper.Map<ApplicationUserDto>(user);
-            model.Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
-            return model;
-        }
 
 
+        //public async Task<PaginatedResponse<ApplicationUserDto>> GetUsersAsync(int pageIndex1, int pageSize1)
+        //{
+        //    PaginatedResponse<ApplicationUserDto> result = new();
+        //    List<ApplicationUser> query = await _userManager.Users.AsNoTracking().ToListAsync();
 
-        public async Task<PaginatedResponse<ApplicationUserDto>> GetUsersAsync(int pageIndex1, int pageSize1)
-        {
-            PaginatedResponse<ApplicationUserDto> result = new();
-            List<ApplicationUser> query = await _userManager.Users.AsNoTracking().ToListAsync();
+        //    List<ApplicationUserDto> Items = new();
 
-            List<ApplicationUserDto> Items = new();
+        //    var roles = _roleManager.Roles;
 
-            var roles = _roleManager.Roles;
+        //    foreach (var item in query)
+        //    {
+        //        //ApplicationUser? applicationUser = _userManager.FindByIdAsync(item.Id).GetAwaiter().GetResult();
+        //        string? roleName = _userManager.GetRolesAsync(item).GetAwaiter().GetResult().FirstOrDefault();
+        //        ApplicationUserDto user = _mapper.Map<ApplicationUserDto>(item);
+        //        user.Role = roleName;
+        //        Items.Add(user);
+        //    }
 
-            foreach (var item in query)
-            {
-                //ApplicationUser? applicationUser = _userManager.FindByIdAsync(item.Id).GetAwaiter().GetResult();
-                string? roleName = _userManager.GetRolesAsync(item).GetAwaiter().GetResult().FirstOrDefault();
-                ApplicationUserDto user = _mapper.Map<ApplicationUserDto>(item);
-                user.Role = roleName;
-                Items.Add(user);
-            }
+        //    result.Items = Items.OrderByDescending(x => x.CreatedDate);
+        //    return result;
+        //}
 
-            result.Items = Items.OrderByDescending(x=>x.CreatedDate);
-            return result;
-        }
-
-        public List<RoleDto> GetAllRoles()
-        {
-            return _mapper.Map<List<RoleDto>>(_roleManager.Roles);
-        }
+        //public List<RoleDto> GetAllRoles()
+        //{
+        //    return _mapper.Map<List<RoleDto>>(_roleManager.Roles);
+        //}
 
         public async Task<MessageResponse> Login(LoginRequest model)
         {
@@ -253,7 +204,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             return response;
         }
 
-        
+
 
         public async Task<MessageResponse> Logout()
         {
@@ -361,9 +312,9 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    _logger.LogError(ex.Message, ex);   
+                    _logger.LogError(ex.Message, ex);
                 }
-               
+
             }
             return response;
         }
@@ -485,10 +436,10 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             return response;
         }
 
-        public async Task<List<ApplicationUserDto>> GetAllUsers()
-        {
-            return _mapper.Map<List<ApplicationUserDto>>(_userManager.Users);
-        }
+        //public async Task<List<ApplicationUserDto>> GetAllUsers()
+        //{
+        //    return _mapper.Map<List<ApplicationUserDto>>(_userManager.Users);
+        //}
 
         public async Task<List<string>> GetRolesAsync(ApplicationUserDto user)
         {

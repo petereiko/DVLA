@@ -4,11 +4,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using DVLA.VerificationPortal.Domain.Interfaces;
 using DVLA.VerificationPortal.Infrastructure.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.Data.SqlClient;
 
 namespace DVLA.VerificationPortal.Infrastructure.Repositories
@@ -25,32 +23,32 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public async Task<PaginatedResponse<T>> GetPagedAsync(Expression<Func<T, bool>>? filter, int pageIndex, int pageSize, params Expression<Func<T, object>>[] includes)
-        {
-            IQueryable<T> query = _dbSet.AsNoTracking();
+        //public async Task<PaginatedResponse<T>> GetPagedAsync(Expression<Func<T, bool>>? filter, int pageIndex, int pageSize, params Expression<Func<T, object>>[] includes)
+        //{
+        //    IQueryable<T> query = _dbSet.AsNoTracking();
 
-            if (includes != null)
-            {
-                foreach (var include in includes)
-                {
-                    query = query.Include(include);
-                }
-            }
+        //    if (includes != null)
+        //    {
+        //        foreach (var include in includes)
+        //        {
+        //            query = query.Include(include);
+        //        }
+        //    }
 
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
+        //    if (filter != null)
+        //    {
+        //        query = query.Where(filter);
+        //    }
 
-            int totalCount = await query.CountAsync();
+        //    int totalCount = await query.CountAsync();
 
-            var items = await query
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+        //    var items = await query
+        //        .Skip((pageIndex - 1) * pageSize)
+        //        .Take(pageSize)
+        //        .ToListAsync();
 
-            return new PaginatedResponse<T>(items, totalCount, pageIndex, pageSize);
-        }
+        //    return new PaginatedResponse<T>(items, totalCount, pageIndex, pageSize);
+        //}
 
         public async Task<T> GetByIdAsync(object id)
         {
@@ -67,15 +65,26 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<IEnumerable<T>> FilterAsync(Expression<Func<T, bool>> predicate, bool isTracking = true, params Expression<Func<T, object>>[] includes)
+
+
+
+        public async Task<IEnumerable<T>> FilterAsync(
+    Expression<Func<T, bool>> predicate,
+    bool isTracking = true,
+    int? take = null,
+    params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = isTracking ? _dbSet.Where(predicate) : _dbSet.AsNoTracking().Where(predicate);
+
             if (includes != null)
-            {
                 query = includes.Aggregate(query, (current, include) => current.Include(include));
-            }
+
+            if (take.HasValue)
+                query = query.Take(take.Value);
+
             return await query.ToListAsync();
         }
+
 
         public async Task<T> AddAsync(T entity)
         {

@@ -1,6 +1,5 @@
 ﻿using DVLA.VerificationPortal.API.Security;
-using DVLA.VerificationPortal.Application.Interfaces;
-using DVLA.VerificationPortal.Domain.Entities;
+using DVLA.VerificationPortal.Infrastructure.Repositories;
 using DVLA.VerificationPortal.Shared.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

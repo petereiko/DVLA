@@ -1,6 +1,6 @@
-﻿using DVLA.VerificationPortal.Application.Interfaces;
-using DVLA.VerificationPortal.CustomAttributes;
-using DVLA.VerificationPortal.Domain.Entities;
+﻿using DVLA.VerificationPortal.CustomAttributes;
+using DVLA.VerificationPortal.Infrastructure.Database.Entities;
+using DVLA.VerificationPortal.Infrastructure.Repositories;
 using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.AspNetCore.Http;

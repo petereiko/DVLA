@@ -6,15 +6,12 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System.Globalization;
 using DVLA.VerificationPortal.Infrastructure.Database.Entities;
 using DVLA.VerificationPortal.Infrastructure.Database.Context;
-using DVLA.VerificationPortal.Domain.Interfaces;
 using DVLA.VerificationPortal.Infrastructure.Repositories;
-using DVLA.VerificationPortal.Application.Interfaces;
-using DVLA.VerificationPortal.Infrastructure.MappingProfiles;
 using DVLA.VerificationPortal.Infrastructure;
-using DVLA.VerificationPortal.Application;
 using DVLA.VerificationPortal.Middleware;
-using DVLA.VerificationPortal.Shared.MappingProfiles;
 using DVLA.VerificationPortal;
+using Quartz;
+using DVLA.VerificationPortal.BackgroundJobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,21 +31,46 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddSignalR();
 
 
-
-builder.Services.ConfigureApplicationCookie(options =>
+builder.Services.AddQuartz(q =>
 {
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
-    options.SlidingExpiration = true;
-    options.Cookie.Name = "AuthDemo.Cookie";
-    options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Logout";
-    options.AccessDeniedPath = "/Account/AccessDenied";
+    var jobKey = new JobKey(nameof(GenesysJob));
+
+    q.AddJob<GenesysJob>(opts => opts
+        .WithIdentity(jobKey)
+        .WithDescription("Queries and processes pending deposits")
+    );
+
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("DepositQueryJob-Trigger")
+        .WithCronSchedule("0 */2 * * * ?") // every 2 mins (Quartz uses 6-part cron)
+        .WithDescription("Runs every 5 minutes")
+    );
 });
+
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
 
 // Add Identity
 builder.Services.AddScoped<UserManager<ApplicationUser>>();
 builder.Services.AddScoped<RoleManager<ApplicationRole>>();
 builder.Services.AddScoped<SignInManager<ApplicationUser>>();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "MyApp.Auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(8);
+        options.SlidingExpiration = true;
+        options.LoginPath = "/account/login";
+        options.LogoutPath = "/account/logout";
+        options.AccessDeniedPath = "/account/access-denied";
+    });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
@@ -68,6 +90,16 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 .AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, string, ApplicationUserRole, IdentityRoleClaim<string>>>()
 .AddDefaultTokenProviders();
 
+builder.Services.AddControllers();
+
+builder.Services.AddTransient<IApiClientService, ApiClientService>();
+builder.Services.AddTransient<IAuditRepo, AuditRepo>();
+builder.Services.AddTransient<IOptometristFirmSynchronization, OptometristFirmSynchronization>();
+builder.Services.AddTransient<IReportService, ReportService>();
+builder.Services.AddTransient<ISearchResultService, SearchResultService>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IUserService, UserService>();
+
 
 
 
@@ -80,17 +112,11 @@ builder.Services.AddSession(options =>
 builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
 
-builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomClaimsPrincipalFactory>();
+//builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomClaimsPrincipalFactory>();
+builder.Services.AddTransient<IUserService, UserService>();
 
 builder.Services.AddInfrastructureServices();
-builder.Services.AddApplicationServices();
 
-
-builder.Services.AddAutoMapper(config =>
-{
-    config.AddMaps(typeof(InfrastructureMappingProfile));
-    config.AddMaps(typeof(SharedMappingProfile));
-});
 
 
 
@@ -137,9 +163,6 @@ using (var scope = app.Services.CreateScope())
     // Resolve the scoped service
     var userService = scopedProvider.GetRequiredService<IUserService>();
 
-    // Call the method on the scoped service
-    await userService.SeedRolesAsync();
-    await userService.SeedSuperAdminAsync();
 }
 
 app.Run();

@@ -26,6 +26,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
+		<PackageReference Include="Quartz.AspNetCore" Version="3.16.0" />
 	</ItemGroup>
 
 </Project>

@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using DVLA.VerificationPortal.Domain.Interfaces;
-using DVLA.VerificationPortal.Infrastructure.Database.Entities;
+﻿using DVLA.VerificationPortal.Infrastructure.Database.Entities;
 using DVLA.VerificationPortal.Shared.DTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -11,16 +9,13 @@ namespace DVLA.VerificationPortal
     public class CustomClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser, ApplicationRole>
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IMapper _mapper;
         public CustomClaimsPrincipalFactory(
         UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager,
-        IOptions<IdentityOptions> optionsAccessor,
-        IMapper mapper)
+        IOptions<IdentityOptions> optionsAccessor)
         : base(userManager, roleManager, optionsAccessor)
         {
             _userManager = userManager;
-            _mapper = mapper;
         }
 
         protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
@@ -38,7 +33,19 @@ namespace DVLA.VerificationPortal
 
         private async Task<ApplicationUserDto> GetUserDependencies(ApplicationUser user)
         {
-            ApplicationUserDto model = _mapper.Map<ApplicationUserDto>(user);
+            ApplicationUserDto model = new()
+            {
+                CentreName = user.CentreName,
+                CreatedDate = user.CreatedDate,
+                Email = user.Email,
+                EmailConfirmed = user.EmailConfirmed,
+                Id = user.Id,
+                IsActive = user.IsActive,
+                IsFirstLogin = user.IsFirstLogin,
+                LastLoginDate = user.LastLoginDate,
+                PhoneNumber = user.PhoneNumber,
+                UserName = user.UserName
+            };
             IList<string> userRoles = await _userManager.GetRolesAsync(user);
             model.Role = userRoles.FirstOrDefault();
             return model;

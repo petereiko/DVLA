@@ -1,4 +1,4 @@
-﻿using DVLA.VerificationPortal.Domain.Entities;
+﻿using DVLA.VerificationPortal.Infrastructure.Database.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 

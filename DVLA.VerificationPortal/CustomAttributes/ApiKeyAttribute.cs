@@ -1,5 +1,5 @@
-﻿using DVLA.VerificationPortal.Application.Interfaces;
-using DVLA.VerificationPortal.Domain.Entities;
+﻿using DVLA.VerificationPortal.Infrastructure.Database.Entities;
+using DVLA.VerificationPortal.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 

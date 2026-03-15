@@ -188,6 +188,7 @@ namespace DVLA.Business.BackgroundJobModule
                         if (response.IsSuccessStatusCode)
                         {
                             var jsonSuccess = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            _logger.LogInformation($"SUCCESS Response JSON: {jsonSuccess}");
                             MessageResponse messageResponse = JsonConvert.DeserializeObject<MessageResponse>(jsonSuccess);
                             if (messageResponse.Success)
                             {
@@ -218,7 +219,7 @@ namespace DVLA.Business.BackgroundJobModule
                     {
                         _logger.LogInformation("Could not reach the Push API");
                         _logger.LogError(ex.Message, ex);
-                        break;
+                        continue;
                     }
 
                     

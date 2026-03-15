@@ -1,6 +1,4 @@
-﻿using DVLA.VerificationPortal.Application.Interfaces;
-using DVLA.VerificationPortal.Domain.Interfaces;
-using DVLA.VerificationPortal.Infrastructure.Database.Context;
+﻿using DVLA.VerificationPortal.Infrastructure.Database.Context;
 using DVLA.VerificationPortal.Infrastructure.Database.Entities;
 using DVLA.VerificationPortal.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;

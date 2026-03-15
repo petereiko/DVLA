@@ -1,0 +1,25 @@
+﻿using DVLA.VerificationPortal.Shared.DTOs;
+using DVLA.VerificationPortal.Shared.Enums;
+using DVLA.VerificationPortal.Shared.Responses;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DVLA.VerificationPortal.Infrastructure.Repositories
+{
+    public interface ISearchResultService
+    {
+        Task<IEnumerable<VisualAssessmentResultDto>> GetResultsAsync(string searchTerm);
+        Task<TestResultDto> GetResultAsync(string? reference);
+        Task<VisualAssessmentResultDto> GetAssessmentResultAsync(string reference);
+        Task ProcessGenesysAsync();
+        Task<MessageResponse> PushBulk(VisualAssessmentResultDto result);
+        Task<MessageResponse> Push(VisualAssessmentResultDto model);
+       // Task<MessageResponse> VerifyResult(string token, VerifyType verifyType);
+        Task<MessageResponse> UpdateAuthDoctor(UpdateDocRequestDto model);
+        Task<MessageResponse<string>> VerifyResultByReferenceAsync(string referenceNumber, VerifyType verifyType);
+       // Task<MessageResponse<string>> VerifyResultByReferenceAsync(string referenceNumber, VerifyType verifyType);
+    }
+}

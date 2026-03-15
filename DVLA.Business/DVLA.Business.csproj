@@ -13,6 +13,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
+    <PackageReference Include="NLog" Version="6.1.0" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="6.1.1" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="6.1.1" />
   </ItemGroup>
 
   <ItemGroup>

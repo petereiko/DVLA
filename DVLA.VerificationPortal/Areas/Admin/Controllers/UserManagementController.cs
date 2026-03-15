@@ -1,8 +1,8 @@
-﻿using AutoMapper;
-using Azure;
+﻿using Azure;
 using Azure.Core;
-using DVLA.VerificationPortal.Application.Interfaces;
 using DVLA.VerificationPortal.Controllers;
+using DVLA.VerificationPortal.Infrastructure.Database.Entities;
+using DVLA.VerificationPortal.Infrastructure.Repositories;
 using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Enums;
 using DVLA.VerificationPortal.Shared.Requests;
@@ -18,12 +18,10 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
     public class UserManagementController : BaseController
     {
         private readonly IUserService _userService;
-        private readonly IMapper _mapper;
 
-        public UserManagementController(IUserService userService, IMapper mapper, IAuditRepo auditRepo):base(auditRepo)
+        public UserManagementController(IUserService userService, IAuditRepo auditRepo):base(auditRepo)
         {
             _userService = userService;
-            _mapper = mapper;
         }
 
         public async Task<IActionResult> Index(int pageIndex = 1, int pageSize = 1000)
@@ -34,10 +32,10 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             OnboardUserRequest request = new();
-            request.Roles = _userService.GetAllRoles().Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            request.Roles = (await _userService.GetAllRoles()).Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
             {
                 Text = x.Name,
                 Value = x.Id
@@ -53,7 +51,7 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
             {
                 return RedirectToAction("Index", "Admin", new { area = "Admin" });
             }
-            model.Roles = _userService.GetAllRoles().Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            model.Roles = (await _userService.GetAllRoles()).Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
             {
                 Text = x.Name,
                 Value = x.Id
@@ -65,7 +63,7 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
                 return View(model);
             }
 
-            ApplicationUserDto userDto = await _userService.GetUserByEmailAsync(model.Email!);
+            ApplicationUser? userDto = await _userService.GetUserByEmail(model.Email!);
 
             if (userDto != null)
             {
@@ -88,9 +86,21 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
-            ApplicationUserDto user = await _userService.GetUserByIdAsync(id);
-            EditUserRequest request = _mapper.Map<EditUserRequest>(user);
-            request.Roles = _userService.GetAllRoles().Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            ApplicationUser user = await _userService.GetUserByIdAsync(id);
+
+            IList<string> roles = await _userService.GetUserRoles(user);
+
+            EditUserRequest request = new()
+            {
+                Email = user.Email,
+                CentreName = user.CentreName,
+                EmailConfirmed = user.EmailConfirmed,
+                Role = roles.FirstOrDefault()!,
+                Id = id,
+                IsActive = user.IsActive,
+                PhoneNumber = user.PhoneNumber
+            };
+            request.Roles = (await _userService.GetAllRoles()).Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
             {
                 Text = x.Name,
                 Value = x.Id
@@ -108,15 +118,15 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
                 return View(model);
             }
 
-            EditUserRequest request = _mapper.Map<EditUserRequest>(model);
-            MessageResponse response = await _userService.UpdateAsync(request);
+            //EditUserRequest request = _mapper.Map<EditUserRequest>(model);
+            MessageResponse response = await _userService.EditUser(model);
             if (response.Success)
             {
                 await LogAuditAsync("Edited Users");
                 TempData["SuccessMessage"] = response.Message;
                 return RedirectToAction("Index");
             }
-            model.Roles = _userService.GetAllRoles().Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            model.Roles = (await _userService.GetAllRoles()).Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
             {
                 Text = x.Name,
                 Value = x.Id
@@ -128,7 +138,8 @@ namespace DVLA.VerificationPortal.Areas.Admin.Controllers
         public async Task<IActionResult> ResetPassword(string id)
         {
             ResetPasswordRequest model = new ResetPasswordRequest();
-            model.ResetToken = await _userService.GeneratePasswordResetTokenAsync(id);
+            var user = await _userService.GetUserByIdAsync(id);
+            model.ResetToken = await _userService.GeneratePasswordResetTokenAsync(user);
             model.Id = id;
             return View(model);
         }

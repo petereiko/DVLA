@@ -1,4 +1,6 @@
-using DVLA.VerificationPortal.Application.Interfaces;
+using DVLA.VerificationPortal.Infrastructure;
+using DVLA.VerificationPortal.Infrastructure.Models;
+using DVLA.VerificationPortal.Infrastructure.Repositories;
 using DVLA.VerificationPortal.Models;
 using DVLA.VerificationPortal.Shared;
 using DVLA.VerificationPortal.Shared.DTOs;
@@ -16,14 +18,13 @@ namespace DVLA.VerificationPortal.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ISearchResultService _searchService;
-        private readonly IAuthUser _authUser;
         private readonly IAuditRepo _auditRepo;
+       
 
-        public HomeController(ILogger<HomeController> logger, ISearchResultService searchService, IAuthUser authUser, IAuditRepo auditRepo) : base(auditRepo)
+        public HomeController(ILogger<HomeController> logger, ISearchResultService searchService, IAuditRepo auditRepo) : base(auditRepo)
         {
             _logger = logger;
             _searchService = searchService;
-            _authUser = authUser;
             _auditRepo = auditRepo;
         }
 
@@ -43,26 +44,25 @@ namespace DVLA.VerificationPortal.Controllers
         [HttpGet]
         public async Task<ActionResult> Details(string key)
         {
-            long id = Convert.ToInt64(key);
-            VisualAssessmentResultDto result = await _searchService.GetResultAsync(id);
+            VisualAssessmentResultDto result = await _searchService.GetAssessmentResultAsync(key);
             await LogAuditAsync("Fetch Visual Assessment Details");
             return View(result);
         }
 
-        [HttpGet]
-        public async Task<JsonResult> VerifyResult(string token)
-        {
-            MessageResponse response = new();
-            if (_authUser.Role != EnumHelper.GetEnumDescription(Role.Verifier))//274556
+        //[HttpGet]
+        //public async Task<JsonResult> VerifyResult(string token)
+        //{
+        //    MessageResponse response = new();
+        //    if(_userProperty.Role != EnumHelper.GetEnumDescription(Role.Verifier))//274556
 
-            {
-                response.Message = "You are not a Verifier";
-                return Json(response);
-            }
-            response = await _searchService.VerifyResult(token, VerifyType.WEB);
+        //    {
+        //        response.Message = "You are not a Verifier";
+        //        return Json(response);
+        //    }
+        //    response = await _searchService.VerifyResultByReference(token, VerifyType.WEB);
             
-            return Json(response);
-        }
+        //    return Json(response);
+        //}
 
         public IActionResult Privacy()
         {

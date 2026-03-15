@@ -1,5 +1,5 @@
-﻿using DVLA.VerificationPortal.Application.Interfaces;
-using DVLA.VerificationPortal.CustomAttributes;
+﻿using DVLA.VerificationPortal.CustomAttributes;
+using DVLA.VerificationPortal.Infrastructure.Repositories;
 using DVLA.VerificationPortal.Models;
 using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Responses;
@@ -51,12 +51,6 @@ namespace DVLA.VerificationPortal.Controllers.APIs
             return Ok(new { resultConclusion = response.Result, success = response.Success, message = response.Message });
         }
 
-        //[HttpGet("get-used-slot/{optometristFirmId}")]
-        //public async Task<IActionResult> GetUsedSlot(int optometristFirmId)
-        //{
-        //    await AuditLogAsync();
-        //    int usedSlots = await _reportService.GetUsedSlot(optometristFirmId);
-        //    return Ok(new { status = true, data = usedSlots });
-        //}
+        
     }
 }

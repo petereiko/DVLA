@@ -20,9 +20,13 @@ namespace DVLA.VerificationPortal.Domain.Interfaces
 
         IEnumerable<T> GetAll(bool isTracking = true, params Expression<Func<T, object>>[] includes);
 
+        Task<IEnumerable<T>> FilterAsync(
+    Expression<Func<T, bool>> predicate,
+    bool isTracking = true,
+    int? take = null,
+    params Expression<Func<T, object>>[] includes);
 
-
-        Task<IEnumerable<T>> FilterAsync(Expression<Func<T, bool>> predicate, bool isTracking = true, params Expression<Func<T, object>>[] includes);
+        //Task<IEnumerable<T>> FilterAsync(Expression<Func<T, bool>> predicate, bool isTracking = true, params Expression<Func<T, object>>[] includes);
         IEnumerable<T> Filter(Expression<Func<T, bool>> predicate, bool isTracking = true, params Expression<Func<T, object>>[] includes);
 
 

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using DVLA.VerificationPortal.Application.Interfaces;
 using DVLA.VerificationPortal.Controllers;
+using DVLA.VerificationPortal.Infrastructure.Repositories;
 using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;

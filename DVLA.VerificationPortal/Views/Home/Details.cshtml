@@ -158,8 +158,7 @@
                             <div class="col-sm-4">
                                 @if (!Model.IsVerified)
                                 {
-                                    string token = Utility.EncryptUrlID((int)Model.Id);
-                                    <button onclick="VerifyResult('@token')" class="btn btn-primary btn-sm right">Verify Eye Test Result</button>
+                                    <button onclick="VerifyResult('@Model.ReferenceNumber')" class="btn btn-primary btn-sm right">Verify Eye Test Result</button>
                                 }
                                 else
                                 {

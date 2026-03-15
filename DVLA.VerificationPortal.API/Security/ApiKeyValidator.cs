@@ -1,7 +1,7 @@
 ﻿
 using DVLA.VerificationPortal.API.Security;
-using DVLA.VerificationPortal.Application.Interfaces;
-using DVLA.VerificationPortal.Domain.Entities;
+using DVLA.VerificationPortal.Infrastructure.Database.Entities;
+using DVLA.VerificationPortal.Infrastructure.Repositories;
 
 namespace AtlasWallet.Api.Security
 {
@@ -18,5 +18,7 @@ namespace AtlasWallet.Api.Security
             ApiClient result = _apiClientService.AuthenticateAsync(apiKey).GetAwaiter().GetResult();
             return result;
         }
+
+        
     }
 }

@@ -1,5 +1,4 @@
 
-using DVLA.VerificationPortal.Application;
 using DVLA.VerificationPortal.Infrastructure;
 using DVLA.VerificationPortal.Infrastructure.Database.Context;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -7,8 +6,6 @@ using Microsoft.AspNetCore.Identity;
 using DVLA.VerificationPortal.Infrastructure.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using DVLA.VerificationPortal.Infrastructure.MappingProfiles;
-using DVLA.VerificationPortal.Shared.MappingProfiles;
 using AtlasWallet.Api.Security;
 using DVLA.VerificationPortal.API.Security;
 
@@ -58,17 +55,9 @@ namespace DVLA.VerificationPortal.API
             .AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, string, ApplicationUserRole, IdentityRoleClaim<string>>>()
             .AddDefaultTokenProviders();
 
-            builder.Services.AddApplicationServices();
             builder.Services.AddInfrastructureServices();
 
             
-
-            builder.Services.AddAutoMapper(config =>
-            {
-                config.AddMaps(typeof(InfrastructureMappingProfile));
-                config.AddMaps(typeof(SharedMappingProfile));
-            });
-
 
 
             builder.Services.AddAuthorization();

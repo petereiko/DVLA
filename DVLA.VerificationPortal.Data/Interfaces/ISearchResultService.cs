@@ -1,4 +1,5 @@
-﻿using DVLA.VerificationPortal.Shared.DTOs;
+﻿using DVLA.VerificationPortal.Domain.Entities;
+using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Enums;
 using DVLA.VerificationPortal.Shared.Responses;
 using System;
@@ -14,10 +15,14 @@ namespace DVLA.VerificationPortal.Application.Interfaces
         Task<IEnumerable<VisualAssessmentResultDto>> GetResultsAsync(string searchTerm);
         Task<TestResultDto> GetResultAsync(string? reference);
         Task<VisualAssessmentResultDto> GetResultAsync(long id);
+        Task<VisualAssessmentResultDto> GetResultByReferenceAsync(string reference);
         Task<MessageResponse> PushBulk(VisualAssessmentResultDto result);
         Task<MessageResponse> Push(VisualAssessmentResultDto model);
         Task<MessageResponse> VerifyResult(string token, VerifyType verifyType);
+        Task<MessageResponse> VerifyResultByReference(string token, VerifyType verifyType);
         Task<MessageResponse> UpdateAuthDoctor(UpdateDocRequestDto model);
         Task<MessageResponse<string>> VerifyResultByReferenceAsync(string referenceNumber, VerifyType verifyType);
+        Task<DvlaResponse> SendResultToGenesysAsync(VisualAssessmentResult model, CancellationToken cancellationToken);
+        Task ProcessGenesysAsync();
     }
 }

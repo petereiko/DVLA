@@ -1,4 +1,5 @@
-﻿using DVLA.VerificationPortal.Application.Interfaces;
+﻿using DVLA.VerificationPortal.Infrastructure.Database.Entities;
+using DVLA.VerificationPortal.Infrastructure.Repositories;
 using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Requests;
 using DVLA.VerificationPortal.Shared.Responses;
@@ -39,16 +40,16 @@ namespace DVLA.VerificationPortal.Controllers
             }
             
 
-            ApplicationUserDto userModel = await _userService.GetUserByEmailAsync(model.Email);
-            if (userModel == null)
+            ApplicationUser? user = await _userService.GetUserByEmail(model.Email);
+            if (user == null)
             {
                 model.Errors.Add("Invalid Email/Password");
                 return View(model);
             }
-            if (userModel.IsFirstLogin)
+            if (user.IsFirstLogin)
             {
-                string token = await _userService.GeneratePasswordResetTokenAsync(userModel.Id);
-                return RedirectToAction("ResetPassword", new { id = userModel.Id, token = token });
+                string token = await _userService.GeneratePasswordResetTokenAsync(user);
+                return RedirectToAction("ResetPassword", new { id = user.Id, token = token });
             }
             MessageResponse loginResult = await _userService.LoginAsync(model);
             if (loginResult.Success)
@@ -107,7 +108,7 @@ namespace DVLA.VerificationPortal.Controllers
         [HttpGet]
         public async Task<IActionResult> ConfirmEmail(string encodedToken, string userid)
         {
-            var result = await _userService.ConfirmEmailAsync(encodedToken, userid);
+            var result = await _userService.ConfirmEmail(encodedToken, userid);
             if (result)
             {
                 TempData["SuccessMessage"] = "Your account has been successfully activated.";
@@ -172,7 +173,7 @@ namespace DVLA.VerificationPortal.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            await _userService.LogoutAsync();
+            await _userService.Logout();
             return RedirectToAction("Login");
         }
 
