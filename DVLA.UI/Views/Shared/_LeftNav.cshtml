@@ -8,24 +8,33 @@
         <!-- Sidebar scroll-->
         <nav class="sidebar-nav scroll-sidebar simplebar-scrollable-y" data-simplebar="init">
             <div class="simplebar-wrapper" style="margin: 0px;">
-                <div class="simplebar-height-auto-observer-wrapper"><div class="simplebar-height-auto-observer"></div></div><div class="simplebar-mask">
+                <div class="simplebar-height-auto-observer-wrapper">
+                    <div class="simplebar-height-auto-observer"></div>
+                </div>
+                <div class="simplebar-mask">
                     <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
-                        <div class="simplebar-content-wrapper" tabindex="0" role="region" aria-label="scrollable content" style="height: 100%; overflow: hidden scroll;">
+                        <div class="simplebar-content-wrapper" tabindex="0" role="region"
+                            aria-label="scrollable content" style="height: 100%; overflow: hidden scroll;">
                             <div class="simplebar-content" style="padding: 0px;">
 
                                 <ul id="sidebarnav">
                                     <li class="nav-small-cap">
-                                        <iconify-icon icon="solar:menu-dots-bold" class="nav-small-cap-icon fs-4"></iconify-icon>
+                                        <iconify-icon icon="solar:menu-dots-bold"
+                                            class="nav-small-cap-icon fs-4"></iconify-icon>
                                         <span class="hide-menu">Applications</span>
                                     </li>
 
 
                                     <!--Dasboard-->
                                     <li class="sidebar-item">
-                                        @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.SLOTMANAGER) || User.IsInRole(AppRoles.FINANCE) || User.IsInRole(AppRoles.FACILITYOWNER) || User.IsInRole(AppRoles.OPTOMETRIST))
+                                        @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.SLOTMANAGER)
+                                                                                || User.IsInRole(AppRoles.FINANCE) || User.IsInRole(AppRoles.FACILITYOWNER) ||
+                                                                                User.IsInRole(AppRoles.OPTOMETRIST))
                                         {
-                                            <a asp-action="Index" asp-controller="Dashboard" asp-area="" class="sidebar-link">
-                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                            <a asp-action="Index" asp-controller="Dashboard" asp-area=""
+                                                class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear"
+                                                    class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Dashboard</span>
                                             </a>
                                         }
@@ -35,35 +44,46 @@
                                     @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.SLOTMANAGER))
                                     {
                                         <li class="sidebar-item">
-                                            <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
-                                                <iconify-icon icon="solar:sidebar-code-linear" class="aside-icon"></iconify-icon>
+                                            <a class="sidebar-link has-arrow" href="javascript:void(0)"
+                                                aria-expanded="false">
+                                                <iconify-icon icon="solar:sidebar-code-linear"
+                                                    class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Setups</span>
                                             </a>
                                             <ul aria-expanded="false" class="collapse first-level">
                                                 @if (User.IsInRole(AppRoles.SYSTEMADMIN))
                                                 {
-                                                   
+
                                                     <li class="sidebar-item">
-                                                        <a asp-action="Index" asp-controller="Transmission" asp-area="Admin" class="sidebar-link sublink">
-                                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                                <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                        <a asp-action="Index" asp-controller="Transmission" asp-area="Admin"
+                                                            class="sidebar-link sublink">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <iconify-icon
+                                                                    icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                             </div>
                                                             <span class="hide-menu">Result Transmission</span>
                                                         </a>
                                                     </li>
                                                     <li class="sidebar-item">
-                                                        <a asp-action="Index" asp-controller="SmsTemplate" asp-area="Admin" class="sidebar-link sublink">
-                                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                                <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                        <a asp-action="Index" asp-controller="SmsTemplate" asp-area="Admin"
+                                                            class="sidebar-link sublink">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <iconify-icon
+                                                                    icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                             </div>
                                                             <span class="hide-menu">SMS Template</span>
                                                         </a>
                                                     </li>
                                                 }
                                                 <li class="sidebar-item">
-                                                    <a asp-action="SlotPrices" asp-controller="SlotManagement" asp-area="Admin" class="sidebar-link sublink">
-                                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                    <a asp-action="SlotPrices" asp-controller="SlotManagement"
+                                                        asp-area="Admin" class="sidebar-link sublink">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon
+                                                                icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                         </div>
                                                         <span class="hide-menu">Slot Fee</span>
                                                     </a>
@@ -78,8 +98,10 @@
                                         if (User.IsInRole(AppRoles.SYSTEMADMIN))
                                         {
                                             <li class="sidebar-item">
-                                                <a asp-action="Index" asp-controller="UserManagement" asp-area="Admin" class="sidebar-link">
-                                                    <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                                <a asp-action="Index" asp-controller="UserManagement" asp-area="Admin"
+                                                    class="sidebar-link">
+                                                    <iconify-icon icon="solar:screencast-2-linear"
+                                                        class="aside-icon"></iconify-icon>
                                                     <span class="hide-menu">User Mgt.</span>
                                                 </a>
                                             </li>
@@ -87,8 +109,10 @@
                                         if (User.IsInRole(AppRoles.FACILITYOWNER))
                                         {
                                             <li class="sidebar-item">
-                                                <a asp-action="Index" asp-controller="UserManagement" asp-area="Customer" class="sidebar-link">
-                                                    <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                                <a asp-action="Index" asp-controller="UserManagement" asp-area="Customer"
+                                                    class="sidebar-link">
+                                                    <iconify-icon icon="solar:screencast-2-linear"
+                                                        class="aside-icon"></iconify-icon>
                                                     <span class="hide-menu">User Mgt.</span>
                                                 </a>
                                             </li>
@@ -99,14 +123,18 @@
                                     @if (User.IsInRole(AppRoles.SYSTEMADMIN))
                                     {
                                         <li class="sidebar-item">
-                                            <a asp-action="Index" asp-controller="OptometristFirmManagement" asp-area="Admin" class="sidebar-link">
-                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                            <a asp-action="Index" asp-controller="OptometristFirmManagement"
+                                                asp-area="Admin" class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear"
+                                                    class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Facility Mgt.</span>
                                             </a>
                                         </li>
                                         <li class="sidebar-item">
-                                            <a asp-action="Deactivated" asp-controller="OptometristFirmManagement" asp-area="Admin" class="sidebar-link">
-                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                            <a asp-action="Deactivated" asp-controller="OptometristFirmManagement"
+                                                asp-area="Admin" class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear"
+                                                    class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Deactivated Opto Firm</span>
                                             </a>
                                         </li>
@@ -115,8 +143,10 @@
                                     @if (User.IsInRole(AppRoles.FRONTOFFICER))
                                     {
                                         <li class="sidebar-item">
-                                            <a asp-action="Index" asp-controller="FrontOffice" asp-area="Registration" class="sidebar-link">
-                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                            <a asp-action="Index" asp-controller="FrontOffice" asp-area="Registration"
+                                                class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear"
+                                                    class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Eye Test Result</span>
                                             </a>
                                         </li>
@@ -126,55 +156,80 @@
                                     @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.SLOTMANAGER))
                                     {
                                         <li class="sidebar-item">
-                                            <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
-                                                <iconify-icon icon="solar:sidebar-code-linear" class="aside-icon"></iconify-icon>
+                                            <a class="sidebar-link has-arrow" href="javascript:void(0)"
+                                                aria-expanded="false">
+                                                <iconify-icon icon="solar:sidebar-code-linear"
+                                                    class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Slot Mgt.</span>
                                             </a>
                                             <ul aria-expanded="false" class="collapse first-level">
                                                 <li class="sidebar-item">
-                                                    <a asp-action="SlotRequest" asp-controller="SlotManagement" asp-area="Admin" asp-route-status="@((int)SlotRequestStatus.Pending)" class="sidebar-link sublink">
-                                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                    <a asp-action="SlotRequest" asp-controller="SlotManagement"
+                                                        asp-area="Admin"
+                                                        asp-route-status="@((int)SlotRequestStatus.Pending)"
+                                                        class="sidebar-link sublink">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon
+                                                                icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                         </div>
                                                         <span class="hide-menu">Pending Request</span>
                                                     </a>
                                                 </li>
                                                 <li class="sidebar-item">
-                                                    <a asp-action="SlotRequest" asp-controller="SlotManagement" asp-area="Admin" asp-route-status="@((int)SlotRequestStatus.Approved)" class="sidebar-link sublink">
-                                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                    <a asp-action="SlotRequest" asp-controller="SlotManagement"
+                                                        asp-area="Admin"
+                                                        asp-route-status="@((int)SlotRequestStatus.Approved)"
+                                                        class="sidebar-link sublink">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon
+                                                                icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                         </div>
                                                         <span class="hide-menu">Approved Request</span>
                                                     </a>
                                                 </li>
                                                 <li class="sidebar-item">
-                                                    <a asp-action="SlotRequest" asp-controller="SlotManagement" asp-area="Admin" asp-route-status="@((int)SlotRequestStatus.Reject)" class="sidebar-link sublink">
-                                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                    <a asp-action="SlotRequest" asp-controller="SlotManagement"
+                                                        asp-area="Admin" asp-route-status="@((int)SlotRequestStatus.Reject)"
+                                                        class="sidebar-link sublink">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon
+                                                                icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                         </div>
                                                         <span class="hide-menu">Rejected Request</span>
                                                     </a>
                                                 </li>
                                                 <li class="sidebar-item">
-                                                    <a asp-action="SlotDeduction" asp-controller="SlotManagement" asp-area="Admin" class="sidebar-link sublink">
-                                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                    <a asp-action="SlotDeduction" asp-controller="SlotManagement"
+                                                        asp-area="Admin" class="sidebar-link sublink">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon
+                                                                icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                         </div>
                                                         <span class="hide-menu">Slot Deduction</span>
                                                     </a>
                                                 </li>
                                                 <li class="sidebar-item">
-                                                    <a asp-action="IncomeReport" asp-controller="SlotManagement" asp-area="Admin" class="sidebar-link sublink">
-                                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                    <a asp-action="IncomeReport" asp-controller="SlotManagement"
+                                                        asp-area="Admin" class="sidebar-link sublink">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon
+                                                                icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                         </div>
                                                         <span class="hide-menu">Income Report</span>
                                                     </a>
                                                 </li>
                                                 <li class="sidebar-item">
-                                                    <a asp-action="FetchSlotReductionLogs" asp-controller="ReportManagement" asp-area="Admin" class="sidebar-link sublink">
-                                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                    <a asp-action="FetchSlotReductionLogs" asp-controller="ReportManagement"
+                                                        asp-area="Admin" class="sidebar-link sublink">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon
+                                                                icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                         </div>
                                                         <span class="hide-menu">Slot Deduction Report</span>
                                                     </a>
@@ -185,34 +240,46 @@
                                     }
 
                                     <!--Report-->
-                                    @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.FACILITYOWNER) || User.IsInRole(AppRoles.FINANCE))
+                                    @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.FACILITYOWNER) ||
+                                                                        User.IsInRole(AppRoles.FINANCE))
                                     {
                                         <li class="sidebar-item">
-                                            <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
-                                                <iconify-icon icon="solar:sidebar-code-linear" class="aside-icon"></iconify-icon>
+                                            <a class="sidebar-link has-arrow" href="javascript:void(0)"
+                                                aria-expanded="false">
+                                                <iconify-icon icon="solar:sidebar-code-linear"
+                                                    class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Slot Statistics</span>
                                             </a>
                                             <ul aria-expanded="false" class="collapse first-level">
                                                 <li class="sidebar-item">
-                                                    <a asp-action="SlotPurchased" asp-controller="SlotManagement" asp-area="Admin" class="sidebar-link sublink">
-                                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                    <a asp-action="SlotPurchased" asp-controller="SlotManagement"
+                                                        asp-area="Admin" class="sidebar-link sublink">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon
+                                                                icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                         </div>
                                                         <span class="hide-menu">Slot Purchased</span>
                                                     </a>
                                                 </li>
                                                 <li class="sidebar-item">
-                                                    <a asp-action="SlotUsed" asp-controller="SlotManagement" asp-area="Admin" class="sidebar-link sublink">
-                                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                    <a asp-action="SlotUsed" asp-controller="SlotManagement"
+                                                        asp-area="Admin" class="sidebar-link sublink">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon
+                                                                icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                         </div>
                                                         <span class="hide-menu">Slot Used</span>
                                                     </a>
                                                 </li>
                                                 <li class="sidebar-item">
-                                                    <a asp-action="SlotBalance" asp-controller="SlotManagement" asp-area="Admin" class="sidebar-link sublink">
-                                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                                            <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                    <a asp-action="SlotBalance" asp-controller="SlotManagement"
+                                                        asp-area="Admin" class="sidebar-link sublink">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <iconify-icon
+                                                                icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                         </div>
                                                         <span class="hide-menu">Slot Balance</span>
                                                     </a>
@@ -222,49 +289,60 @@
                                     }
 
 
-                                    @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.FACILITYOWNER) || User.IsInRole(AppRoles.OPTOMETRIST))
+                                    @if (User.IsInRole(AppRoles.SYSTEMADMIN) || User.IsInRole(AppRoles.FACILITYOWNER) ||
+                                                                        User.IsInRole(AppRoles.OPTOMETRIST))
                                     {
                                         <li class="sidebar-item">
-                                            <a asp-action="Index" asp-controller="AuditManagement" asp-area="Admin" class="sidebar-link sublink">
+                                            <a asp-action="Index" asp-controller="AuditManagement" asp-area="Admin"
+                                                class="sidebar-link sublink">
                                                 <div class="round-16 d-flex align-items-center justify-content-center">
                                                     <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                 </div>
                                                 <span class="hide-menu">Audit Management</span>
                                             </a>
                                         </li>
+                                        <li class="sidebar-item">
+                                            <a asp-action="Index" asp-controller="TransmitResult" asp-area="Admin"
+                                                class="sidebar-link sublink">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
+                                                </div>
+                                                <span class="hide-menu">Transmit Result</span>
+                                            </a>
+                                        </li>
                                     }
 
                                     @if (User.IsInRole(AppRoles.FACILITYOWNER) || User.IsInRole(AppRoles.OPTOMETRIST))
                                     {
-
                                         <li class="sidebar-item">
-                                            <a asp-action="Index" asp-controller="VisualAssessmentResult" asp-area="Customer" class="sidebar-link">
-                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                            <a asp-action="Index" asp-controller="VisualAssessmentResult"
+                                                asp-area="Customer" class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear"
+                                                    class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Eye Test Result</span>
                                             </a>
                                         </li>
-
-                                        @* <li class="sidebar-item">
-                                    <a asp-action="SlotReorder" asp-controller="Slot" asp-area="Customer" class="sidebar-link">
-                                    <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
-                                    <span class="hide-menu">Access Reorder Level</span>
-                                    </a>
-                                    </li> *@
                                         <li class="sidebar-item">
-                                            <a asp-action="InitiateSlotRequest" asp-controller="Slot" asp-area="Customer" class="sidebar-link">
-                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                            <a asp-action="InitiateSlotRequest" asp-controller="Slot" asp-area="Customer"
+                                                class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear"
+                                                    class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Buy Slots</span>
                                             </a>
                                         </li>
                                         <li class="sidebar-item">
-                                            <a asp-action="MyRequests" asp-controller="Slot" asp-area="Customer" class="sidebar-link">
-                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                            <a asp-action="MyRequests" asp-controller="Slot" asp-area="Customer"
+                                                class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear"
+                                                    class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Slot History</span>
                                             </a>
                                         </li>
                                         <li class="sidebar-item">
-                                            <a asp-action="BiodataUpdate" asp-controller="ReportManagement" asp-area="Customer" class="sidebar-link">
-                                                <iconify-icon icon="solar:screencast-2-linear" class="aside-icon"></iconify-icon>
+                                            <a asp-action="BiodataUpdate" asp-controller="ReportManagement"
+                                                asp-area="Customer" class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear"
+                                                    class="aside-icon"></iconify-icon>
                                                 <span class="hide-menu">Biodata Update</span>
                                             </a>
                                         </li>
@@ -273,8 +351,16 @@
                             </div>
                         </div>
                     </div>
-                </div><div class="simplebar-placeholder" style="width: 260px; height: 3841px;"></div>
-            </div><div class="simplebar-track simplebar-horizontal" style="visibility: hidden;"><div class="simplebar-scrollbar" style="width: 0px; display: none;"></div></div><div class="simplebar-track simplebar-vertical" style="visibility: visible;"><div class="simplebar-scrollbar" style="height: 113px; transform: translate3d(0px, 0px, 0px); display: block;"></div></div>
+                </div>
+                <div class="simplebar-placeholder" style="width: 260px; height: 3841px;"></div>
+            </div>
+            <div class="simplebar-track simplebar-horizontal" style="visibility: hidden;">
+                <div class="simplebar-scrollbar" style="width: 0px; display: none;"></div>
+            </div>
+            <div class="simplebar-track simplebar-vertical" style="visibility: visible;">
+                <div class="simplebar-scrollbar"
+                    style="height: 113px; transform: translate3d(0px, 0px, 0px); display: block;"></div>
+            </div>
         </nav>
 
         <!-- End Sidebar scroll-->

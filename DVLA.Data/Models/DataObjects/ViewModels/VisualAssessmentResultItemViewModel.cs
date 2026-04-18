@@ -10,6 +10,7 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
     public class VisualAssessmentResultItemViewModel
     {
         public long Id { get; set; }
+        public string Status { get; set; }
         public string ResultConclusion { get; set; }
         public string ApplicantName { get; set; }
         public string ApplicantAddress { get; set; }

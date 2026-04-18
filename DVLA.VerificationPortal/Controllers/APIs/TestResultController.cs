@@ -42,6 +42,26 @@ namespace DVLA.VerificationPortal.Controllers.APIs
             return Ok(new { status = "success", data = result });
         }
 
+
+        [HttpGet("get-test-by-dsreference/{dsreference}")]
+        public async Task<IActionResult> GetTestByDSReference(string dsreference)
+        {
+            await AuditLogAsync();
+
+            TestResultDto? result = await _searchResultService.GetTestByDSReferenceAsync(dsreference);
+            if (result == null)
+            {
+                return BadRequest(new { status = "error", message = "Applicant not found" });
+            }
+            //if (result.Verified)
+            //{
+            //    return BadRequest(new { status = "error", message = "Test has already been verified once" });
+            //}
+            return Ok(new { status = "success", data = result });
+        }
+
+
+
         [HttpGet("verify-result/{reference}")]
         public async Task<IActionResult> VerifyResult(string reference)
         {
@@ -51,6 +71,6 @@ namespace DVLA.VerificationPortal.Controllers.APIs
             return Ok(new { resultConclusion = response.Result, success = response.Success, message = response.Message });
         }
 
-        
+
     }
 }

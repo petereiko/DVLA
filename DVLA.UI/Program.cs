@@ -15,8 +15,6 @@ using DVLA.Business.UserModule;
 using DVLA.Business.VisualAssessmentResultModule;
 using DVLA.Data;
 using DVLA.Data.Models.Auth;
-using Hangfire;
-using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -133,28 +131,12 @@ try
     builder.Services.AddTransient<IAuditRepo, AuditRepo>();
     builder.Services.AddTransient<IAuthUser, AuthUser>();
     builder.Services.AddTransient<ITempPasswordService, TempPasswordService>();
-    builder.Services.AddTransient<BackgroundJobService>();
 
     builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppConstants"));
     builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
     builder.Services.Configure<SmsSettings>(builder.Configuration.GetSection("SmsSettings"));
 
-
-    builder.Services.AddHangfire(configuration => configuration
-        .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-        .UseSimpleAssemblyNameTypeSerializer()
-        .UseDefaultTypeSerializer()
-        .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection"), new SqlServerStorageOptions
-        {
-            CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-            SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-            QueuePollInterval = TimeSpan.FromSeconds(15),
-            UseRecommendedIsolationLevel = true,
-            DisableGlobalLocks = true
-        }));
-
-
-    builder.Services.AddHangfireServer();
+    builder.Services.AddBackgroundJobRegistrations(builder.Configuration);
 
 
 
@@ -205,8 +187,6 @@ try
     app.UseAuthorization();
 
 
-    app.UseHangfireDashboard("/hangfire");
-
     app.MapControllerRoute(
         name: "areas",
         pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
@@ -216,16 +196,7 @@ try
         pattern: "{controller=Dashboard}/{action=Index}/{id?}");
 
     app.MapHub<NotificationHub>("/notification");
-
-    RecurringJob.AddOrUpdate<BackgroundJobService>("SendBulkEmail", service => service.SendBulkEmail(), "*/2 * * * *");
-    RecurringJob.AddOrUpdate<BackgroundJobService>("VerifyTransfers", service => service.VerifyPayments(), "*/1 * * * *");
-    RecurringJob.AddOrUpdate<BackgroundJobService>("PushVisualAssessmentResult", service => service.PushVisualAssessmentResult(), "*/2 * * * *");//Every 1 minute
-    RecurringJob.AddOrUpdate<BackgroundJobService>("UpdateAuthDoc", service => service.UpdateAuthDoc(), "*/2 * * * *");//Every 1 minute
-    RecurringJob.AddOrUpdate<BackgroundJobService>("HardDeleteVisualAssessmentResults", service => service.HardDeleteVisualAssessmentResults(), "0 0 * * *"); // Cron: minute hour day month day-of-week
-    RecurringJob.AddOrUpdate<BackgroundJobService>("BackupVisualAssessmentResults", service => service.BackupVisualAssessmentResults(), "0 0 * * *"); // Cron: minute hour day month day-of-week
-
-    RecurringJob.AddOrUpdate<BackgroundJobService>("SyncOptometristFirms", service => service.SyncOptometristFirms(), "0 0 * * *"); // Cron: minute hour day month day-of-week
-
+    
 
     //Create a scope to resolve scoped services
     using (var scope = app.Services.CreateScope())

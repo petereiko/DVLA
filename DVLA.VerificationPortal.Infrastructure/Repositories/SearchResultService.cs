@@ -110,6 +110,48 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             return result;
 
         }
+
+
+        public async Task<TestResultDto> GetTestByDSReferenceAsync(string? dsreference)
+        {
+            TestResultDto? result = null;
+            try
+            {
+                Expression<Func<VisualAssessmentResult, bool>> expression = v => v.DvlaLicenseNumber.Equals(dsreference);
+                IEnumerable<VisualAssessmentResult> results = await _visualAssessmentResultRepository.FilterAsync(expression, false);
+
+                foreach (var item in results)
+                {
+                    result = new()
+                    {
+                        FullName = $"{item.Surname} {item.FirstName}",
+                        PassConclusion = EnumHelper.GetEnumDescription(item.PassResult),
+                        Verified = item.IsVerified,
+                        TestDate = item.TestDate,
+                        TestType = EnumHelper.GetEnumDescription(item.TestType),
+                        DvlaLicenseNumber = item.DvlaLicenseNumber,
+                        IdentityNumber = string.IsNullOrEmpty(item.PassportNumber) ? item.NationalID : item.PassportNumber,
+                        IdentityType = string.IsNullOrEmpty(item.PassportNumber) ? "National ID" : "Passport Number"
+                    };
+                    try
+                    {
+                        result.Passport = await Utility.ConvertImageUrlToBase64($"{_configuration["AppConstants:PassportUrl"]}{item.PassportImageUrl}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex.Message, ex);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
+            return result;
+
+        }
+
+
         private VisualAssessmentResultDto GetDto(VisualAssessmentResult entity)
         {
             VisualAssessmentResultDto model = new()
@@ -514,7 +556,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
 
         public async Task ProcessGenesysAsync()
         {
-            var records = await _visualAssessmentResultRepository.FilterAsync(x => x.GenesisIsTranmitted != true && x.GenesisStatus == null && x.GenesisError == null && x.InvoiceNumber!=null, true, 20);
+            var records = await _visualAssessmentResultRepository.FilterAsync(x => x.GenesisIsTranmitted != true && x.GenesisStatus == null && x.GenesisError == null && x.InvoiceNumber != null, true, 20);
             foreach (var record in records)
             {
                 var result = await Transmit(record);

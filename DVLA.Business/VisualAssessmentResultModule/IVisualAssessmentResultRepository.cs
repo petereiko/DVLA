@@ -13,6 +13,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
 {
     public interface IVisualAssessmentResultRepository
     {
+        Task<List<VisualAssessmentResultItemViewModel>> FetchResultAsync(string term);
         PaginationResponseModel<List<VisualAssessmentResultItemViewModel>> FetchAssessmentResults(PaginationRequestModel<ClientSearchRequest> model);
 
 

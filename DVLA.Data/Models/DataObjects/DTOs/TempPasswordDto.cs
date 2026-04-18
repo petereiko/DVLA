@@ -14,7 +14,7 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public bool IsActive { get; set; }
 
         [Required]
-        public string Password { get; set; } = "optodrivedvla";
+        public string Password { get; set; } = Guid.NewGuid().ToString().Replace("-", "");
 
         public string UserId { get; set; }
 

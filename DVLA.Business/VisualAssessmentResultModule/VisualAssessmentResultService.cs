@@ -177,7 +177,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
 
         public async Task<IEnumerable<VisualAssessmentResultDto>> GetPendingTransmissions()
         {
-            IEnumerable<VisualAssessmentResultDto> results=Enumerable.Empty<VisualAssessmentResultDto>();
+            IEnumerable<VisualAssessmentResultDto> results = Enumerable.Empty<VisualAssessmentResultDto>();
             try
             {
                 _visualAssessmentResultRepository.Filter(x => x.HasTransmissionError == false && x.IsTransmitted == false).OrderByDescending(x => x.Id).Take(1000)
@@ -197,6 +197,25 @@ namespace DVLA.Business.VisualAssessmentResultModule
         }
 
 
+        public async Task<List<VisualAssessmentResultItemViewModel>> FetchResultAsync(string term)
+        {
+            var query = _context.VisualAssessmentResults.AsNoTracking().Include(x => x.OptometristFirm).Where(x => x.ReferenceNumber.Contains(term)
+            || x.FirstName.Contains(term) || x.Surname.Contains(term));
+
+            return await query.Select(x => new VisualAssessmentResultItemViewModel
+            {
+                Id = x.Id,
+                ApplicantAddress = x.PostalAddress,
+                ApplicantName = $"{x.FirstName} {x.Surname}",
+                DSReference = x.ReferenceNumber,
+                Grade = x.PassOrFail == null ? "N/A" : EnumHelper.GetDescription(x.PassOrFail),
+                ResultConclusion = x.ResultConclusion,
+                TestDate = x.TestDate.GetValueOrDefault().ToString("dd MMM yyyy"),
+                Optometrist = $"{x.OptometristFirm.ContactFirstName} {x.OptometristFirm.ContactLastName}",
+                OptometristFirmName = x.OptometristFirm.BusinessName,
+                Status = x.IsTransmitted == true ? "Transmitted" : "Not Transmitted"
+            }).ToListAsync();
+        }
 
         public void Dispose()
         {
@@ -515,7 +534,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
 
         public PaginationResponseModel<List<VisualAssessmentResultItemViewModel>> FetchAssessmentResults(PaginationRequestModel<ClientSearchRequest> model)
         {
-            PaginationResponseModel<List<VisualAssessmentResultItemViewModel>> result = new() { ListResult = new(),  };
+            PaginationResponseModel<List<VisualAssessmentResultItemViewModel>> result = new() { ListResult = new(), };
             //var offset = (model.PageSize - 1) * model.PageSize;
             //model.InputModel.StartDate = Utility.StartOfDay(model.InputModel.StartDate);
             //model.InputModel.EndDate = Utility.EndOfDay(model.InputModel.EndDate);
@@ -540,7 +559,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                         {
                             result.ListResult.Add(new VisualAssessmentResultItemViewModel
                             {
-                                ResultConclusion= !reader.IsDBNull(reader.GetOrdinal("ResultConclusion")) ? reader.GetString("ResultConclusion") : null,
+                                ResultConclusion = !reader.IsDBNull(reader.GetOrdinal("ResultConclusion")) ? reader.GetString("ResultConclusion") : null,
                                 ApplicantAddress = !reader.IsDBNull(reader.GetOrdinal("ApplicantAddress")) ? reader.GetString("ApplicantAddress") : null,
                                 ApplicantName = !reader.IsDBNull(reader.GetOrdinal("ApplicantName")) ? reader.GetString("ApplicantName") : null,
                                 DSReference = !reader.IsDBNull(reader.GetOrdinal("DSReference")) ? reader.GetString("DSReference") : null,
@@ -681,8 +700,8 @@ namespace DVLA.Business.VisualAssessmentResultModule
                             {
                                 result.ListResult.Add(new VisualAssessmentResultListItem
                                 {
-                                    PassResult= reader.IsDBNull(reader.GetOrdinal("PassResult")) ? null : reader.GetString(reader.GetOrdinal("PassResult")),
-                                    ResultServiceType = reader.IsDBNull(reader.GetOrdinal("ResultServiceType"))?null: (ResultServiceType)reader.GetInt32(reader.GetOrdinal("ResultServiceType")),
+                                    PassResult = reader.IsDBNull(reader.GetOrdinal("PassResult")) ? null : reader.GetString(reader.GetOrdinal("PassResult")),
+                                    ResultServiceType = reader.IsDBNull(reader.GetOrdinal("ResultServiceType")) ? null : (ResultServiceType)reader.GetInt32(reader.GetOrdinal("ResultServiceType")),
                                     //DVLAReferenceNo = reader.IsDBNull(reader.GetOrdinal("DVLAReferenceNo")) ? null : reader.GetString(reader.GetOrdinal("DVLAReferenceNo")),
                                     ReferenceNumber = reader.IsDBNull(reader.GetOrdinal("ReferenceNumber")) ? null : reader.GetString(reader.GetOrdinal("ReferenceNumber")),
                                     Id = reader.IsDBNull(reader.GetOrdinal("Id")) ? 0 : reader.GetInt64(reader.GetOrdinal("Id")),
@@ -706,7 +725,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                 }
                 var _result = new PaginationResponseModel<List<VisualAssessmentResultListItem>>(result.TotalCount, pagination.PageSize, result.ListResult.Count);
                 result.StartIndex = _result.StartIndex;
-                result.PageSize=_result.PageSize;
+                result.PageSize = _result.PageSize;
                 result.EndIndex = _result.EndIndex;
                 result.TotalPages = _result.TotalPages;
             }
@@ -860,7 +879,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                     result.Message += $"Stack Trace = {ex.StackTrace}";
                 }
             }
-            
+
             return result;
         }
 
@@ -890,7 +909,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                 _logger.LogError(ex.Message, ex);
                 result.Message = "An error occurred in the remote server while trying to process data";
             }
-            return result;  
+            return result;
         }
 
 
@@ -901,7 +920,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
             foreach (VisualAssessmentTransmissionModel model in data)
             {
                 var resultItem = await Transmit(model);
-                if (resultItem.Success) formNumberList.Add(resultItem.Message);               
+                if (resultItem.Success) formNumberList.Add(resultItem.Message);
             }
             result.Success = formNumberList.Count > 0;
             result.Message = formNumberList.Count > 0 ? $"{formNumberList.Count} out of {data.Count} were transmitted successfully" : "All items were transmitted successfully";
