@@ -14,7 +14,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
         //Task<string> GeneratePasswordResetToken(string id);
         //List<RoleDto> GetAllRoles();
         //Task<List<ApplicationUserDto>> GetAllUsers();
-        //Task<List<string>> GetRolesAsync(ApplicationUserDto user);
+        Task<List<string>> GetRolesAsync(ApplicationUserDto user);
         Task<ApplicationUserDto> GetUserByEmail(string email);
         //Task<PaginatedResponse<ApplicationUserDto>> GetUsersAsync(int pageIndex1, int pageSize1);
         //Task<List<ApplicationUserDto>> GetUsersInRole(string roleName);

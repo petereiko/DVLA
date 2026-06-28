@@ -828,9 +828,10 @@ namespace DVLA.Business.VisualAssessmentResultModule
                         Unaided_OU = model.Unaided_OU,
                         IsTransmitted = true,
                         TransmittedDate = DateTime.UtcNow,
-                        NationalID = model.NationalID,
-                        PassportNumber = model.PassportNumber,
-                        DvlaLicenseNumber = model.DvlaLicenseNumber
+                        //NationalID = model.NationalID,
+                        //PassportNumber = model.PassportNumber,
+                        DvlaLicenseNumber = model.DvlaLicenseNumber,
+                        InvoiceNumber = model.InvoiceNumber
                     };
                     _context.VisualAssessmentResults.Add(visualAssessmentResult);
                     await _context.SaveChangesAsync();

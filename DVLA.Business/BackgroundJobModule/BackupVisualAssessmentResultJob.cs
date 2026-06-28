@@ -87,8 +87,8 @@ namespace DVLA.Business.BackgroundJobModule
                             Status = item.Status,
                             TransmissionError = item.TransmissionError,
                             TransmittedDate = item.TransmittedDate,
-                            NationalID = item.NationalID,
-                            PassportNumber = item.PassportNumber,
+                            InvoiceNumber  = item.InvoiceNumber,
+                            //PassportNumber = item.PassportNumber,
                             DvlaLicenseNumber = item.DvlaLicenseNumber
                         };
                         await _context.VisualAssessmentResultBackups.AddAsync(backup);

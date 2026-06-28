@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Http;
 using DVLA.Business.TempPasswordModule;
 using DVLA.Business.BackgroundJobModule;
 using Microsoft.Extensions.Options;
+using DVLA.Business.EmailModule;
 
 namespace DVLA.UI.Controllers
 {
@@ -36,11 +37,13 @@ namespace DVLA.UI.Controllers
         private readonly DVLADbContext _context;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly ITempPasswordService _tempPasswordService;
+        private readonly IEmailService _emailService;
 
 
 
 
-        public AccountController(IUserService userService, ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IOptions<AppSettings> options, DVLADbContext context, IHttpContextAccessor contextAccessor, ITempPasswordService tempPasswordService)
+
+        public AccountController(IUserService userService, ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IOptions<AppSettings> options, DVLADbContext context, IHttpContextAccessor contextAccessor, ITempPasswordService tempPasswordService, IEmailService emailService)
         {
             _userService = userService;
             _logger = logger;
@@ -51,14 +54,13 @@ namespace DVLA.UI.Controllers
             _context = context;
             _contextAccessor = contextAccessor;
             _tempPasswordService = tempPasswordService;
+            _emailService = emailService;
         }
 
         [HttpGet]
         public IActionResult Login()
         {
             LoginViewModel model = new();
-
-            //_backgroundJobService.BackupVisualAssessmentResults();
             return View(model);
         }
 

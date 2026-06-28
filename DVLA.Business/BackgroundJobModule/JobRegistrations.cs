@@ -93,28 +93,6 @@ namespace DVLA.Business.BackgroundJobModule
                     .WithIdentity("SyncOptometristFirmJob-Trigger")
                     .WithCronSchedule("0 0 0 * * ?") // daily
                 );
-
-                //var maturedSavingJobKey = new JobKey(nameof(MaturedSavingJob));
-                //q.AddJob<MaturedSavingJob>(opts => opts
-                //    .WithIdentity(maturedSavingJobKey)
-                //    .WithDescription("Processes Interests for active savings only")
-                //);
-                //q.AddTrigger(opts => opts
-                //    .ForJob(maturedSavingJobKey)
-                //    .WithIdentity("MaturedSavingJob-Trigger")
-                //    .WithCronSchedule("0 0 0 * * ?") //daily
-                //);
-
-                //var savingsInterestJobKey = new JobKey(nameof(SavingsInterestJob));
-                //q.AddJob<SavingsInterestJob>(opts => opts
-                //    .WithIdentity(savingsInterestJobKey)
-                //    .WithDescription("Processes Interests for active savings only")
-                //);
-                //q.AddTrigger(opts => opts
-                //    .ForJob(savingsInterestJobKey)
-                //    .WithIdentity("SavingsInterestJob-Trigger")
-                //    .WithCronSchedule("0 0 0 * * ?") //daily
-                //);
             });
 
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);

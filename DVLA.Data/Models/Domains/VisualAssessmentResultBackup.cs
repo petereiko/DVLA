@@ -98,8 +98,8 @@ namespace DVLA.Data.Models.Domains
         public string TransmissionError { get; set; }
         public bool HasTransmissionError { get; set; }
         public bool? OptometristNameIsUpdate { get; set; }
-        public string NationalID { get; set; }
-        public string PassportNumber { get; set; }
+        public string InvoiceNumber { get; set; }
+        //public string PassportNumber { get; set; }
         public string DvlaLicenseNumber { get; set; }
     }
 }

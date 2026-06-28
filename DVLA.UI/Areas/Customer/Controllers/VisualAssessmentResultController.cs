@@ -245,7 +245,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     string LearnerServiceType = workSheet.Cells[rowIndex, 34].Text.Trim().ToUpper();
                     string NationalID = workSheet.Cells[rowIndex,35].Text.Trim().ToUpper();
                     string PassportNumber = workSheet.Cells[rowIndex, 36].Text.Trim().ToUpper();
-                    string DvlaLicenseNumber = workSheet.Cells[rowIndex, 37].Text.Trim().ToUpper();
+                    string InvoiceNumber = workSheet.Cells[rowIndex, 37].Text.Trim().ToUpper();
                     //Validation
                     if (string.IsNullOrEmpty(TestType))
                     {
@@ -466,9 +466,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         Status = Status.InProgress,
                         IsSynchronized = false,
                         TestType = TestType == "NEW" ? Data.Models.Enumerables.TestType.NewTest : Data.Models.Enumerables.TestType.ReTest,
-                        NationalID = NationalID,
-                        PassportNumber = PassportNumber,
-                        DvlaLicenseNumber = DvlaLicenseNumber
+                        //InvoiceNumber = InvoiceNumber,
+                        //PassportNumber = PassportNumber,
+                        InvoiceNumber = InvoiceNumber
                     };
 
                     list.Add(newEntry);
@@ -592,9 +592,8 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         TestType = y.TestType,
                         ActionType = "Modify",
                         Gender = y.Gender,
-                        DvlaLicenseNumber = y.DvlaLicenseNumber,
-                        IdentityNumber = string.IsNullOrEmpty(y.PassportNumber) ? y.NationalID : y.PassportNumber,
-                        IdentityType = string.IsNullOrEmpty(y.PassportNumber) ? IdentityType.NationalIDCard : IdentityType.InternationalPassport
+                        InvoiceNumber = y.InvoiceNumber,
+                       // IdentityType = string.IsNullOrEmpty(y.PassportNumber) ? IdentityType.NationalIDCard : IdentityType.InternationalPassport
                     }).FirstOrDefault();
 
                     if (!string.IsNullOrEmpty(model.PassportImageUrl) && model.PassportImageUrl.Contains(".png"))
@@ -857,15 +856,15 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     return View(model);
                 }
 
-                if (model.ResultServiceType != ResultServiceType.LearnerDriversLicence)
-                {
-                    if (string.IsNullOrEmpty(model.DvlaLicenseNumber))
-                    {
-                        model.Errors.Add($"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
-                        ModelState.AddModelError("DvlaLicenseNumber", $"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
-                        return View(model);
-                    }
-                }
+                //if (model.ResultServiceType != ResultServiceType.LearnerDriversLicence)
+                //{
+                //    if (string.IsNullOrEmpty(model.InvoiceNumber))
+                //    {
+                //        model.Errors.Add($"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
+                //        ModelState.AddModelError("InvoiceNumber", $"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
+                //        return View(model);
+                //    }
+                //}
 
                 Slot slot = _slotRepositoryQuery.FilterAsync(x => x.OptometristFirmId == optometristUser.OptometristFirmId && x.AccessType == (model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory)).Result.FirstOrDefault();
                 if (model.Action == Status.Complete)
@@ -968,9 +967,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 IsRegistration = false,
                                 ContrastSensitivity_BCV = model.ContrastSensitivity_BCV,
                                 AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
-                                PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
-                                NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
-                                DvlaLicenseNumber = model.DvlaLicenseNumber
+                                //PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
+                                //InvoiceNumber = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
+                                InvoiceNumber = model.InvoiceNumber
                             };
                             context.VisualAssessmentResults.Add(visualAssessmentResult);
                             await context.SaveChangesAsync();

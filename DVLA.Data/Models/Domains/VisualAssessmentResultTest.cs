@@ -44,5 +44,6 @@ namespace DVLA.DATA.Domains
         public string Optometrist { get; set; }
         public Nullable<int> PassOrFail { get; set; }
         public Nullable<int> PassResultId { get; set; }
+        public string InvoiceNumber { get; set; }
     }
 }

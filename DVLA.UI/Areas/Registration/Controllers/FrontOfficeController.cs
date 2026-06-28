@@ -229,9 +229,10 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     IsRegistration = true,
                     CreatedBy = currentUserId,
                     Gender = model.Gender,
-                    NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
-                    PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
-                    DvlaLicenseNumber = model.DvlaLicenseNumber
+                    //NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
+                    //PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
+                    DvlaLicenseNumber = model.DvlaLicenseNumber,
+                    InvoiceNumber = model.InvoiceNumber
                 };
 
                 await _applicantQuery.AddAsync(applicant);
@@ -307,9 +308,10 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 model.IsDeleted = applicant.IsDeleted;
                 model.UpdatedBy = applicant.ModifiedBy;
                 model.PassportImageUrl = applicant.PassportImageUrl;
-                model.IdentityNumber = string.IsNullOrEmpty(applicant.PassportNumber) ? applicant.NationalID : applicant.PassportNumber;
+                //model.IdentityNumber = string.IsNullOrEmpty(applicant.PassportNumber) ? applicant.NationalID : applicant.PassportNumber;
                 model.DvlaLicenseNumber = applicant.DvlaLicenseNumber;
-                model.IdentityType = string.IsNullOrEmpty(applicant.PassportNumber) ? IdentityType.NationalIDCard : IdentityType.InternationalPassport;
+                model.InvoiceNumber = applicant.InvoiceNumber;
+                //model.IdentityType = string.IsNullOrEmpty(applicant.PassportNumber) ? IdentityType.NationalIDCard : IdentityType.InternationalPassport;
 
                 if (!string.IsNullOrEmpty(model.PassportImageUrl))
                 {

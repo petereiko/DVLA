@@ -19,13 +19,15 @@ namespace DVLA.VerificationPortal.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly ISearchResultService _searchService;
         private readonly IAuditRepo _auditRepo;
-       
+        private readonly IUserRepository _userRepository;
 
-        public HomeController(ILogger<HomeController> logger, ISearchResultService searchService, IAuditRepo auditRepo) : base(auditRepo)
+
+        public HomeController(ILogger<HomeController> logger, ISearchResultService searchService, IAuditRepo auditRepo, IUserRepository userRepository) : base(auditRepo)
         {
             _logger = logger;
             _searchService = searchService;
             _auditRepo = auditRepo;
+            _userRepository = userRepository;
         }
 
         public IActionResult Index()
@@ -49,20 +51,21 @@ namespace DVLA.VerificationPortal.Controllers
             return View(result);
         }
 
-        //[HttpGet]
-        //public async Task<JsonResult> VerifyResult(string token)
-        //{
-        //    MessageResponse response = new();
-        //    if(_userProperty.Role != EnumHelper.GetEnumDescription(Role.Verifier))//274556
+        [HttpGet]
+        public async Task<JsonResult> VerifyResult(string token)
+        {
+            MessageResponse<string> response = new();
 
-        //    {
-        //        response.Message = "You are not a Verifier";
-        //        return Json(response);
-        //    }
-        //    response = await _searchService.VerifyResultByReference(token, VerifyType.WEB);
-            
-        //    return Json(response);
-        //}
+            ApplicationUserDto applicationUser = await _userRepository.GetUserByEmail(HttpContext.User.Identity.Name);
+            List<string> roles = await _userRepository.GetRolesAsync(applicationUser);
+            if (!roles.Contains(EnumHelper.GetEnumDescription(Role.Verifier)))
+            {
+                response.Message = "You are not a Verifier";
+                return Json(response);
+            }
+            response = await _searchService.VerifyResultByReferenceAsync(token, VerifyType.WEB);
+            return Json(response);
+        }
 
         public IActionResult Privacy()
         {

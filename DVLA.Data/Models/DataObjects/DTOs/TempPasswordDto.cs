@@ -14,7 +14,7 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public bool IsActive { get; set; }
 
         [Required]
-        public string Password { get; set; } = Guid.NewGuid().ToString().Replace("-", "");
+        public string Password { get; set; } = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
 
         public string UserId { get; set; }
 

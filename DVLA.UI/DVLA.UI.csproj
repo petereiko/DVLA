@@ -38,6 +38,7 @@
     <Folder Include="Areas\Registration\Data\" />
     <Folder Include="Areas\Registration\Models\" />
     <Folder Include="Connected Services\" />
+    <Folder Include="API\" />
     <Folder Include="Views\EmailTemplate\" />
     <Folder Include="wwwroot\Passports\" />
   </ItemGroup>

@@ -231,9 +231,10 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     Email = model.Email,
                     IsRegistration = true,
                     CreatedBy = null,
-                    PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
-                    NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
-                    DvlaLicenseNumber = model.DvlaLicenseNumber
+                    //PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
+                    //NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
+                    DvlaLicenseNumber = model.DvlaLicenseNumber,
+                    InvoiceNumber = model.InvoiceNumber
                 };
 
                 _visualAssessmentResultQuery.Add(applicant);

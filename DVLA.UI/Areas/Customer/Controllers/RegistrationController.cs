@@ -211,8 +211,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     Email = model.Email,
                     IsRegistration = true,
                     CreatedBy = _authUser.UserId,
-                    PassportNumber = model.IdentityType==IdentityType.InternationalPassport? model.IdentityNumber:null,
-                    NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null
+                    DvlaLicenseNumber = model.DvlaLicenseNumber,
+                    //PassportNumber = model.IdentityType==IdentityType.InternationalPassport? model.IdentityNumber:null,
+                    //NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null
                 };
 
                 await _applicantQuery.AddAsync(applicant);

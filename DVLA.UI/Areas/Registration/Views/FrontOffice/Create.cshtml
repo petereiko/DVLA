@@ -177,7 +177,7 @@
 
                                             <div class="row">
 
-                                                <div class="col-md-3">
+                                                @* <div class="col-md-3">
                                                     <label>Identity Type</label><br />
                                                     @foreach (var item in Model.IdentityTypes)
                                                     {
@@ -191,12 +191,12 @@
                                                         <br />
                                                     }
                                                     <span asp-validation-for="IdentityType" class="text-danger"></span>
-                                                </div>
+                                                </div> *@
                                                 
                                                 <div class="col-md-3">
-                                                    Identity Number
-                                                    @Html.TextBoxFor(model => model.IdentityNumber, new { @class = "form-control", @autocomplete = "off" })
-                                                    @Html.ValidationMessageFor(model => model.IdentityNumber, "", new { @class = "text-danger" })
+                                                    Invoice Number
+                                                    @Html.TextBoxFor(model => model.InvoiceNumber, new { @class = "form-control", @autocomplete = "off" })
+                                                    @Html.ValidationMessageFor(model => model.InvoiceNumber, "", new { @class = "text-danger" })
 
                                                 </div>
 
