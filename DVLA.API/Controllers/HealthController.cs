@@ -1,0 +1,17 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace DVLA.API.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class HealthController : ControllerBase
+    {
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult Get()
+        {
+            return Ok(new { status = "Healthy" });
+        }
+    }
+}
