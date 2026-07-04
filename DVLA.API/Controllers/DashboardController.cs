@@ -8,12 +8,14 @@ using DVLA.Data.Models.Enumerables;
 using DVLA.DATA.Domains;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System;
 using System.Linq;
 
 namespace DVLA.API.Controllers
 {
     [Authorize]
+    [EnableRateLimiting("AuthenticatedRead")]
     [ApiController]
     [Route("api/[controller]")]
     public class DashboardController : ControllerBase

@@ -5,11 +5,13 @@ using DVLA.Data.Models.DataObjects.UtilityObjects;
 using DVLA.Data.Models.DataObjects.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.Tasks;
 
 namespace DVLA.API.Controllers
 {
     [Authorize]
+    [EnableRateLimiting("AuthenticatedRead")]
     [ApiController]
     [Route("api/[controller]")]
     public class OptometristFirmsController : ControllerBase
@@ -44,6 +46,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting("SensitiveWrite")]
         public async Task<IActionResult> Create([FromBody] OptometristFirmViewModel model)
         {
             var result = await _optometristService.CreateOptometricFirm(model);
@@ -51,6 +54,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [EnableRateLimiting("SensitiveWrite")]
         public async Task<IActionResult> Update(int id, [FromBody] OptometristFirmViewModel model)
         {
             model.Id = id;
@@ -59,6 +63,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost("{id:int}/change-status")]
+        [EnableRateLimiting("SensitiveWrite")]
         public async Task<IActionResult> ChangeStatus(int id)
         {
             var result = await _optometristService.ChangeStatus(id);

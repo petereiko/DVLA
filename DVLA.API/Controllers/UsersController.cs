@@ -3,11 +3,13 @@ using DVLA.Data.Models.DataObjects.UtilityObjects;
 using DVLA.Data.Models.DataObjects.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.Tasks;
 
 namespace DVLA.API.Controllers
 {
     [Authorize]
+    [EnableRateLimiting("AuthenticatedRead")]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -65,6 +67,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting("SensitiveWrite")]
         public async Task<IActionResult> Create([FromBody] UserViewModel model)
         {
             var result = await _userService.OnboardUser(model);
@@ -72,6 +75,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [EnableRateLimiting("SensitiveWrite")]
         public async Task<IActionResult> Update(string id, [FromBody] UserViewModel model)
         {
             model.Id = id;
@@ -80,6 +84,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost("{id}/reset-password")]
+        [EnableRateLimiting("SensitiveWrite")]
         public async Task<IActionResult> AdminResetPassword(string id, [FromBody] ResetPasswordViewModel model)
         {
             var result = await _userService.AdminResetPasswordAsync(model.Password, id);
@@ -87,6 +92,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost("{id}/change-status")]
+        [EnableRateLimiting("SensitiveWrite")]
         public async Task<IActionResult> ChangeStatus(string id)
         {
             var user = await _userService.GetUserById(id);

@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +31,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Net;
 using System.Text;
+using System.Threading.RateLimiting;
 
 try
 {
@@ -133,6 +136,63 @@ try
         });
 
     builder.Services.AddAuthorization();
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        options.OnRejected = async (context, cancellationToken) =>
+        {
+            context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+            context.HttpContext.Response.ContentType = "application/json";
+
+            await context.HttpContext.Response.WriteAsync(
+                "{\"success\":false,\"message\":\"Too many requests. Please try again later.\"}",
+                cancellationToken);
+        };
+
+        options.AddPolicy("Auth", httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                GetClientPartitionKey(httpContext),
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 5,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0,
+                    AutoReplenishment = true
+                }));
+
+        options.AddPolicy("AuthenticatedRead", httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                GetClientPartitionKey(httpContext),
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 120,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0,
+                    AutoReplenishment = true
+                }));
+
+        options.AddPolicy("SensitiveWrite", httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                GetClientPartitionKey(httpContext),
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 30,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0,
+                    AutoReplenishment = true
+                }));
+
+        options.AddPolicy("ExternalOperation", httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                GetClientPartitionKey(httpContext),
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 10,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0,
+                    AutoReplenishment = true
+                }));
+    });
 
     builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppConstants"));
     builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
@@ -179,9 +239,11 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.UseRouting();
     app.UseCors();
     app.UseAuthentication();
     app.UseAuthorization();
+    app.UseRateLimiter();
 
     app.MapControllers();
 
@@ -193,4 +255,21 @@ catch (Exception ex)
     Console.Error.WriteLine(ex);
     Debug.WriteLine(ex);
     throw;
+}
+
+static string GetClientPartitionKey(HttpContext httpContext)
+{
+    var userId = httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    if (!string.IsNullOrWhiteSpace(userId))
+    {
+        return $"user:{userId}";
+    }
+
+    var forwardedFor = httpContext.Request.Headers["X-Forwarded-For"].ToString();
+    if (!string.IsNullOrWhiteSpace(forwardedFor))
+    {
+        return $"ip:{forwardedFor.Split(',')[0].Trim()}";
+    }
+
+    return $"ip:{httpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? IPAddress.None.ToString()}";
 }

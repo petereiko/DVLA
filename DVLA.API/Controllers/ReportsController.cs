@@ -5,11 +5,13 @@ using DVLA.Data.Models.DataObjects.UtilityObjects;
 using DVLA.Data.Models.DataObjects.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.Tasks;
 
 namespace DVLA.API.Controllers
 {
     [Authorize]
+    [EnableRateLimiting("AuthenticatedRead")]
     [ApiController]
     [Route("api/[controller]")]
     public class ReportsController : ControllerBase

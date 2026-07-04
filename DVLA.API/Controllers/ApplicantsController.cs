@@ -2,10 +2,12 @@ using DVLA.Business.ApplicantModule;
 using DVLA.Data.Models.DataObjects.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace DVLA.API.Controllers
 {
     [Authorize]
+    [EnableRateLimiting("AuthenticatedRead")]
     [ApiController]
     [Route("api/[controller]")]
     public class ApplicantsController : ControllerBase
@@ -25,6 +27,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [EnableRateLimiting("SensitiveWrite")]
         public IActionResult Update(string id, [FromBody] ApplicantModel model)
         {
             var result = _applicantService.Update(model, id);

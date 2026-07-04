@@ -8,6 +8,7 @@ using DVLA.DATA.Domains;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
@@ -45,6 +46,7 @@ namespace DVLA.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
+        [EnableRateLimiting("Auth")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
             if (model == null || string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
@@ -87,6 +89,7 @@ namespace DVLA.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
+        [EnableRateLimiting("Auth")]
         public async Task<IActionResult> Register([FromBody] UserViewModel model)
         {
             if (model == null)
@@ -110,6 +113,7 @@ namespace DVLA.API.Controllers
 
         [AllowAnonymous]
         [HttpGet("confirm-email")]
+        [EnableRateLimiting("Auth")]
         public async Task<IActionResult> ConfirmEmail([FromQuery] string encodedToken, [FromQuery] string userid)
         {
             if (string.IsNullOrWhiteSpace(encodedToken) || string.IsNullOrWhiteSpace(userid))
@@ -128,6 +132,7 @@ namespace DVLA.API.Controllers
 
         [Authorize]
         [HttpPost("change-password")]
+        [EnableRateLimiting("SensitiveWrite")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordViewModel model)
         {
             if (model == null)
@@ -165,6 +170,7 @@ namespace DVLA.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("forgot-password")]
+        [EnableRateLimiting("Auth")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordViewModel model)
         {
             if (model == null || string.IsNullOrWhiteSpace(model.Email))
@@ -183,6 +189,7 @@ namespace DVLA.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("reset-password")]
+        [EnableRateLimiting("Auth")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel model)
         {
             if (model == null)

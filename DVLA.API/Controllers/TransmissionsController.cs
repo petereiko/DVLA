@@ -2,11 +2,13 @@ using DVLA.Business.ReportModule;
 using DVLA.Data.Models.DataObjects.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.Tasks;
 
 namespace DVLA.API.Controllers
 {
     [Authorize]
+    [EnableRateLimiting("ExternalOperation")]
     [ApiController]
     [Route("api/[controller]")]
     public class TransmissionsController : ControllerBase

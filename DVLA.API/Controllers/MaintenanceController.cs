@@ -4,6 +4,7 @@ using DVLA.Data.Models.DataObjects.DTOs;
 using DVLA.DATA.Domains;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 namespace DVLA.API.Controllers
 {
     [Authorize]
+    [EnableRateLimiting("AuthenticatedRead")]
     [ApiController]
     [Route("api/[controller]")]
     public class MaintenanceController : ControllerBase
@@ -43,6 +45,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPut("email-templates/{id:int}")]
+        [EnableRateLimiting("SensitiveWrite")]
         public async Task<IActionResult> UpdateEmailTemplate(int id, [FromBody] EmailTemplateDto model)
         {
             var template = _emailTemplateRepository.GetById(id);
@@ -72,6 +75,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPut("sms-templates/{id:int}")]
+        [EnableRateLimiting("SensitiveWrite")]
         public async Task<IActionResult> UpdateSmsTemplate(int id, [FromBody] SmsTemplateDto model)
         {
             var template = _smsTemplateRepository.GetById(id);
@@ -88,6 +92,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost("temp-password")]
+        [EnableRateLimiting("SensitiveWrite")]
         public async Task<IActionResult> CreateTempPassword([FromBody] TempPasswordDto model)
         {
             var result = await _tempPasswordService.Create(model);

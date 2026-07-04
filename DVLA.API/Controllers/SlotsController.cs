@@ -6,12 +6,14 @@ using DVLA.Data.Models.DataObjects.ViewModels;
 using DVLA.Data.Models.Enumerables;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System;
 using System.Threading.Tasks;
 
 namespace DVLA.API.Controllers
 {
     [Authorize]
+    [EnableRateLimiting("AuthenticatedRead")]
     [ApiController]
     [Route("api/[controller]")]
     public class SlotsController : ControllerBase
@@ -45,6 +47,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost("requests")]
+        [EnableRateLimiting("SensitiveWrite")]
         public IActionResult CreateRequest([FromBody] SlotRequestModel model)
         {
             var result = _slotRepository.CreateSlotRequest(model);
@@ -52,6 +55,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost("requests/{id:int}/approve")]
+        [EnableRateLimiting("SensitiveWrite")]
         public IActionResult Approve(int id)
         {
             var result = _slotRepository.ApproveSlotRequest(id);
@@ -59,6 +63,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost("requests/reject")]
+        [EnableRateLimiting("SensitiveWrite")]
         public IActionResult Reject([FromBody] RejectSlotRequestModel model)
         {
             var result = _slotRepository.RejectSlotRequest(model);
@@ -85,6 +90,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost("prices")]
+        [EnableRateLimiting("SensitiveWrite")]
         public IActionResult CreatePrice([FromBody] SlotPriceModel model)
         {
             var result = _slotRepository.CreateSlotPrice(model);
@@ -92,6 +98,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPut("prices/{id:int}")]
+        [EnableRateLimiting("SensitiveWrite")]
         public IActionResult UpdatePrice(int id, [FromBody] SlotPriceModel model)
         {
             var result = _slotRepository.UpdateSlotPrice(model, id);
@@ -99,6 +106,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost("deduction")]
+        [EnableRateLimiting("SensitiveWrite")]
         public IActionResult SlotDeduction([FromBody] SlotDeductionModel model)
         {
             var result = _slotRepository.SlotDeduction(model);
@@ -118,6 +126,7 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPut("reorder-levels")]
+        [EnableRateLimiting("SensitiveWrite")]
         public IActionResult UpdateReorderLevel([FromBody] SlotModel model)
         {
             var result = _slotRepository.UpdateSlotReOrderLevel(model);
@@ -144,12 +153,14 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost("payments/initiate")]
+        [EnableRateLimiting("ExternalOperation")]
         public async Task<IActionResult> InitiatePayment([FromBody] InitiatePaymentRequest model)
         {
             return Ok(await _paymentService.InitiatePayment(model));
         }
 
         [HttpGet("payments/verify/{reference}")]
+        [EnableRateLimiting("ExternalOperation")]
         public IActionResult VerifyPayment(string reference)
         {
             return Ok(_paymentService.VerifyPayment(reference));

@@ -8,6 +8,7 @@ using DVLA.Data.Models.Enumerables;
 using DVLA.DATA.Domains;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ using System.Threading.Tasks;
 namespace DVLA.API.Controllers
 {
     [Authorize]
+    [EnableRateLimiting("AuthenticatedRead")]
     [ApiController]
     [Route("api/[controller]")]
     public class VisualAssessmentController : ControllerBase
@@ -74,12 +76,14 @@ namespace DVLA.API.Controllers
         }
 
         [HttpPost("transmit")]
+        [EnableRateLimiting("ExternalOperation")]
         public async Task<IActionResult> Transmit([FromBody] VisualAssessmentTransmissionModel model)
         {
             return Ok(await _visualAssessmentResultRepository.Transmit(model));
         }
 
         [HttpPost("bulk-transmit")]
+        [EnableRateLimiting("ExternalOperation")]
         public async Task<IActionResult> Transmit([FromBody] List<VisualAssessmentTransmissionModel> model)
         {
             return Ok(await _visualAssessmentResultRepository.LogBulkTransmission(model));
