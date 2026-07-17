@@ -1,4 +1,5 @@
 using DVLA.Business.BackgroundJobModule;
+using DVLA.Business.EmailModule;
 using DVLA.Business.SlotModule;
 using DVLA.UI.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,7 @@ namespace DVLA.UI.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ISlotUsageRepository _slotUsageRepository;
-        
+
 
         public HomeController(ILogger<HomeController> logger, ISlotUsageRepository slotUsageRepository)
         {
@@ -22,6 +23,7 @@ namespace DVLA.UI.Controllers
             _slotUsageRepository = slotUsageRepository;
         }
 
+        [AllowAnonymous]
         public IActionResult Index()
         {
             return View();

@@ -301,9 +301,14 @@
                                                 <span class="hide-menu">Audit Management</span>
                                             </a>
                                         </li>
+                                        
+                                    }
+
+                                    @if (User.IsInRole(AppRoles.SYSTEMADMIN))
+                                    {
                                         <li class="sidebar-item">
                                             <a asp-action="Index" asp-controller="TransmitResult" asp-area="Admin"
-                                                class="sidebar-link sublink">
+                                               class="sidebar-link sublink">
                                                 <div class="round-16 d-flex align-items-center justify-content-center">
                                                     <iconify-icon icon="solar:stop-circle-line-duotone"></iconify-icon>
                                                 </div>
@@ -312,7 +317,35 @@
                                         </li>
                                     }
 
-                                    @if (User.IsInRole(AppRoles.FACILITYOWNER) || User.IsInRole(AppRoles.OPTOMETRIST))
+                                    @if (User.IsInRole(AppRoles.FACILITYOWNER))
+                                    {
+                                        <li class="sidebar-item">
+                                            <a asp-action="InitiateSlotRequest" asp-controller="Slot" asp-area="Customer"
+                                               class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear"
+                                                              class="aside-icon"></iconify-icon>
+                                                <span class="hide-menu">Buy Slots</span>
+                                            </a>
+                                        </li>
+                                        <li class="sidebar-item">
+                                            <a asp-action="MyRequests" asp-controller="Slot" asp-area="Customer"
+                                               class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear"
+                                                              class="aside-icon"></iconify-icon>
+                                                <span class="hide-menu">Slot History</span>
+                                            </a>
+                                        </li>
+                                        <li class="sidebar-item">
+                                            <a asp-action="BiodataUpdate" asp-controller="ReportManagement"
+                                               asp-area="Customer" class="sidebar-link">
+                                                <iconify-icon icon="solar:screencast-2-linear"
+                                                              class="aside-icon"></iconify-icon>
+                                                <span class="hide-menu">Biodata Update</span>
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @if(User.IsInRole(AppRoles.OPTOMETRIST))
                                     {
                                         <li class="sidebar-item">
                                             <a asp-action="Index" asp-controller="VisualAssessmentResult"
