@@ -9,6 +9,8 @@ namespace DVLA.VerificationPortal.Shared.Enums
 {
     public enum TestType : Byte
     {
+        [Display(Name = "New Test")]
+        NewTest1 = 0,
         [Display(Name = "New")]
         NewTest = 1,
         [Display(Name = "ReTest")]
