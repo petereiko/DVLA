@@ -85,13 +85,16 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                     result = new()
                     {
                         FullName = $"{item.Surname} {item.FirstName}",
-                        PassConclusion = EnumHelper.GetEnumDescription(item.PassResult),
+                        PassConclusion = item.PassResult is null? "N/A": EnumHelper.GetEnumDescription(item.PassResult),
                         Verified = item.IsVerified,
                         TestDate = item.TestDate,
-                        TestType = EnumHelper.GetEnumDescription(item.TestType),
+                        ResultServiceType = item.ResultServiceType,
                         DvlaLicenseNumber = item.DvlaLicenseNumber,
-                        IdentityNumber = string.IsNullOrEmpty(item.PassportNumber) ? item.NationalID : item.PassportNumber,
-                        IdentityType = string.IsNullOrEmpty(item.PassportNumber) ? "National ID" : "Passport Number"
+                        IdentityNumber = string.IsNullOrEmpty(item.PassportNumber)
+                            ? item.NationalID
+                            : item.PassportNumber,
+                        IdentityType = string.IsNullOrEmpty(item.PassportNumber) ? "National ID" : "Passport Number",
+                        ContactNumber = item.ContactNumber
                     };
                     try
                     {
@@ -128,9 +131,14 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                         PassConclusion = EnumHelper.GetEnumDescription(item.PassResult),
                         Verified = item.IsVerified,
                         TestDate = item.TestDate,
-                        TestType = EnumHelper.GetEnumDescription(item.TestType),
+                        ResultServiceType = item.ResultServiceType,
+                        ResultServiceTypeName = item.ResultServiceType is not null
+                            ? EnumHelper.GetEnumDescription((ResultServiceType)item.ResultServiceType)
+                            : "N/A",
                         DvlaLicenseNumber = item.DvlaLicenseNumber,
-                        IdentityNumber = string.IsNullOrEmpty(item.PassportNumber) ? item.NationalID : item.PassportNumber,
+                        IdentityNumber = string.IsNullOrEmpty(item.PassportNumber)
+                            ? item.NationalID
+                            : item.PassportNumber,
                         IdentityType = string.IsNullOrEmpty(item.PassportNumber) ? "National ID" : "Passport Number"
                     };
                     try

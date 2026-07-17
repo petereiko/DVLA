@@ -128,7 +128,10 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 PassConclusion = x.ResultConclusion,
                 TestDate = x.TestDate,
                 Passport = x.PassportImageUrl,
-                TestType = EnumHelper.GetEnumDescription(x.TestType),
+                ResultServiceType = x.ResultServiceType,
+                ResultServiceTypeName = x.ResultServiceType is not null
+                    ? EnumHelper.GetEnumDescription((ResultServiceType)x.ResultServiceType)
+                    : "N/A",
                 Verified = x.IsVerified
             });
         }
