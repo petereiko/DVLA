@@ -14,7 +14,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Database.Entities
         public int OptometristFirmId { get; set; }
         public string? ReferenceNumber { get; set; }
         public int? ResultServiceType { get; set; }
-        public TestType TestType { get; set; }
+        public TestType? TestType { get; set; }
         public PassOrFail? PassOrFail { get; set; }
         public string? Surname { get; set; }
         public string? FirstName { get; set; }
@@ -46,7 +46,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Database.Entities
         public bool? IsRegistration { get; set; }
         public AccessType? AccessType { get; set; }
         public PassResult? PassResult { get; set; }
-        public DateTime TransmittedDate { get; set; }
+        public DateTime? TransmittedDate { get; set; }
         public DateTime CreatedDate { get; set; }
         public string? CreatedBy { get; set; }
         public bool IsVerified { get; set; } = false;

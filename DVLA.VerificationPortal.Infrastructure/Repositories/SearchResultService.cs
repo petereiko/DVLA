@@ -89,6 +89,9 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                         Verified = item.IsVerified,
                         TestDate = item.TestDate,
                         ResultServiceType = item.ResultServiceType,
+                        ResultServiceTypeName = item.ResultServiceType is not null
+                            ? EnumHelper.GetEnumDescription((ResultServiceType)item.ResultServiceType)
+                            : "N/A",
                         DvlaLicenseNumber = item.DvlaLicenseNumber,
                         IdentityNumber = string.IsNullOrEmpty(item.PassportNumber)
                             ? item.NationalID

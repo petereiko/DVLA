@@ -141,7 +141,7 @@
                                             <td>DVLA License Number:</td>
                                             <td>
                                                 @{
-                                                    string licenseNumber="N/A";
+                                                    string licenseNumber = "N/A";
                                                     if (!string.IsNullOrEmpty(Model.DvlaLicenseNumber))
                                                     {
                                                         licenseNumber = Model.DvlaLicenseNumber;
@@ -252,7 +252,19 @@
                                     </tr>
                                     <tr>
                                         <td>Recommendation</td>
-                                        <td><strong>@EnumHelper.GetEnumDescription(Model.PassResult)</strong></td>
+                                        <td>
+                                            <strong>
+                                                @if (Model.PassResult is null)
+                                                {
+                                                    <text>N/A</text>
+                                                }
+                                                else
+                                                {
+
+                                                    <text>@EnumHelper.GetEnumDescription(Model.PassResult)</text>
+                                                }
+                                            </strong>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>Pathological Remarks:</td>

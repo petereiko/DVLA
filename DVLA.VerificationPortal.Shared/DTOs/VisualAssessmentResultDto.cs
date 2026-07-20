@@ -14,14 +14,14 @@ namespace DVLA.VerificationPortal.Shared.DTOs
         public long VisualAssessmentResultId { get; set; }
         public int OptometristFirmId { get; set; }
         public Gender? Gender { get; set; }
-        public string OptometristFirmName { get; set; }
-        public string OptometristName { get; set; }
-        public string Nationality { get; set; }
+        public string? OptometristFirmName { get; set; }
+        public string? OptometristName { get; set; }
+        public string? Nationality { get; set; }
         public string? ReferenceNumber { get; set; }
 
         //public string? FormNumber { get; set; }
         public ResultServiceType? ResultServiceType { get; set; }
-        public TestType TestType { get; set; }
+        public TestType? TestType { get; set; }
 
         public PassOrFail? PassOrFail { get; set; }
 
@@ -80,10 +80,10 @@ namespace DVLA.VerificationPortal.Shared.DTOs
         public bool? IsRegistration { get; set; }
         public AccessType? AccessType { get; set; }
         public PassResult? PassResult { get; set; }
-        public DateTime TransmittedDate { get; set; }
+        public DateTime? TransmittedDate { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
-        public string CreatedBy { get; set; }
+        public string? CreatedBy { get; set; }
 
         public bool IsVerified { get; set; }
         public DateTime? VerifiedDate { get; set; }

@@ -807,7 +807,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
             try
             {
                 model.PassOrFail = model.PassOrFailInt == null? null: (PassOrFail)model.PassOrFailInt;
-
+                
 
                 var visualAcuitys = _visualAcuityScoreRepositoryQuery.FilterAsync(x => x.IsActive).Result.ToList();
                 var visualFieldScores = _visualFieldScoreRepositoryQuery.FilterAsync(x => x.IsActive).Result.ToList();
@@ -828,6 +828,13 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         return View(model);
                     }
                 }
+                if (model.PassOrFail == PassOrFail.Pass && model.PassResult is null)
+                {
+                    ModelState.AddModelError("PassResult", "Pass Result is required");
+                    model.Errors.Add("Pass Result is required");
+                    return View(model);
+                }
+
 
                 if (model.Image != null)
                 {
