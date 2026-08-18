@@ -112,5 +112,6 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         //public string PassportNumber { get; set; }
         public string DvlaLicenseNumber { get; set; }
         public string InvoiceNumber { get; set; }
+        public DateTime? TestExpiryDate { get; set; }
     }
 }

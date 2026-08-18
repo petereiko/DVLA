@@ -11,6 +11,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using DVLA.Data.Models.Enumerables;
 
 namespace DVLA.Data
 {
@@ -24,6 +25,35 @@ namespace DVLA.Data
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
             _configuration = builder.Build();
+        }
+
+        public static PassResult? GetPassResult(string passType)
+        {
+            return passType == "UNLIMITED" ? PassResult.Unlimited :
+                passType == "LIMITED FOR 3 MONTHS" ? PassResult.ThreeMonths : PassResult.SixMonths;
+        }
+
+
+        public static DateTime? GetExpiryDate(PassResult? passResult)
+        {
+            var now = DateTime.UtcNow;
+            DateTime? expiryDate = null;
+
+            switch (passResult)
+            {
+                case PassResult.ThreeMonths:
+                    expiryDate = now.AddMonths(3);
+                    break;
+                case PassResult.SixMonths:
+                    expiryDate = now.AddMonths(6);
+                    break;
+                case PassResult.Unlimited:
+                    expiryDate = now.AddYears(2);
+                    break;
+                default: break;
+            }
+
+            return expiryDate;
         }
 
         public static byte[] ExportToExcel<T>(List<T> data)

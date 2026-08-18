@@ -427,14 +427,17 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     var newEntry = new VisualAssessmentResult()
                     {
                         //NameTitle = Title == "MR" ? NameTitle.Mr : Title == "MRS" ? NameTitle.Mrs : NameTitle.Other,
-                        PassOrFail = PassOrFail == "PASS" ? Data.Models.Enumerables.PassOrFail.Pass : Data.Models.Enumerables.PassOrFail.Fail,
-                        PassResult = PassType == "UNLIMITED" ? PassResult.Unlimited : PassType == "LIMITED FOR 3 MONTHS" ? PassResult.ThreeMonths : PassResult.SixMonths,
+                        PassOrFail = PassOrFail == "PASS"
+                            ? Data.Models.Enumerables.PassOrFail.Pass
+                            : Data.Models.Enumerables.PassOrFail.Fail,
+                        PassResult = PassType == "UNLIMITED" ? PassResult.Unlimited :
+                            PassType == "LIMITED FOR 3 MONTHS" ? PassResult.ThreeMonths : PassResult.SixMonths,
                         Surname = Surname,
                         //DriversLicence = LicenceNumber,
                         //DVLAReferenceNo = DVLAReferenceNumber,
                         FirstName = FirstName,
                         OtherName = OtherName,
-                        DOB = Convert.ToDateTime(DOB),   //(DateTime)DOB.GetDateValue(),
+                        DOB = Convert.ToDateTime(DOB), //(DateTime)DOB.GetDateValue(),
                         PostalAddress = PostalAddress,
                         ContactNumber = ContactNumber,
                         Nationality = TIN,
@@ -456,7 +459,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         //ContrastSensitivity_BCV = ContrastSensitivity_BCV,
                         PathologicalRemarks = PathologicalRemarks,
                         ResultConclusion = ResultConclusion,
-                        ResultServiceType = (ResultServiceType)serviceType,// == "DRIVER'S LICENCE" ? ResultServiceType.DriversLicence : ResultServiceType.LearnerDriversLicence,
+                        ResultServiceType =
+                            (ResultServiceType)
+                            serviceType, // == "DRIVER'S LICENCE" ? ResultServiceType.DriversLicence : ResultServiceType.LearnerDriversLicence,
                         OptometristFirmId = optometristUser.OptometristFirmId,
                         ReferenceNumber = referenceNumber,
                         CreatedBy = _authUser.UserId,
@@ -465,10 +470,13 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         TestDate = DateTime.UtcNow,
                         Status = Status.InProgress,
                         IsSynchronized = false,
-                        TestType = TestType == "NEW" ? Data.Models.Enumerables.TestType.NewTest : Data.Models.Enumerables.TestType.ReTest,
+                        TestType = TestType == "NEW"
+                            ? Data.Models.Enumerables.TestType.NewTest
+                            : Data.Models.Enumerables.TestType.ReTest,
                         //InvoiceNumber = InvoiceNumber,
-                        //PassportNumber = PassportNumber,
-                        InvoiceNumber = InvoiceNumber
+                        //PassportNumber = PassportNumber,PassType
+                        InvoiceNumber = InvoiceNumber,
+                        TestExpiryDate = Utility.GetExpiryDate(Utility.GetPassResult(PassType))
                     };
 
                     list.Add(newEntry);

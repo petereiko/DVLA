@@ -179,8 +179,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     return View(model);
                 }
 
-
-
+                
 
                 //var user = UserManager.FindByEmail(model.Email);
                 //if (user != null)
@@ -212,6 +211,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     IsRegistration = true,
                     CreatedBy = _authUser.UserId,
                     DvlaLicenseNumber = model.DvlaLicenseNumber,
+                    TestExpiryDate = Utility.GetExpiryDate(model.PassResult)
                     //PassportNumber = model.IdentityType==IdentityType.InternationalPassport? model.IdentityNumber:null,
                     //NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null
                 };

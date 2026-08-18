@@ -234,7 +234,8 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     //PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
                     //NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
                     DvlaLicenseNumber = model.DvlaLicenseNumber,
-                    InvoiceNumber = model.InvoiceNumber
+                    InvoiceNumber = model.InvoiceNumber,
+                    TestExpiryDate = Utility.GetExpiryDate(model.PassResult)
                 };
 
                 _visualAssessmentResultQuery.Add(applicant);

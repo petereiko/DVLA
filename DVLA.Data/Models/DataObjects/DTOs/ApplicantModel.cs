@@ -25,6 +25,8 @@ namespace DVLA.Data.Models.DataObjects.DTOs
             //}).ToList();
         }
         public long Id { get; set; }
+        
+        public PassResult? PassResult{ get; set; }
 
         [Required(ErrorMessage ="Gender is required")]
         public Gender? Gender { get; set; }

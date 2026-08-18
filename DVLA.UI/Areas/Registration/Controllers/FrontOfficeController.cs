@@ -215,7 +215,9 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     Surname = model.Surname,
                     OptometristFirmId = model.OptometristFirmId,
                     ResultServiceType = model.ResultServiceType,
-                    AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
+                    AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence
+                        ? AccessType.LearnerDriversLicence
+                        : AccessType.OtherLicenceCategory,
                     PassportImageUrl = model.Filename,
                     TestType = model.TestType,
                     Status = Status.InProgress,
@@ -232,8 +234,10 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     //NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
                     //PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
                     DvlaLicenseNumber = model.DvlaLicenseNumber,
-                    InvoiceNumber = model.InvoiceNumber
+                    InvoiceNumber = model.InvoiceNumber,
+                    TestExpiryDate = Utility.GetExpiryDate(model.PassResult)
                 };
+                
 
                 await _applicantQuery.AddAsync(applicant);
 

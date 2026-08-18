@@ -779,6 +779,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
 
                     string referenceNumber = GenerateReferenceNo(model.OptometristFirmId, (Status)model.Status);
 
+
                     VisualAssessmentResult visualAssessmentResult = new()
                     {
                         AccessType = (AccessType)model.AccessType,
@@ -831,7 +832,8 @@ namespace DVLA.Business.VisualAssessmentResultModule
                         //NationalID = model.NationalID,
                         //PassportNumber = model.PassportNumber,
                         DvlaLicenseNumber = model.DvlaLicenseNumber,
-                        InvoiceNumber = model.InvoiceNumber
+                        InvoiceNumber = model.InvoiceNumber,
+                        TestExpiryDate = model.TestExpiryDate
                     };
                     _context.VisualAssessmentResults.Add(visualAssessmentResult);
                     await _context.SaveChangesAsync();
