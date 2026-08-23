@@ -148,12 +148,12 @@ namespace DVLA.Business.VisualAssessmentResultModule
             {
                 //var count = GenerateSerialNumber();
                 var optometristFirm = _context.OptometristFirms.Include(x => x.Region).FirstOrDefault(x => x.Id == optometristFirmId);
-                var regionPrefix = optometristFirm.Region.PrefixName;
+                var regionPrefix = optometristFirm.RegionId.Value.ToString().PadLeft(2, '0');
                 int applicantCount = _context.VisualAssessmentResults.Count();
                 string countString = applicantCount.ToString().PadLeft(4, '0');
                 var accrdArry = optometristFirm.AccreditationNumber.Split('/');
                 string serial = accrdArry[1];
-                result = $"DS{serial}{DateTime.Now.ToString("yy")}{optometristFirm.Region.PrefixName}{countString}";
+                result = $"DS{serial}{DateTime.Now.ToString("yy")}{regionPrefix}{countString}";
                 //DS2022  25ASH0915
 
                 while (_context.VisualAssessmentResults.Any(x => x.ReferenceNumber == result))
