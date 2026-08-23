@@ -91,5 +91,6 @@ namespace DVLA.VerificationPortal.Shared.DTOs
         public string? PassportNumber { get; set; }
         public string? DvlaLicenseNumber { get; set; }
         public string? InvoiceNumber { get; set; }
+        public DateTime? TestExpiryDate { get; set; }
     }
 }

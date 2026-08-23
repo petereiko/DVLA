@@ -67,6 +67,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Database.Entities
         public string? GenesisError { get; set; }
         public string? GenesisMessage { get; set; }
         public string? InvoiceNumber { get; set; }
+        public DateTime? TestExpiryDate { get; set; }
 
     }
 }

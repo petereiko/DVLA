@@ -1,9 +1,11 @@
-﻿using DVLA.VerificationPortal.CustomAttributes;
+﻿using Azure;
+using DVLA.VerificationPortal.CustomAttributes;
 using DVLA.VerificationPortal.Infrastructure.Repositories;
 using DVLA.VerificationPortal.Models;
 using DVLA.VerificationPortal.Shared.DTOs;
 using DVLA.VerificationPortal.Shared.Responses;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DVLA.VerificationPortal.Controllers.APIs
@@ -39,7 +41,19 @@ namespace DVLA.VerificationPortal.Controllers.APIs
             //{
             //    return BadRequest(new { status = "error", message = "Test has already been verified once" });
             //}
-            return Ok(new { status = "success", data = result });
+            var projection = new ApiTestResultDto()
+            {
+                ContactNumber = result.ContactNumber,
+                FullName = result.FullName,
+                IdentityNumber = result.IdentityNumber,
+                IdentityType = result.IdentityType,
+                PassConclusion = result.PassConclusion,
+                PassResult = result.PassResult,
+                TestDate = result.TestDate,
+                TestExpiryDate = result.TestExpiryDate,
+                ResultConclusion = result.ResultConclusion
+            };
+            return Ok(new { status = "success", data = projection });
         }
 
 
@@ -57,7 +71,19 @@ namespace DVLA.VerificationPortal.Controllers.APIs
             //{
             //    return BadRequest(new { status = "error", message = "Test has already been verified once" });
             //}
-            return Ok(new { status = "success", data = result });
+            var projection = new ApiTestResultDto()
+            {
+                ContactNumber = result.ContactNumber,
+                FullName = result.FullName,
+                IdentityNumber = result.IdentityNumber,
+                IdentityType = result.IdentityType,
+                PassConclusion = result.PassConclusion,
+                PassResult = result.PassResult,
+                TestDate = result.TestDate,
+                TestExpiryDate = result.TestExpiryDate,
+                ResultConclusion= result.ResultConclusion
+            };
+            return Ok(new { status = "success", data = projection });
         }
 
 

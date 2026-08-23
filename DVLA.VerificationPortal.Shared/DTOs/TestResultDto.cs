@@ -22,5 +22,26 @@ namespace DVLA.VerificationPortal.Shared.DTOs
         public string? IdentityNumber { get; set; }
         public string? DvlaLicenseNumber { get; set; }
         public string? ContactNumber { get; set; }
+        public DateTime? TestExpiryDate { get; set; }
+        public string? PassResult { get; set; }
+        public string? ResultConclusion { get; set; }
+    }
+
+    public class ApiTestResultDto
+    {
+        public string? FullName { get; set; }
+        public string? PassConclusion { get; set; }
+        //public bool Verified { get; set; }
+        //public string? Passport { get; set; }
+        //public int? ResultServiceType { get; set; }
+        //public string? ResultServiceTypeName { get; set; }
+        public DateTime? TestDate { get; set; }
+        public string? IdentityType { get; set; }
+        public string? IdentityNumber { get; set; }
+        //public string? DvlaLicenseNumber { get; set; }
+        public string? ContactNumber { get; set; }
+        public DateTime? TestExpiryDate { get; set; }
+        public string? PassResult { get; set; }
+        public string? ResultConclusion { get; set; }
     }
 }

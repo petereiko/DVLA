@@ -86,8 +86,9 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                     {
                         FullName = $"{item.Surname} {item.FirstName}",
                         PassConclusion = item.PassResult is null? "N/A": EnumHelper.GetEnumDescription(item.PassResult),
-                        Verified = item.IsVerified,
+                        //Verified = item.IsVerified,
                         TestDate = item.TestDate,
+                        PassResult = item.PassOrFail==null? string.Empty:EnumHelper.GetEnumDescription(item.PassOrFail),
                         ResultServiceType = item.ResultServiceType,
                         ResultServiceTypeName = item.ResultServiceType is not null
                             ? EnumHelper.GetEnumDescription((ResultServiceType)item.ResultServiceType)
@@ -97,7 +98,8 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                             ? item.NationalID
                             : item.PassportNumber,
                         IdentityType = string.IsNullOrEmpty(item.PassportNumber) ? "National ID" : "Passport Number",
-                        ContactNumber = item.ContactNumber
+                        ContactNumber = item.ContactNumber,
+                        ResultConclusion = item.ResultConclusion,
                     };
                     try
                     {
@@ -123,7 +125,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             TestResultDto? result = null;
             try
             {
-                Expression<Func<VisualAssessmentResult, bool>> expression = v => v.DvlaLicenseNumber.Equals(dsreference);
+                Expression<Func<VisualAssessmentResult, bool>> expression = v => v.DvlaLicenseNumber.Equals(dsreference) || v.ReferenceNumber.Equals(dsreference);
                 IEnumerable<VisualAssessmentResult> results = await _visualAssessmentResultRepository.FilterAsync(expression, false);
 
                 foreach (var item in results)
@@ -139,9 +141,13 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                             ? EnumHelper.GetEnumDescription((ResultServiceType)item.ResultServiceType)
                             : "N/A",
                         DvlaLicenseNumber = item.DvlaLicenseNumber,
+                        PassResult = item.PassOrFail is null ? string.Empty : EnumHelper.GetEnumDescription(item.PassOrFail),
                         IdentityNumber = string.IsNullOrEmpty(item.PassportNumber)
                             ? item.NationalID
                             : item.PassportNumber,
+                        TestExpiryDate = item.TestExpiryDate,
+                        ContactNumber = item.ContactNumber,
+                        ResultConclusion = item.ResultConclusion,
                         IdentityType = string.IsNullOrEmpty(item.PassportNumber) ? "National ID" : "Passport Number"
                     };
                     try
@@ -214,7 +220,8 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 Unaided_OD = entity.Unaided_OD,
                 Unaided_OS = entity.Unaided_OS,
                 Unaided_OU = entity.Unaided_OU,
-                VisualAssessmentResultId = entity.VisualAssessmentResultId
+                VisualAssessmentResultId = entity.VisualAssessmentResultId,
+                TestExpiryDate = entity.TestExpiryDate
             };
             //model.EncodedKey = Utility.EncryptUrlID((int)model.Id);
             return model;
@@ -272,7 +279,8 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 Unaided_OD = result.Unaided_OD,
                 Unaided_OS = result.Unaided_OS,
                 Unaided_OU = result.Unaided_OU,
-                VisualAssessmentResultId = result.VisualAssessmentResultId
+                VisualAssessmentResultId = result.VisualAssessmentResultId,
+                TestExpiryDate = result.TestExpiryDate
             };
             //model.EncodedKey = Utility.EncryptUrlID((int)model.Id);
             return model;
@@ -330,7 +338,8 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 Unaided_OD = result.Unaided_OD,
                 Unaided_OS = result.Unaided_OS,
                 Unaided_OU = result.Unaided_OU,
-                VerifiedDate = result.VerifiedDate
+                VerifiedDate = result.VerifiedDate,
+                TestExpiryDate = result.TestExpiryDate
             };
 
             VisualAssessmentResult record = await _visualAssessmentResultRepository.GetSingleAsync(x => x.ReferenceNumber == entity.ReferenceNumber, false);
@@ -398,7 +407,8 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                     Unaided_OU = model.Unaided_OU,
                     VerifiedDate = model.VerifiedDate,
                     VisualAssessmentResultId = model.VisualAssessmentResultId,
-                    InvoiceNumber = model.InvoiceNumber
+                    InvoiceNumber = model.InvoiceNumber,
+                    TestExpiryDate = model.TestExpiryDate
                 };
 
                 VisualAssessmentResult record = await _visualAssessmentResultRepository.GetSingleAsync(x => x.ReferenceNumber == entity.ReferenceNumber, false);
