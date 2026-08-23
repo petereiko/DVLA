@@ -18,9 +18,9 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
         Task ProcessGenesysAsync();
         Task<MessageResponse> PushBulk(VisualAssessmentResultDto result);
         Task<MessageResponse> Push(VisualAssessmentResultDto model);
-        // Task<MessageResponse> VerifyResult(string token, VerifyType verifyType);
         Task<MessageResponse> UpdateAuthDoctor(UpdateDocRequestDto model);
         Task<MessageResponse<string>> VerifyResultByReferenceAsync(string referenceNumber, VerifyType verifyType);
-        // Task<MessageResponse<string>> VerifyResultByReferenceAsync(string referenceNumber, VerifyType verifyType);
+
+        Task<List<VisualAssessmentResultDto>> GetVerifiedResultsAsync();
     }
 }

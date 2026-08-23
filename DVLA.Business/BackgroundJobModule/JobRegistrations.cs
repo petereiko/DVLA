@@ -25,7 +25,7 @@ namespace DVLA.Business.BackgroundJobModule
                 q.AddTrigger(opts => opts
                     .ForJob(visualAssessmentResultJob)
                     .WithIdentity("VisualAssessmentResultJob-Trigger")
-                    .WithCronSchedule("0 */2 * * * ?") // every 2 mins (Quartz uses 6-part cron)
+                    .WithCronSchedule("0 */2 * * * ?") 
                     .WithDescription("Runs every 2 minutes")
                 );
 

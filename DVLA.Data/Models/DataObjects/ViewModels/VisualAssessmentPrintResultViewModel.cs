@@ -59,6 +59,7 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
         public string PathologicalRemarks { get; set; }
         public string ResultConclusion { get; set; }
         public DateTime? TestDate { get; set; }
+        public DateTime? TestExpiryDate { get; set; }
         public string PassportImageUrl { get; set; }
         public Status? Status { get; set; }
         public string ActionType { get; set; }

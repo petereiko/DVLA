@@ -48,6 +48,7 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public bool? IsSynchronized { get; set; }
         public bool? IsGHDriveSynchronized { get; set; }
         public DateTime? TestDate { get; set; }
+        public DateTime? TestExpiryDate { get; set; }
         public string PassportImageUrl { get; set; }
         public Status? Status { get; set; }
         public string BusinessAddress { get; set; }

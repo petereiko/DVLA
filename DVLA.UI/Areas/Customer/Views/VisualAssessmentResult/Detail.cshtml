@@ -92,6 +92,15 @@
                                 Test Date: @Model.TestDate.GetValueOrDefault().ToString("dd/MM/yyyy")
                             </td>
                         </tr>
+                        @if (Model.TestExpiryDate.HasValue)
+                        {
+                            <tr>
+                                <td></td>
+                                <td colspan="2" style="text-align:right">
+                                    Test Expiry Date: @Model.TestExpiryDate.Value.ToString("dd/MM/yyyy")
+                                </td>
+                            </tr>
+                        }
                         <tr>
                             <td colspan="3"><hr /></td>
                         </tr>
@@ -151,7 +160,6 @@
        
     </script>
 }
-
 
 
 

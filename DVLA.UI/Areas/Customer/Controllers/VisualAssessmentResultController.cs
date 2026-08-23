@@ -601,7 +601,9 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         ActionType = "Modify",
                         Gender = y.Gender,
                         InvoiceNumber = y.InvoiceNumber,
-                       // IdentityType = string.IsNullOrEmpty(y.PassportNumber) ? IdentityType.NationalIDCard : IdentityType.InternationalPassport
+                        PassportNumber = y.PassportNumber,
+                        GhanaCardNumber = y.GhanaCardNumber,
+                        IdentityType = y.IdentityType ?? (string.IsNullOrEmpty(y.PassportNumber) ? IdentityType.NationalIDCard : IdentityType.InternationalPassport)
                     }).FirstOrDefault();
 
                     if (!string.IsNullOrEmpty(model.PassportImageUrl) && model.PassportImageUrl.Contains(".png"))
@@ -843,6 +845,35 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     return View(model);
                 }
 
+                if (!string.IsNullOrEmpty(model.Nationality))
+                {
+                    bool isGhanaian = model.Nationality.Equals("Ghana", StringComparison.OrdinalIgnoreCase)
+                        || model.Nationality.Equals("Ghanaian", StringComparison.OrdinalIgnoreCase);
+
+                    if (isGhanaian)
+                    {
+                        model.IdentityType = IdentityType.NationalIDCard;
+
+                        if (model.Action == Status.Complete && string.IsNullOrEmpty(model.GhanaCardNumber))
+                        {
+                            ModelState.AddModelError("GhanaCardNumber", "Please enter Ghana Card Number");
+                            model.Errors.Add("Please enter Ghana Card Number");
+                            return View(model);
+                        }
+                    }
+                    else
+                    {
+                        model.IdentityType = IdentityType.InternationalPassport;
+
+                        if (model.Action == Status.Complete && string.IsNullOrEmpty(model.PassportNumber))
+                        {
+                            ModelState.AddModelError("PassportNumber", "Please enter Passport Number");
+                            model.Errors.Add("Please enter Passport Number");
+                            return View(model);
+                        }
+                    }
+                }
+
 
                 if (model.Image != null)
                 {
@@ -936,7 +967,11 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             VisualAssessmentResult visualAssessmentResult = new VisualAssessmentResult()
                             {
                                 //NameTitle = model.NameTitle,
-                                PassOrFail = (model.ResultConclusion == "Fit to drive" || model.ResultConclusion == "Fit to drive with glasses") ? PassOrFail.Pass : PassOrFail.Fail,
+                                PassOrFail =
+                                    (model.ResultConclusion == "Fit to drive" ||
+                                     model.ResultConclusion == "Fit to drive with glasses")
+                                        ? PassOrFail.Pass
+                                        : PassOrFail.Fail,
                                 PassResult = model.PassResult,
                                 Surname = model.Surname,
                                 Gender = model.Gender,
@@ -948,7 +983,8 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 PostalAddress = model.PostalAddress,
                                 ContactNumber = model.ContactNumber,
                                 Nationality = model.Nationality,
-                                Email = string.IsNullOrEmpty(model.Email) ? "" : _emailService.IsValidEmail(model.Email.Trim()) ? model.Email.Trim() : "",
+                                Email = string.IsNullOrEmpty(model.Email) ? "" :
+                                    _emailService.IsValidEmail(model.Email.Trim()) ? model.Email.Trim() : "",
                                 Unaided_OD = model.Unaided_OD,
                                 Unaided_OS = model.Unaided_OS,
                                 Unaided_OU = model.Unaided_OU,
@@ -981,10 +1017,18 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 CreatedDate = DateTime.UtcNow,
                                 IsRegistration = false,
                                 ContrastSensitivity_BCV = model.ContrastSensitivity_BCV,
-                                AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory,
-                                //PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
-                                //InvoiceNumber = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
-                                InvoiceNumber = model.InvoiceNumber
+                                AccessType = model.ResultServiceType == ResultServiceType.LearnerDriversLicence
+                                    ? AccessType.LearnerDriversLicence
+                                    : AccessType.OtherLicenceCategory,
+                                PassportNumber = model.IdentityType == IdentityType.InternationalPassport
+                                    ? model.PassportNumber
+                                    : null,
+                                GhanaCardNumber = model.IdentityType == IdentityType.NationalIDCard
+                                    ? model.GhanaCardNumber
+                                    : null,
+                                InvoiceNumber = model.InvoiceNumber,
+                                IdentityType = model.IdentityType,
+                                TestExpiryDate = Utility.GetExpiryDate(model.PassResult)
                             };
                             context.VisualAssessmentResults.Add(visualAssessmentResult);
                             await context.SaveChangesAsync();
@@ -1089,6 +1133,15 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             visualAssessmentResult.CreatedBy = _authUser.UserId;
                             visualAssessmentResult.ModifiedBy = _authUser.UserId;
                             visualAssessmentResult.ModifiedDate = DateTime.UtcNow;
+                            visualAssessmentResult.PassportNumber = model.IdentityType == IdentityType.InternationalPassport
+                                ? model.PassportNumber
+                                : null;
+                            visualAssessmentResult.GhanaCardNumber = model.IdentityType == IdentityType.NationalIDCard
+                                ? model.GhanaCardNumber
+                                : null;
+                            visualAssessmentResult.IdentityType = model.IdentityType;
+                            visualAssessmentResult.InvoiceNumber = model.InvoiceNumber;
+                            visualAssessmentResult.TestExpiryDate = Utility.GetExpiryDate(model.PassOrFail == PassOrFail.Fail ? null : model.PassResult);
 
                             //visualAssessmentResult.TestDate = DateTime.UtcNow;
                             await context.SaveChangesAsync();
@@ -1253,6 +1306,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                             TaxIdentificationNumber = result.Nationality,
                             TelephoneNumber = result.ContactNumber,
                             TestDate = result.TestDate,
+                            TestExpiryDate = result.TestExpiryDate,
                             Unaided_OD = result.Unaided_OD,
                             Unaided_OS = result.Unaided_OS,
                             Unaided_OU = result.Unaided_OU,

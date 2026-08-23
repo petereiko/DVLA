@@ -15,13 +15,13 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
         public VisualAssessmentResultViewModel()
         {
             Status = Enumerables.Status.InProgress;
-            //IdentityTypes = Enum.GetValues(typeof(IdentityType))
-            //.Cast<IdentityType>()
-            //.Select(e => new SelectListItem
-            //{
-            //    Value = ((int)e).ToString(),
-            //    Text = EnumHelper.GetDescription(e)
-            //}).ToList();
+            IdentityTypes = Enum.GetValues(typeof(IdentityType))
+            .Cast<IdentityType>()
+            .Select(e => new SelectListItem
+            {
+                Value = ((int)e).ToString(),
+                Text = EnumHelper.GetDescription(e)
+            }).ToList();
         }
 
         [Required(ErrorMessage ="Gender is required")]
@@ -72,7 +72,7 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
         public bool? IsRegistration { get; set; }
         public string Filename { get; set; }
         //public string InvoiceNumber { get; set; }
-        //public string PassportNumber { get; set; }
+        public string PassportNumber { get; set; }
 
         [Required(ErrorMessage = "Please select an Identity Type.")] 
         public IdentityType IdentityType { get; set; }
@@ -83,8 +83,7 @@ namespace DVLA.Data.Models.DataObjects.ViewModels
         [Required(ErrorMessage ="Please enter Invoice Number")]
         public string InvoiceNumber { get; set; }
 
-
-        //public List<SelectListItem> IdentityTypes { get; set; }
-        //public string DvlaLicenseNumber { get; set; }
+        public List<SelectListItem> IdentityTypes { get; set; }
+        public string GhanaCardNumber { get; set; }
     }
 }

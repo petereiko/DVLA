@@ -16,13 +16,13 @@ namespace DVLA.Data.Models.DataObjects.DTOs
     {
         public ApplicantModel()
         {
-            //IdentityTypes = Enum.GetValues(typeof(IdentityType))
-            //.Cast<IdentityType>()
-            //.Select(e => new SelectListItem
-            //{
-            //    Value = ((int)e).ToString(),
-            //    Text = EnumHelper.GetDescription(e)
-            //}).ToList();
+            IdentityTypes = Enum.GetValues(typeof(IdentityType))
+            .Cast<IdentityType>()
+            .Select(e => new SelectListItem
+            {
+                Value = ((int)e).ToString(),
+                Text = EnumHelper.GetDescription(e)
+            }).ToList();
         }
         public long Id { get; set; }
         
@@ -67,16 +67,18 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public string DisplayImageUrl { get; set; }
         public bool VideoCapture { get; set; }
 
-        //[Required(ErrorMessage = "Please select an Identity Type.")]
-        //public IdentityType IdentityType { get; set; }
+        [Required(ErrorMessage = "Please select an Identity Type.")]
+        public IdentityType IdentityType { get; set; }
 
         //[Required(ErrorMessage = "Please enter identity number.")]
         //public string IdentityNumber { get; set; }
 
-        //public List<SelectListItem> IdentityTypes { get; set; }
+        public List<SelectListItem> IdentityTypes { get; set; }
 
         public string DvlaLicenseNumber { get; set; }
         public string InvoiceNumber { get; set; }
+        public string PassportNumber { get; set; }
+        public string GhanaCardNumber { get; set; }
 
     }
 }

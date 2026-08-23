@@ -298,6 +298,7 @@ namespace DVLA.Business.VisualAssessmentResultModule
                                     Surname = !reader.IsDBNull(reader.GetOrdinal("Surname")) ? reader.GetString("Surname") : null,
                                     TaxIdentificationNumber = !reader.IsDBNull(reader.GetOrdinal("TaxIdentificationNumber")) ? reader.GetString("TaxIdentificationNumber") : null,
                                     TelephoneNumber = !reader.IsDBNull(reader.GetOrdinal("TelephoneNumber")) ? reader.GetString("TelephoneNumber") : null,
+                                    TestExpiryDate = !reader.IsDBNull(reader.GetOrdinal("TestExpiryDate")) ? reader.GetDateTime("TestExpiryDate") : (DateTime?)null,
                                     Unaided_OD = !reader.IsDBNull(reader.GetOrdinal("Unaided_OD")) ? reader.GetString("Unaided_OD") : null,
                                     Unaided_OS = !reader.IsDBNull(reader.GetOrdinal("Unaided_OS")) ? reader.GetString("Unaided_OS") : null,
                                     Unaided_OU = !reader.IsDBNull(reader.GetOrdinal("Unaided_OU")) ? reader.GetString("Unaided_OU") : null,

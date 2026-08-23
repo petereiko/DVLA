@@ -31,6 +31,11 @@
                 <th>@Model.PathologicalRemarks</th>
                 <td>Result</td>
                 <th>@Model.ResultConclusion</th>
+                @if (@Model.TestExpiryDate is not null)
+                {
+                    <td>Expiry Date</td>
+                    <th>@Model.TestExpiryDate.Value.ToString("dd MMM yyyy | hh:mm tt")</th>
+                }
             </tr>
         </table>
         <br />

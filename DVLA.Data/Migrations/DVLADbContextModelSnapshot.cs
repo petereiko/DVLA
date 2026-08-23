@@ -1503,6 +1503,12 @@ namespace DVLA.Data.Migrations
                     b.Property<string>("HX_BCV_OU")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("GhanaCardNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("IdentityType")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -1541,6 +1547,9 @@ namespace DVLA.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("PassportImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PassportNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PathologicalRemarks")

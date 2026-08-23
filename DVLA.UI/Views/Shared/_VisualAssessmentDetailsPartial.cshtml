@@ -12,6 +12,7 @@
     string age = "";
     string passOrFail = "";
     string testdate = "";
+    string testExpiryDate = "";
     string learnerType = "";
     if (Model != null)
     {
@@ -37,6 +38,10 @@
         if (Model.TestDate.HasValue)
         {
             testdate = Model.TestDate.Value.ToShortDateString();
+        }
+        if (Model.TestExpiryDate.HasValue)
+        {
+            testExpiryDate = Model.TestExpiryDate.Value.ToShortDateString();
         }
         if (Model.PassOrFail.HasValue)
         {
@@ -304,7 +309,14 @@
                         <td>Location: <b><u>@Model.BusinessAddress</u></b></td>
                         <td>District: <b><u>@Model.DistrictName</u></b></td>
                         <td>Region: <b><u>@Model.RegionName</u></b></td>
-                        <td>Test Date: <b><u>@testdate</u></b></td>
+                        <td>
+                            Test Date: <b><u>@testdate</u></b>
+                            @if (Model.TestExpiryDate.HasValue)
+                            {
+                                <br />
+                                <span>Test Expiry Date: <b><u>@testExpiryDate</u></b></span>
+                            }
+                        </td>
                     </tr>
                 </table>
             </div>

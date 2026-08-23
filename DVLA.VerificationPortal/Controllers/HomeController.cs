@@ -72,6 +72,15 @@ namespace DVLA.VerificationPortal.Controllers
             return View();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> VerifiedResults()
+        {
+            List<VisualAssessmentResultDto> results = await _searchService.GetVerifiedResultsAsync();
+            return View(results);
+        }
+
+        
+
         public IActionResult Error()
         {
             // Retrieve the error message from HttpContext.Items

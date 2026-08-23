@@ -297,6 +297,7 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 model.OptometristFirmId = applicant.OptometristFirmId;
                 //model.FormNumber = applicant.FormNumber;
                 model.TestType = Enum.GetName(typeof(TestType), applicant.TestType); ;
+                model.TestExpiryDate = applicant.TestExpiryDate;
                 //model.OldDVLAReferenceNo = applicant.OldDVLAReferenceNo;
              
 

@@ -2,8 +2,20 @@
 <project version="4">
   <component name="dataSourceStorageLocal" created-in="RD-262.8665.400">
     <data-source name="@localhost" uuid="583df327-8e5a-4794-9c8b-44ee624724bb">
-      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="MSSQL" />
-      <schema-mapping />
+      <database-info product="Microsoft SQL Server" version="16.00.4255" jdbc-version="4.2" driver-name="JetBrains JDBC Driver for SQL Server" driver-version="1.0" dbms="MSSQL" exact-version="16.0.4255" exact-driver-version="1.0">
+        <extra-name-characters>$#@</extra-name-characters>
+        <identifier-quote-string>&quot;</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>sa</user-name>
+      <schema-mapping>
+        <introspection-scope>
+          <node kind="database" qname="DVLADB">
+            <node kind="schema" qname="dbo" />
+          </node>
+        </introspection-scope>
+      </schema-mapping>
     </data-source>
   </component>
 </project>

@@ -9,10 +9,10 @@ namespace DVLA.Data.Models.Enumerables
 {
     public enum IdentityType
     {
-        [Description("National ID Card")]
+        [Description("Ghanaian")]
         NationalIDCard = 0,
 
-        [Description("International Passport")]
+        [Description("International")]
         InternationalPassport = 1
     }
 }

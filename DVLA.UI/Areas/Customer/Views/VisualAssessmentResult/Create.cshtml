@@ -225,21 +225,19 @@
 
                                                 </div>
 
-                                                @* <div class="col-sm">
-                                                    <label>Identity Type</label><br />
-                                                    @foreach (var item in Model.IdentityTypes)
-                                                    {
-                                                        <label>
-                                                            <input type="radio"
-                                                                   name="IdentityType"
-                                                                   value="@item.Value"
-                                                                   @(item.Value == ((int?)Model.IdentityType)?.ToString() ? "checked" : "") />
-                                                            @item.Text
-                                                        </label>
-                                                        <br />
-                                                    }
-                                                    <span asp-validation-for="IdentityType" class="text-danger"></span>
-                                                </div> *@
+                                                <div class="col-sm">
+                                                    <input type="hidden" asp-for="IdentityType" />
+                                                    <div id="identity-number-area" style="display:none">
+                                                        <label id="identity-number-label">Ghana Card Number</label>
+                                                        <input type="text"
+                                                               id="identity-number-input"
+                                                               class="form-control"
+                                                               value="@(string.IsNullOrEmpty(Model.GhanaCardNumber) ? Model.PassportNumber : Model.GhanaCardNumber)"
+                                                               autocomplete="off" />
+                                                        <span asp-validation-for="GhanaCardNumber" class="text-danger"></span>
+                                                        <span asp-validation-for="PassportNumber" class="text-danger"></span>
+                                                    </div>
+                                                </div>
 
                                                 <div class="col-sm">
                                                     Invoice Number
@@ -563,10 +561,10 @@
 
     <script src="~/createvisualassessment.js" asp-append-version="true"></script>
 
-                function PreSubmit(){
-                }
-
     <script>
+        function PreSubmit(){
+        }
+
         $(function(){
             $('#ResultServiceType').change(function(){
                 let serviceType=$(this).val();
@@ -580,7 +578,32 @@
                 }
 
             });
+
+            function updateIdentityNumberInput() {
+                const nationality = ($('#Nationality').val() || '').toLowerCase();
+                const isGhanaian = nationality === 'ghana' || nationality === 'ghanaian';
+                const hasNationality = nationality.length > 0;
+                const input = $('#identity-number-input');
+
+                $('#identity-number-area').toggle(hasNationality);
+
+                if (isGhanaian) {
+                    $('#identity-number-label').text('Ghana Card Number');
+                    $('#IdentityType').val('@((int)IdentityType.NationalIDCard)');
+                    input.attr('name', 'GhanaCardNumber');
+                    input.attr('placeholder', 'Enter your Ghana Card Number');
+                } else {
+                    $('#identity-number-label').text('Passport Number');
+                    $('#IdentityType').val('@((int)IdentityType.InternationalPassport)');
+                    input.attr('name', 'PassportNumber');
+                    input.attr('placeholder', 'Enter your Passport Number');
+                }
+
+                input.prop('required', hasNationality);
+            }
+
+            $('#Nationality').change(updateIdentityNumberInput);
+            updateIdentityNumberInput();
         })
     </script>
 }
-

@@ -83,6 +83,15 @@
                                             @Model.TestType
                                         </div>
                                     </div>
+                                    @if (Model.TestExpiryDate.HasValue)
+                                    {
+                                        <div class="col-sm">
+                                            <b>Test Expiry Date</b>
+                                            <div>
+                                                @Model.TestExpiryDate.Value.ToString("dd/MM/yyyy")
+                                            </div>
+                                        </div>
+                                    }
                                     @* <div class="col-sm">
                                         <b>Licence Number</b>
                                         <div>
@@ -397,4 +406,3 @@
 
     </script>
 }
-

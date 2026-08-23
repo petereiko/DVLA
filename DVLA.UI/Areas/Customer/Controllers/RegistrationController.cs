@@ -211,9 +211,11 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     IsRegistration = true,
                     CreatedBy = _authUser.UserId,
                     DvlaLicenseNumber = model.DvlaLicenseNumber,
-                    TestExpiryDate = Utility.GetExpiryDate(model.PassResult)
-                    //PassportNumber = model.IdentityType==IdentityType.InternationalPassport? model.IdentityNumber:null,
-                    //NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null
+                    TestExpiryDate = Utility.GetExpiryDate(model.PassResult),
+                    PassportNumber = model.IdentityType == IdentityType.InternationalPassport
+                        ? model.PassportNumber
+                        : null,
+                    GhanaCardNumber = model.IdentityType == IdentityType.NationalIDCard ? model.GhanaCardNumber : null
                 };
 
                 await _applicantQuery.AddAsync(applicant);
