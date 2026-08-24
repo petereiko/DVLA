@@ -59,15 +59,15 @@ namespace DVLA.VerificationPortal.Infrastructure.Database.Entities
         public string? Nationality { get; set; }
         public string? NationalID { get; set; }
         public string? PassportNumber { get; set; }
-        public string? DvlaLicenseNumber { get; set; }
         public bool? GenesisIsTranmitted { get; set; }
         public DateTime? GenesisTransmittedDate { get; set; }
         public string? GenesisResponseCode { get; set; }
         public string? GenesisStatus { get; set; }
         public string? GenesisError { get; set; }
         public string? GenesisMessage { get; set; }
-        public string? InvoiceNumber { get; set; }
         public DateTime? TestExpiryDate { get; set; }
+        public int? IdentityType { get; set; }
+        public string? GhanaCardNumber { get; set; }
 
     }
 }

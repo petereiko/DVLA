@@ -25,7 +25,51 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6df90dc1-215f-452b-9aa9-42af050b9372" name="Changes" comment="" />
+    <list default="true" id="6df90dc1-215f-452b-9aa9-42af050b9372" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.DVLA/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DVLA/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Business/ApplicantModule/ApplicantService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Business/ApplicantModule/ApplicantService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Business/BackgroundJobModule/BackupVisualAssessmentResultJob.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Business/BackgroundJobModule/BackupVisualAssessmentResultJob.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Business/ReportModule/ReportService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Business/ReportModule/ReportService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Business/Repository/GenericRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Business/Repository/GenericRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Business/Repository/IRepositoryQuery.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Business/Repository/IRepositoryQuery.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Business/VisualAssessmentResultModule/VisualAssessmentResultService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Business/VisualAssessmentResultModule/VisualAssessmentResultService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Data/Models/DataObjects/DTOs/ApplicantModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Data/Models/DataObjects/DTOs/ApplicantModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Data/Models/DataObjects/DTOs/VisualAssessmentResultDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Data/Models/DataObjects/DTOs/VisualAssessmentResultDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Data/Models/DataObjects/DTOs/VisualAssessmentTransmissionModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Data/Models/DataObjects/DTOs/VisualAssessmentTransmissionModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Data/Models/DataObjects/ViewModels/VisualAssessmentResultViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Data/Models/DataObjects/ViewModels/VisualAssessmentResultViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Data/Models/Domains/Applicant.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Data/Models/Domains/Applicant.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Data/Models/Domains/VisualAssessmentResult.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Data/Models/Domains/VisualAssessmentResult.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Data/Models/Domains/VisualAssessmentResultBackup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Data/Models/Domains/VisualAssessmentResultBackup.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Data/Models/Domains/VisualAssessmentResultTest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Data/Models/Domains/VisualAssessmentResultTest.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Data/Models/Domains/VisualAssessmentTransmission.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Data/Models/Domains/VisualAssessmentTransmission.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.Data/Utility.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.Data/Utility.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.UI/Areas/Admin/Controllers/RegistrationController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.UI/Areas/Admin/Controllers/RegistrationController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.UI/Areas/Admin/Controllers/ReportManagementController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.UI/Areas/Admin/Controllers/ReportManagementController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.UI/Areas/Customer/Controllers/RegistrationController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.UI/Areas/Customer/Controllers/RegistrationController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.UI/Areas/Customer/Controllers/ReportManagementController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.UI/Areas/Customer/Controllers/ReportManagementController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.UI/Areas/Customer/Controllers/VisualAssessmentResultController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.UI/Areas/Customer/Controllers/VisualAssessmentResultController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.UI/Areas/Customer/Views/VisualAssessmentResult/Create.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.UI/Areas/Customer/Views/VisualAssessmentResult/Create.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.UI/Areas/Registration/Controllers/FrontOfficeController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.UI/Areas/Registration/Controllers/FrontOfficeController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.UI/Areas/Registration/Controllers/OnlineApplicantController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.UI/Areas/Registration/Controllers/OnlineApplicantController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.UI/Areas/Registration/Views/FrontOffice/Create.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.UI/Areas/Registration/Views/FrontOffice/Create.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.UI/Areas/Registration/Views/FrontOffice/Update.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.UI/Areas/Registration/Views/FrontOffice/Update.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.UI/Areas/Registration/Views/OnlineApplicant/Confirmation.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.UI/Areas/Registration/Views/OnlineApplicant/Confirmation.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.UI/Areas/Registration/Views/OnlineApplicant/Create.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.UI/Areas/Registration/Views/OnlineApplicant/Create.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.VerificationPortal.Business/Entities/VisualAssessmentResult.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.VerificationPortal.Business/Entities/VisualAssessmentResult.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.VerificationPortal.Business/Interfaces/IGenericRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.VerificationPortal.Business/Interfaces/IGenericRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.VerificationPortal.Data/Services/SearchResultService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.VerificationPortal.Data/Services/SearchResultService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.VerificationPortal.Infrastructure/Database/Entities/VisualAssessmentResult.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.VerificationPortal.Infrastructure/Database/Entities/VisualAssessmentResult.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.VerificationPortal.Infrastructure/Repositories/GenericRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.VerificationPortal.Infrastructure/Repositories/GenericRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.VerificationPortal.Infrastructure/Repositories/IGenericRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.VerificationPortal.Infrastructure/Repositories/IGenericRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.VerificationPortal.Infrastructure/Repositories/SearchResultService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.VerificationPortal.Infrastructure/Repositories/SearchResultService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.VerificationPortal.Shared/DTOs/TestResultDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.VerificationPortal.Shared/DTOs/TestResultDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.VerificationPortal.Shared/DTOs/VisualAssessmentResultDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.VerificationPortal.Shared/DTOs/VisualAssessmentResultDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.VerificationPortal/Controllers/APIs/SynchronizationController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.VerificationPortal/Controllers/APIs/SynchronizationController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.VerificationPortal/Controllers/HomeController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.VerificationPortal/Controllers/HomeController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.VerificationPortal/Views/Home/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.VerificationPortal/Views/Home/Details.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DVLA.WindowsApplication/Data/Applicant.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DVLA.WindowsApplication/Data/Applicant.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WinApp/Data/Applicant.cs" beforeDir="false" afterPath="$PROJECT_DIR$/WinApp/Data/Applicant.cs" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -78,62 +122,65 @@
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0000000002061156" />
-      <entry key="S60" value="1.0001127606404756" />
-      <entry key="M2" value="1.0904548522786324" />
-      <entry key="M5" value="6.548448599107172" />
-      <entry key="M10" value="32.367371250457154" />
-      <entry key="M15" value="73.55788405369233" />
-      <entry key="M30" value="219.26269576452196" />
-      <entry key="H1" value="433.2519062125997" />
-      <entry key="H2" value="635.8642290878526" />
-      <entry key="H4" value="780.1068238436761" />
-      <entry key="D1" value="931.5648948003155" />
-      <entry key="W1" value="960.9875333353748" />
+      <entry key="MS100" value="1.4461055502496833E-42" />
+      <entry key="MS500" value="1.6102716274673122E-8" />
+      <entry key="S2" value="0.07516731010127004" />
+      <entry key="S5" value="2.092104488506409" />
+      <entry key="S10" value="7.395401935845062" />
+      <entry key="S30" value="24.243710075908034" />
+      <entry key="S60" value="42.012790454615875" />
+      <entry key="M2" value="64.46797363464677" />
+      <entry key="M5" value="103.13008365299974" />
+      <entry key="M10" value="148.33853006581597" />
+      <entry key="M15" value="193.52386798065476" />
+      <entry key="M30" value="340.46150737244704" />
+      <entry key="H1" value="603.816347366407" />
+      <entry key="H2" value="916.7731746913007" />
+      <entry key="H4" value="1175.728631764745" />
+      <entry key="D1" value="1478.0838124904894" />
+      <entry key="W1" value="1540.292119073477" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="5.2273920641095295E-229" />
-      <entry key="S5" value="1.0142261228474985E-91" />
-      <entry key="S10" value="7.232027665565112E-46" />
-      <entry key="S30" value="3.3168747167642457E-15" />
-      <entry key="S60" value="1.62980018443309E-7" />
-      <entry key="M2" value="0.0013118467034285433" />
-      <entry key="M5" value="0.4243081060173583" />
-      <entry key="M10" value="3.4374802653951826" />
-      <entry key="M15" value="7.222013514881295" />
-      <entry key="M30" value="18.198003177737682" />
-      <entry key="H1" value="37.85415803951213" />
-      <entry key="H2" value="62.115084295356745" />
-      <entry key="H4" value="82.462970128926" />
-      <entry key="D1" value="106.2673272510516" />
-      <entry key="W1" value="111.15847985390623" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000000677112544" />
+      <entry key="S2" value="1.0279204064391847" />
+      <entry key="S5" value="1.4526957565146348" />
+      <entry key="S10" value="2.3801567285546588" />
+      <entry key="S30" value="5.405368625174211" />
+      <entry key="S60" value="8.523853564503728" />
+      <entry key="M2" value="13.40230596865796" />
+      <entry key="M5" value="26.419335761693326" />
+      <entry key="M10" value="39.42246718273401" />
+      <entry key="M15" value="47.04355515659001" />
+      <entry key="M30" value="61.75494073790904" />
+      <entry key="H1" value="83.9809693531812" />
+      <entry key="H2" value="114.25511216432925" />
+      <entry key="H4" value="143.03760131131295" />
+      <entry key="D1" value="180.43209774760726" />
+      <entry key="W1" value="188.5823297173546" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9526379980439373" />
-      <entry key="MS500" value="0.9903428719330246" />
-      <entry key="S2" value="0.9975769252644544" />
-      <entry key="S5" value="0.9990300646389034" />
-      <entry key="S10" value="0.9995149146655609" />
-      <entry key="S30" value="0.9998382789422583" />
-      <entry key="S60" value="1.0000320503464746" />
-      <entry key="M2" value="1.0917115168936375" />
-      <entry key="M5" value="6.971160239689847" />
-      <entry key="M10" value="35.79837231390058" />
-      <entry key="M15" value="80.77037717213007" />
-      <entry key="M30" value="237.44534224226567" />
-      <entry key="H1" value="471.0844323496397" />
-      <entry key="H2" value="697.9582098419935" />
-      <entry key="H4" value="862.5545736396298" />
-      <entry key="D1" value="1037.82873190603" />
-      <entry key="W1" value="1072.1454859675248" />
+      <entry key="MS100" value="4.555825153988317E-4" />
+      <entry key="MS500" value="0.2146414128866286" />
+      <entry key="S2" value="0.7782626288737434" />
+      <entry key="S5" value="3.3421630941710356" />
+      <entry key="S10" value="9.577688690897245" />
+      <entry key="S30" value="29.45727550814352" />
+      <entry key="S60" value="50.37596593288039" />
+      <entry key="M2" value="77.74247969042382" />
+      <entry key="M5" value="129.4431471151406" />
+      <entry key="M10" value="187.67472242532114" />
+      <entry key="M15" value="240.4951835133071" />
+      <entry key="M30" value="402.1650540318286" />
+      <entry key="H1" value="687.7580513984307" />
+      <entry key="H2" value="1030.9975323934475" />
+      <entry key="H4" value="1318.7449898009743" />
+      <entry key="D1" value="1658.511015888046" />
+      <entry key="W1" value="1728.8737061305242" />
     </decayedShown>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
@@ -143,32 +190,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Launch Settings Profile.DVLA.API: http.executor&quot;: &quot;Debug&quot;,
-    &quot;.NET Launch Settings Profile.DVLA.UI: http.executor&quot;: &quot;Debug&quot;,
-    &quot;Publish to IIS.DVLA.UI: FolderProfile.executor&quot;: &quot;Run&quot;,
-    &quot;Publish to folder.Publish DVLA.UI to folder.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Launch Settings Profile.DVLA.API: http.executor": "Debug",
+    ".NET Launch Settings Profile.DVLA.UI: http.executor": "Run",
+    "Publish to IIS.DVLA.UI: FolderProfile.executor": "Run",
+    "Publish to folder.Publish DVLA.UI to folder.executor": "Run",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "master",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "to.speed.mode.migration.done": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Publish to folder.Publish DVLA.UI to folder">
     <configuration name="Publish DVLA.UI to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
       <riderPublish configuration="Release" platform="Any CPU" target_folder="$PROJECT_DIR$/../../PublishedApps/DVLA Publish" target_framework="net8.0" uuid_high="-3577207097530692218" uuid_low="-5823051156317700581">

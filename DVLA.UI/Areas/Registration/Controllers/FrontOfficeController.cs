@@ -183,12 +183,28 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 //    ModelState.AddModelError("IdentityNumber", "Please enter either Passport Number or National ID");
                 //}
 
-                if (model.ResultServiceType != ResultServiceType.LearnerDriversLicence)
+                if (!string.IsNullOrEmpty(model.Nationality))
                 {
-                    if (string.IsNullOrEmpty(model.DvlaLicenseNumber))
+                    bool isGhanaian = model.Nationality.Equals("Ghana", StringComparison.OrdinalIgnoreCase)
+                        || model.Nationality.Equals("Ghanaian", StringComparison.OrdinalIgnoreCase);
+
+                    if (isGhanaian)
                     {
-                        model.Errors.Add($"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
-                        ModelState.AddModelError("DvlaLicenseNumber", $"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
+                        model.IdentityType = IdentityType.NationalIDCard;
+
+                        if (string.IsNullOrEmpty(model.GhanaCardNumber))
+                        {
+                            ModelState.AddModelError("GhanaCardNumber", "Please enter Ghana Card Number");
+                        }
+                    }
+                    else
+                    {
+                        model.IdentityType = IdentityType.InternationalPassport;
+
+                        if (string.IsNullOrEmpty(model.PassportNumber))
+                        {
+                            ModelState.AddModelError("PassportNumber", "Please enter Passport Number");
+                        }
                     }
                 }
 
@@ -233,9 +249,16 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     Gender = model.Gender,
                     //NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
                     //PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
-                    DvlaLicenseNumber = model.DvlaLicenseNumber,
-                    InvoiceNumber = model.InvoiceNumber,
-                    TestExpiryDate = Utility.GetExpiryDate(model.PassResult)
+                    TestExpiryDate = Utility.GetExpiryDate(model.PassResult), 
+                    GhanaCardNumber = model.IdentityType == IdentityType.NationalIDCard
+                        ? model.GhanaCardNumber
+                        : null,
+                    PassportNumber = model.IdentityType == IdentityType.InternationalPassport
+                        ? model.PassportNumber
+                        : null,
+                    IdentityType = string.IsNullOrEmpty(model.Nationality)
+                        ? null
+                        : model.IdentityType,
                 };
                 
 
@@ -306,16 +329,17 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 model.Optometrist = firm.BusinessName;
                 //model.FormNumber = applicant.FormNumber;
                 model.TestType = (TestType)applicant.TestType;
-                //model.InvoiceNumber = applicant.OldDVLAReferenceNo;
                 model.IsActive = applicant.IsActive;
                 model.CreatedBy = applicant.CreatedBy;
                 model.IsDeleted = applicant.IsDeleted;
                 model.UpdatedBy = applicant.ModifiedBy;
                 model.PassportImageUrl = applicant.PassportImageUrl;
-                //model.IdentityNumber = string.IsNullOrEmpty(applicant.PassportNumber) ? applicant.NationalID : applicant.PassportNumber;
-                model.DvlaLicenseNumber = applicant.DvlaLicenseNumber;
-                model.InvoiceNumber = applicant.InvoiceNumber;
-                //model.IdentityType = string.IsNullOrEmpty(applicant.PassportNumber) ? IdentityType.NationalIDCard : IdentityType.InternationalPassport;
+                model.PassportNumber = applicant.PassportNumber;
+                model.GhanaCardNumber = applicant.GhanaCardNumber;
+                model.IdentityType = applicant.IdentityType
+                    ?? (string.IsNullOrEmpty(applicant.PassportNumber)
+                        ? IdentityType.NationalIDCard
+                        : IdentityType.InternationalPassport);
 
                 if (!string.IsNullOrEmpty(model.PassportImageUrl))
                 {
@@ -386,6 +410,31 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     ModelState.AddModelError("ContactNumber", "Please enter contact number");
                 }
 
+                if (!string.IsNullOrEmpty(model.Nationality))
+                {
+                    bool isGhanaian = model.Nationality.Equals("Ghana", StringComparison.OrdinalIgnoreCase)
+                        || model.Nationality.Equals("Ghanaian", StringComparison.OrdinalIgnoreCase);
+
+                    if (isGhanaian)
+                    {
+                        model.IdentityType = IdentityType.NationalIDCard;
+
+                        if (string.IsNullOrEmpty(model.GhanaCardNumber))
+                        {
+                            ModelState.AddModelError("GhanaCardNumber", "Please enter Ghana Card Number");
+                        }
+                    }
+                    else
+                    {
+                        model.IdentityType = IdentityType.InternationalPassport;
+
+                        if (string.IsNullOrEmpty(model.PassportNumber))
+                        {
+                            ModelState.AddModelError("PassportNumber", "Please enter Passport Number");
+                        }
+                    }
+                }
+
                 //if (string.IsNullOrEmpty(model.TaxIdentificationNumber))
                 //{
                 //    ModelState.AddModelError("TaxIdentificationNumber", "Please enter tax identification number");
@@ -426,12 +475,20 @@ namespace DVLA.UI.Areas.Registration.Controllers
                 applicant.PassportImageUrl = model.Filename;
                 //applicant.Status = model.Status;
                 applicant.TestType = (TestType)model.TestType;
-                //applicant.OldDVLAReferenceNo = model.InvoiceNumber;
                 applicant.IsActive = model.IsActive;
                 applicant.CreatedBy = model.CreatedBy;
                 applicant.IsDeleted = model.IsDeleted;
                 applicant.ModifiedBy = model.UpdatedBy;
                 applicant.Gender = model.Gender;
+                applicant.PassportNumber = model.IdentityType == IdentityType.InternationalPassport
+                    ? model.PassportNumber
+                    : null;
+                applicant.GhanaCardNumber = model.IdentityType == IdentityType.NationalIDCard
+                    ? model.GhanaCardNumber
+                    : null;
+                applicant.IdentityType = string.IsNullOrEmpty(model.Nationality)
+                    ? null
+                    : model.IdentityType;
                 _applicantQuery.Update(applicant);
 
 

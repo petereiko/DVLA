@@ -53,7 +53,6 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public string ContactNumber { get; set; }
         public string Nationality { get; set; }
         public string Email { get; set; }
-        //public string InvoiceNumber { get; set; }
         public string PassportImageUrl { get; set; }
         public Status? Status { get; set; }
 
@@ -75,8 +74,6 @@ namespace DVLA.Data.Models.DataObjects.DTOs
 
         public List<SelectListItem> IdentityTypes { get; set; }
 
-        public string DvlaLicenseNumber { get; set; }
-        public string InvoiceNumber { get; set; }
         public string PassportNumber { get; set; }
         public string GhanaCardNumber { get; set; }
 

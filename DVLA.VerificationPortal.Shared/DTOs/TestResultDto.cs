@@ -20,7 +20,6 @@ namespace DVLA.VerificationPortal.Shared.DTOs
         public DateTime? TestDate { get; set; }
         public string? IdentityType { get; set; }
         public string? IdentityNumber { get; set; }
-        public string? DvlaLicenseNumber { get; set; }
         public string? ContactNumber { get; set; }
         public DateTime? TestExpiryDate { get; set; }
         public string? PassResult { get; set; }
@@ -38,7 +37,6 @@ namespace DVLA.VerificationPortal.Shared.DTOs
         public DateTime? TestDate { get; set; }
         public string? IdentityType { get; set; }
         public string? IdentityNumber { get; set; }
-        //public string? DvlaLicenseNumber { get; set; }
         public string? ContactNumber { get; set; }
         public DateTime? TestExpiryDate { get; set; }
         public string? PassResult { get; set; }

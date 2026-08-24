@@ -136,22 +136,6 @@
                                                 <td>@Model.PassportNumber</td>
                                             </tr>
                                         }
-
-                                        <tr>
-                                            <td>DVLA License Number:</td>
-                                            <td>
-                                                @{
-                                                    string licenseNumber = "N/A";
-                                                    if (!string.IsNullOrEmpty(Model.DvlaLicenseNumber))
-                                                    {
-                                                        licenseNumber = Model.DvlaLicenseNumber;
-                                                    }
-                                                    <span>@licenseNumber</span>
-                                                }
-                                            </td>
-                                        </tr>
-
-
                                     </table>
                                 </div>
                             </div>

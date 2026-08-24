@@ -832,8 +832,6 @@ namespace DVLA.Business.VisualAssessmentResultModule
                         TransmittedDate = DateTime.UtcNow,
                         //NationalID = model.NationalID,
                         //PassportNumber = model.PassportNumber,
-                        DvlaLicenseNumber = model.DvlaLicenseNumber,
-                        InvoiceNumber = model.InvoiceNumber,
                         TestExpiryDate = model.TestExpiryDate
                     };
                     _context.VisualAssessmentResults.Add(visualAssessmentResult);

@@ -65,6 +65,22 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
+        public async Task<IEnumerable<T>> GetLastRecordsAsync(int count, bool isTracking = true, params Expression<Func<T, object>>[] includes)
+        {
+            if (count <= 0)
+            {
+                return Enumerable.Empty<T>();
+            }
+
+            IQueryable<T> query = isTracking ? _dbSet : _dbSet.AsNoTracking();
+            if (includes != null)
+            {
+                query = includes.Aggregate(query, (current, include) => current.Include(include));
+            }
+
+            return await OrderByIdDescending(query).Take(count).ToListAsync();
+        }
+
 
 
 
@@ -200,6 +216,22 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             return query.ToList();
         }
 
+        public IEnumerable<T> GetLastRecords(int count, bool isTracking = true, params Expression<Func<T, object>>[] includes)
+        {
+            if (count <= 0)
+            {
+                return Enumerable.Empty<T>();
+            }
+
+            IQueryable<T> query = isTracking ? _dbSet : _dbSet.AsNoTracking();
+            if (includes != null)
+            {
+                query = includes.Aggregate(query, (current, include) => current.Include(include));
+            }
+
+            return OrderByIdDescending(query).Take(count).ToList();
+        }
+
         public IEnumerable<T> Filter(Expression<Func<T, bool>> predicate, bool isTracking = true, params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = isTracking ? _dbSet.Where(predicate) : _dbSet.AsNoTracking().Where(predicate);
@@ -294,6 +326,36 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
         {
             var sql = parameters.Count() == 0 ? storedProcedureName : BuildStoredProcedureCommand(storedProcedureName, parameters);
             return _context.Database.ExecuteSqlRaw(sql, parameters);
+        }
+
+        private IQueryable<T> OrderByIdDescending(IQueryable<T> query)
+        {
+            var entityType = _context.Model.FindEntityType(typeof(T));
+            var idProperty = entityType?.FindProperty("Id");
+
+            if (idProperty == null)
+            {
+                throw new InvalidOperationException($"{typeof(T).Name} does not have an Id property mapped in the DbContext.");
+            }
+
+            var parameter = Expression.Parameter(typeof(T), "entity");
+            Expression propertyAccess = idProperty.PropertyInfo != null
+                ? Expression.Property(parameter, idProperty.PropertyInfo)
+                : Expression.Call(
+                    typeof(EF),
+                    nameof(EF.Property),
+                    new[] { idProperty.ClrType },
+                    parameter,
+                    Expression.Constant(idProperty.Name));
+
+            var orderByExpression = Expression.Lambda(propertyAccess, parameter);
+            var orderByMethod = typeof(Queryable)
+                .GetMethods()
+                .Single(method => method.Name == nameof(Queryable.OrderByDescending)
+                    && method.GetParameters().Length == 2)
+                .MakeGenericMethod(typeof(T), idProperty.ClrType);
+
+            return (IQueryable<T>)orderByMethod.Invoke(null, new object[] { query, orderByExpression });
         }
 
 

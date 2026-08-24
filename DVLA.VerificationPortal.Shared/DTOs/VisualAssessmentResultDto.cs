@@ -89,8 +89,8 @@ namespace DVLA.VerificationPortal.Shared.DTOs
         public DateTime? VerifiedDate { get; set; }
         public string? NationalID { get; set; }
         public string? PassportNumber { get; set; }
-        public string? DvlaLicenseNumber { get; set; }
-        public string? InvoiceNumber { get; set; }
         public DateTime? TestExpiryDate { get; set; }
+        public int? IdentityType { get; set; }
+        public string? GhanaCardNumber { get; set; }
     }
 }

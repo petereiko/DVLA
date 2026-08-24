@@ -19,6 +19,5 @@ namespace DVLA.Data.Models.Domains
         public string Data { get; set; }
         public bool IsActive { get; set; }
         public DateTime? ModifiedDate { get; set; }
-        public string InvoiceNumber { get; set; }
     }
 }

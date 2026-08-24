@@ -22,6 +22,8 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
         Task<IEnumerable<T>> FilterAsync(Expression<Func<T, bool>> predicate, bool isTracking = true, int? take = null, params Expression<Func<T, object>>[] includes);
         IEnumerable<T> GetAll(bool isTracking = true, params Expression<Func<T, object>>[] includes);
         Task<IEnumerable<T>> GetAllAsync(bool isTracking = true, params Expression<Func<T, object>>[] includes);
+        IEnumerable<T> GetLastRecords(int count, bool isTracking = true, params Expression<Func<T, object>>[] includes);
+        Task<IEnumerable<T>> GetLastRecordsAsync(int count, bool isTracking = true, params Expression<Func<T, object>>[] includes);
         T GetById(object id);
         Task<T> GetByIdAsync(object id);
         T GetSingle(Expression<Func<T, bool>> predicate, bool isTracking = true, params Expression<Func<T, object>>[] includes);

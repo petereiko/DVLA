@@ -95,10 +95,8 @@ namespace DVLA.DATA.Domains
         public bool? OptometristNameIsUpdate { get; set; }
         public bool? IsBackedUp { get; set; } = false;
         public DateTime? BackupDate { get; set; } = DateTime.UtcNow;
-        public string? InvoiceNumber { get; set; }
         public string? PassportNumber { get; set; }
         public string? GhanaCardNumber { get; set; }
-        public string DvlaLicenseNumber { get; set; }
         public DateTime? TestExpiryDate { get; set; }
         public IdentityType? IdentityType { get; set; }
 

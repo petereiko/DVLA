@@ -112,28 +112,6 @@
                                         </select>
                                         @Html.ValidationMessageFor(model => model.ResultServiceType, "", new { @class = "text-danger" })
                                     </div>
-                                    <div class="col-4">
-
-                                        @if (Model.ResultServiceType == ResultServiceType.RenewalOfDriverLicence || Model.ResultServiceType == ResultServiceType.AccidentReport || Model.ResultServiceType == ResultServiceType.UpgradeOfDriverLicence || Model.ResultServiceType == ResultServiceType.ReplacementOfDriverLicence)
-                                        {
-                                            <div id="dvla-licensenumber-area">
-                                                <span>DVLA License Number</span>
-                                                <input type="text" class="form-control" asp-for="DvlaLicenseNumber" />
-                                                @Html.ValidationMessageFor(Model => Model.DvlaLicenseNumber, "", new { @class = "text-danger" })
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <div style="display:none" id="dvla-licensenumber-area">
-                                                <span>DVLA License Number</span>
-                                                <input type="text" class="form-control" asp-for="DvlaLicenseNumber" />
-                                                @Html.ValidationMessageFor(Model => Model.DvlaLicenseNumber, "", new { @class = "text-danger" })
-                                            </div>
-                                        }
-
-
-
-                                    </div>
                                 </div>
                                 <br />
                                 <div id="DetailsOfApplicant">
@@ -237,13 +215,6 @@
                                                         <span asp-validation-for="GhanaCardNumber" class="text-danger"></span>
                                                         <span asp-validation-for="PassportNumber" class="text-danger"></span>
                                                     </div>
-                                                </div>
-
-                                                <div class="col-sm">
-                                                    Invoice Number
-                                                    @Html.TextBoxFor(model => model.InvoiceNumber, new { @class = "form-control", @autocomplete = "off" })
-                                                    @Html.ValidationMessageFor(model => model.InvoiceNumber, "", new { @class = "text-danger" })
-
                                                 </div>
 
                                             </div>
@@ -566,19 +537,6 @@
         }
 
         $(function(){
-            $('#ResultServiceType').change(function(){
-                let serviceType=$(this).val();
-
-                serviceType=Number(serviceType);
-                if(serviceType===2||serviceType===3||serviceType===4||serviceType===5){
-                    $('#dvla-licensenumber-area').show();
-                }
-                else{
-                    $('#dvla-licensenumber-area').hide();
-                }
-
-            });
-
             function updateIdentityNumberInput() {
                 const nationality = ($('#Nationality').val() || '').toLowerCase();
                 const isGhanaian = nationality === 'ghana' || nationality === 'ghanaian';

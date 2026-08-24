@@ -642,8 +642,9 @@ namespace DVLA.Business.ReportModule
                                     Unaided_OU = SafeGetString(reader, "Unaided_OU"),
                                     PassportNumber = SafeGetString(reader, "PassportNumber"),
                                     NationalID = SafeGetString(reader, "NationalID"),
-                                    DvlaLicenseNumber = SafeGetString(reader, "DvlaLicenseNumber"),
                                     TestExpiryDate = reader.IsDBNull(reader.GetOrdinal("TestExpiryDate")) ? null : reader.GetDateTime(reader.GetOrdinal("TestExpiryDate")),
+                                    GhanaCardNumber = SafeGetString(reader, "GhanaCardNumber"),
+                                    IdentityType = reader.IsDBNull(reader.GetOrdinal("IdentityType")) ? null : (IdentityType)reader.GetInt32("IdentityType"),
                                 });
                             }
                         }

@@ -103,7 +103,6 @@ namespace DVLA.VerificationPortal.Application.Services
                         Verified = item.IsVerified,
                         TestDate = item.TestDate,
                         TestType = EnumHelper.GetEnumDescription(item.ResultServiceType),
-                        DvlaLicenseNumber = item.DvlaLicenseNumber,
                         IdentityNumber = string.IsNullOrEmpty(item.PassportNumber) ? item.NationalID : item.PassportNumber,
                         IdentityType = string.IsNullOrEmpty(item.PassportNumber) ? "National ID" : "Passport Number"
                     };
@@ -335,7 +334,7 @@ namespace DVLA.VerificationPortal.Application.Services
             {
                 var payload = new
                 {
-                    dvlaSvcInvoiceNo = model.DvlaLicenseNumber,
+                    dvlaSvcInvoiceNo = model.ReferenceNumber,
                     eyeTestResult = EnumHelper.GetEnumDescription(model.PassOrFail),
                     eyeTestDate = model.TestDate,
                     eyeTestRefNo = model.ReferenceNumber,
@@ -371,7 +370,7 @@ namespace DVLA.VerificationPortal.Application.Services
 
         public async Task ProcessGenesysAsync()
         {
-            IEnumerable<VisualAssessmentResult> assessments = await _visualAssessmentResultRepository.FilterAsync(x => x.GenesisIsTranmitted != true && x.GenesisMessage == null && x.DvlaLicenseNumber!=null, true, 20);
+            IEnumerable<VisualAssessmentResult> assessments = await _visualAssessmentResultRepository.FilterAsync(x => x.GenesisIsTranmitted != true && x.GenesisMessage == null && x.ReferenceNumber != null, true, 20);
             foreach (var assessmentResult in assessments)
             {
                 DvlaResponse response = await SendResultToGenesysAsync(assessmentResult, CancellationToken.None);

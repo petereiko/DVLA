@@ -93,7 +93,6 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                         ResultServiceTypeName = item.ResultServiceType is not null
                             ? EnumHelper.GetEnumDescription((ResultServiceType)item.ResultServiceType)
                             : "N/A",
-                        DvlaLicenseNumber = item.DvlaLicenseNumber,
                         IdentityNumber = string.IsNullOrEmpty(item.PassportNumber)
                             ? item.NationalID
                             : item.PassportNumber,
@@ -125,7 +124,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             TestResultDto? result = null;
             try
             {
-                Expression<Func<VisualAssessmentResult, bool>> expression = v => v.DvlaLicenseNumber.Equals(dsreference) || v.ReferenceNumber.Equals(dsreference);
+                Expression<Func<VisualAssessmentResult, bool>> expression = v => v.ReferenceNumber.Equals(dsreference);
                 IEnumerable<VisualAssessmentResult> results = await _visualAssessmentResultRepository.FilterAsync(expression, false);
 
                 foreach (var item in results)
@@ -140,7 +139,6 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                         ResultServiceTypeName = item.ResultServiceType is not null
                             ? EnumHelper.GetEnumDescription((ResultServiceType)item.ResultServiceType)
                             : "N/A",
-                        DvlaLicenseNumber = item.DvlaLicenseNumber,
                         PassResult = item.PassOrFail is null ? string.Empty : EnumHelper.GetEnumDescription(item.PassOrFail),
                         IdentityNumber = string.IsNullOrEmpty(item.PassportNumber)
                             ? item.NationalID
@@ -184,7 +182,6 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 ContrastSensitivity_BCV = entity.ContrastSensitivity_BCV,
                 CreatedDate = entity.CreatedDate,
                 DOB = entity.DOB,
-                DvlaLicenseNumber = entity.DvlaLicenseNumber,
                 Email = entity.Email,
                 FirstName = entity.FirstName,
                 Gender = entity.Gender,
@@ -243,7 +240,6 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 ContrastSensitivity_BCV = result.ContrastSensitivity_BCV,
                 CreatedDate = result.CreatedDate,
                 DOB = result.DOB,
-                DvlaLicenseNumber = result.DvlaLicenseNumber,
                 Email = result.Email,
                 FirstName = result.FirstName,
                 Gender = result.Gender,
@@ -304,7 +300,6 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 CreatedDate = result.CreatedDate,
                 CreatedBy = result.CreatedBy,
                 DOB = result.DOB,
-                DvlaLicenseNumber = result.DvlaLicenseNumber,
                 Email = result.Email,
                 FirstName = result.FirstName,
                 Gender = result.Gender,
@@ -369,7 +364,6 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                     CreatedBy = model.CreatedBy,
                     CreatedDate = model.CreatedDate,
                     DOB = model.DOB,
-                    DvlaLicenseNumber = model.DvlaLicenseNumber,
                     Email = model.Email,
                     FirstName = model.FirstName,
                     Gender = model.Gender,
@@ -407,8 +401,9 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                     Unaided_OU = model.Unaided_OU,
                     VerifiedDate = model.VerifiedDate,
                     VisualAssessmentResultId = model.VisualAssessmentResultId,
-                    InvoiceNumber = model.InvoiceNumber,
-                    TestExpiryDate = model.TestExpiryDate
+                    TestExpiryDate = model.TestExpiryDate,
+                    IdentityType = model.IdentityType,
+                    GhanaCardNumber = model.GhanaCardNumber
                 };
 
                 VisualAssessmentResult record = await _visualAssessmentResultRepository.GetSingleAsync(x => x.ReferenceNumber == entity.ReferenceNumber, false);
@@ -491,6 +486,25 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
                 _logger.LogError(ex.Message, ex);
             }
             return response;
+        }
+
+        public async Task<List<VisualAssessmentResultDto>> GetVerifiedResultsAsync()
+        {
+           var results=  await _visualAssessmentResultRepository.GetLastRecordsAsync(50, false, x => x.IsVerified);
+
+           var records = results.Select(x => new VisualAssessmentResultDto()
+           {
+               ReferenceNumber = x.ReferenceNumber,
+               Id = x.Id,
+               PassportNumber = x.PassportNumber,
+               VisualAssessmentResultId = x.VisualAssessmentResultId,
+               AccessType = x.AccessType,
+               ContactNumber = x.ContactNumber,
+               ResultConclusion = x.ResultConclusion,
+               ResultServiceType = (ResultServiceType)x.ResultServiceType,
+               PassResult = x.PassResult
+           }).ToList();
+           return records;
         }
 
         //public async Task<MessageResponse> VerifyResult(string token, VerifyType verifyType)
@@ -577,7 +591,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
 
         public async Task ProcessGenesysAsync()
         {
-            var records = await _visualAssessmentResultRepository.FilterAsync(x => x.GenesisIsTranmitted != true && x.GenesisStatus == null && x.GenesisError == null && x.InvoiceNumber != null, true, 20);
+            var records = await _visualAssessmentResultRepository.FilterAsync(x => x.GenesisIsTranmitted != true && x.GenesisStatus == null && x.GenesisError == null && x.ReferenceNumber != null, true, 20);
             foreach (var record in records)
             {
                 var result = await Transmit(record);
@@ -606,7 +620,7 @@ namespace DVLA.VerificationPortal.Infrastructure.Repositories
             {
                 var payload = new
                 {
-                    dvlaSvcInvoiceNo = assessment.InvoiceNumber,
+                    dvlaSvcInvoiceNo = assessment.ReferenceNumber,
                     eyeTestResult = EnumHelper.GetEnumDescription(assessment.PassOrFail),
                     eyeTestDate = assessment.TestDate?.ToString("yyyy-MM-dd hh:mm:ss"),
                     eyeTestRefNo = assessment.ReferenceNumber,

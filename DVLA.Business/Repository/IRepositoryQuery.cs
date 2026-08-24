@@ -19,6 +19,8 @@ namespace DVLA.Business.Repository
                                                           params Expression<Func<T, object>>[] includes);
         Task<IEnumerable<T>> GetAllAsync();
         IEnumerable<T> GetAll();
+        Task<IEnumerable<T>> GetLastRecordsAsync(int count);
+        IEnumerable<T> GetLastRecords(int count);
         Task<IEnumerable<T>> GetAllIncludeAsync(params Expression<Func<T, object>>[] includes);
         IEnumerable<T> GetAllInclude(params Expression<Func<T, object>>[] includes);
         Task AddAsync(T entity);

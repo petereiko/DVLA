@@ -84,7 +84,8 @@ namespace DVLA.Data.Models.DataObjects.DTOs
         public string CreatedBy { get; set; }
         public string NationalID { get; set; }
         public string PassportNumber { get; set; }
-        public string DvlaLicenseNumber { get; set; }
         public DateTime? TestExpiryDate { get; set; }
+        public string? GhanaCardNumber { get; set; }
+        public IdentityType? IdentityType { get; set; }
     }
 }

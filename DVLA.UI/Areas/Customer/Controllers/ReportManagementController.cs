@@ -247,7 +247,6 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 model.OptometristFirmId = applicant.OptometristFirmId;
                 //model.FormNumber = applicant.FormNumber;
                 model.TestType = applicant.TestType;
-                //model.InvoiceNumber = applicant.OldDVLAReferenceNo;
                 model.Optometrist = optometristUser == null ? "" : optometristUser.OptometristFirm.BusinessName;
                 model.IsActive = applicant.IsActive;
                 model.CreatedBy = applicant.CreatedBy;
@@ -447,7 +446,6 @@ namespace DVLA.UI.Areas.Customer.Controllers
                 }
                 //applicant.Status = model.Status;
                 applicant.TestType = (TestType)model.TestType;
-                //applicant.OldDVLAReferenceNo = model.InvoiceNumber;
                 //applicant.IsActive = model.IsActive;
                 //applicant.CreatedBy = model.CreatedBy;
                 //applicant.IsDeleted = model.IsDeleted;

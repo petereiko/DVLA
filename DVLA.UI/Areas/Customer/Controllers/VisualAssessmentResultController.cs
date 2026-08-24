@@ -245,7 +245,6 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     string LearnerServiceType = workSheet.Cells[rowIndex, 34].Text.Trim().ToUpper();
                     string NationalID = workSheet.Cells[rowIndex,35].Text.Trim().ToUpper();
                     string PassportNumber = workSheet.Cells[rowIndex, 36].Text.Trim().ToUpper();
-                    string InvoiceNumber = workSheet.Cells[rowIndex, 37].Text.Trim().ToUpper();
                     //Validation
                     if (string.IsNullOrEmpty(TestType))
                     {
@@ -473,9 +472,7 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         TestType = TestType == "NEW"
                             ? Data.Models.Enumerables.TestType.NewTest
                             : Data.Models.Enumerables.TestType.ReTest,
-                        //InvoiceNumber = InvoiceNumber,
                         //PassportNumber = PassportNumber,PassType
-                        InvoiceNumber = InvoiceNumber,
                         TestExpiryDate = Utility.GetExpiryDate(Utility.GetPassResult(PassType))
                     };
 
@@ -600,7 +597,6 @@ namespace DVLA.UI.Areas.Customer.Controllers
                         TestType = y.TestType,
                         ActionType = "Modify",
                         Gender = y.Gender,
-                        InvoiceNumber = y.InvoiceNumber,
                         PassportNumber = y.PassportNumber,
                         GhanaCardNumber = y.GhanaCardNumber,
                         IdentityType = y.IdentityType ?? (string.IsNullOrEmpty(y.PassportNumber) ? IdentityType.NationalIDCard : IdentityType.InternationalPassport)
@@ -902,16 +898,6 @@ namespace DVLA.UI.Areas.Customer.Controllers
                     return View(model);
                 }
 
-                //if (model.ResultServiceType != ResultServiceType.LearnerDriversLicence)
-                //{
-                //    if (string.IsNullOrEmpty(model.InvoiceNumber))
-                //    {
-                //        model.Errors.Add($"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
-                //        ModelState.AddModelError("InvoiceNumber", $"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
-                //        return View(model);
-                //    }
-                //}
-
                 Slot slot = _slotRepositoryQuery.FilterAsync(x => x.OptometristFirmId == optometristUser.OptometristFirmId && x.AccessType == (model.ResultServiceType == ResultServiceType.LearnerDriversLicence ? AccessType.LearnerDriversLicence : AccessType.OtherLicenceCategory)).Result.FirstOrDefault();
                 if (model.Action == Status.Complete)
                 {
@@ -1026,7 +1012,6 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 GhanaCardNumber = model.IdentityType == IdentityType.NationalIDCard
                                     ? model.GhanaCardNumber
                                     : null,
-                                InvoiceNumber = model.InvoiceNumber,
                                 IdentityType = model.IdentityType,
                                 TestExpiryDate = Utility.GetExpiryDate(model.PassResult)
                             };
@@ -1140,7 +1125,6 @@ namespace DVLA.UI.Areas.Customer.Controllers
                                 ? model.GhanaCardNumber
                                 : null;
                             visualAssessmentResult.IdentityType = model.IdentityType;
-                            visualAssessmentResult.InvoiceNumber = model.InvoiceNumber;
                             visualAssessmentResult.TestExpiryDate = Utility.GetExpiryDate(model.PassOrFail == PassOrFail.Fail ? null : model.PassResult);
 
                             //visualAssessmentResult.TestDate = DateTime.UtcNow;

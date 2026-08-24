@@ -41,6 +41,26 @@ namespace DVLA.Business.Repository
             return _dbSet.ToList();
         }
 
+        public async Task<IEnumerable<T>> GetLastRecordsAsync(int count)
+        {
+            if (count <= 0)
+            {
+                return Enumerable.Empty<T>();
+            }
+
+            return await OrderByIdDescending(_dbSet).Take(count).ToListAsync();
+        }
+
+        public IEnumerable<T> GetLastRecords(int count)
+        {
+            if (count <= 0)
+            {
+                return Enumerable.Empty<T>();
+            }
+
+            return OrderByIdDescending(_dbSet).Take(count).ToList();
+        }
+
         public async Task<IEnumerable<T>> GetAllIncludeAsync(params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet;
@@ -151,6 +171,35 @@ namespace DVLA.Business.Repository
             return query.Where(predicate).ToList();
         }
 
+        private IQueryable<T> OrderByIdDescending(IQueryable<T> query)
+        {
+            var entityType = _context.Model.FindEntityType(typeof(T));
+            var idProperty = entityType?.FindProperty("Id");
+
+            if (idProperty == null)
+            {
+                throw new InvalidOperationException($"{typeof(T).Name} does not have an Id property mapped in the DbContext.");
+            }
+
+            var parameter = Expression.Parameter(typeof(T), "entity");
+            Expression propertyAccess = idProperty.PropertyInfo != null
+                ? Expression.Property(parameter, idProperty.PropertyInfo)
+                : Expression.Call(
+                    typeof(EF),
+                    nameof(EF.Property),
+                    new[] { idProperty.ClrType },
+                    parameter,
+                    Expression.Constant(idProperty.Name));
+
+            var orderByExpression = Expression.Lambda(propertyAccess, parameter);
+            var orderByMethod = typeof(Queryable)
+                .GetMethods()
+                .Single(method => method.Name == nameof(Queryable.OrderByDescending)
+                    && method.GetParameters().Length == 2)
+                .MakeGenericMethod(typeof(T), idProperty.ClrType);
+
+            return (IQueryable<T>)orderByMethod.Invoke(null, new object[] { query, orderByExpression });
+        }
 
     }
 }

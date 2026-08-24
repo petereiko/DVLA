@@ -64,7 +64,6 @@ namespace DVLA.Business.ApplicantModule
                 model.OptometristFirmId = applicant.OptometristFirmId;
                 //model.FormNumber = applicant.FormNumber;
                 model.TestType = (TestType)applicant.TestType;
-                //model.InvoiceNumber = applicant.OldDVLAReferenceNo;
                 model.IsActive = applicant.IsActive;
                 model.CreatedBy = applicant.CreatedBy;
                 model.IsDeleted = applicant.IsDeleted;

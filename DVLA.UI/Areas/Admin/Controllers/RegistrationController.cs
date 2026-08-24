@@ -220,7 +220,6 @@ namespace DVLA.UI.Areas.Admin.Controllers
                 applicant.PassportImageUrl = model.PassportImageUrl;
                 applicant.Status = model.Status;
                 applicant.TestType = (TestType)model.TestType;
-                //applicant.OldDVLAReferenceNo = model.InvoiceNumber;
                 applicant.IsActive = model.IsActive;
                 applicant.CreatedBy = model.CreatedBy;
                 applicant.IsDeleted = model.IsDeleted;

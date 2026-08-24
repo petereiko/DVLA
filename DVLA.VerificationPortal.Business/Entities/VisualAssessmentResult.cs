@@ -103,7 +103,6 @@ namespace DVLA.VerificationPortal.Domain.Entities
         public VerifyType? VerifyType { get; set; }
         public string? NationalID { get; set; }
         public string? PassportNumber { get; set; }
-        public string? DvlaLicenseNumber { get; set; }
         public string? GenesisError { get; set; }
         public string? GenesisResponseCode { get; set; }
         public string? GenesisStatus { get; set; }

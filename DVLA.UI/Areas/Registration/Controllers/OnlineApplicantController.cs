@@ -138,16 +138,6 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     ModelState.AddModelError("Gender", "Gender is required");
                 }
 
-                if (model.ResultServiceType != ResultServiceType.LearnerDriversLicence)
-                {
-                    if (string.IsNullOrEmpty(model.DvlaLicenseNumber))
-                    {
-                        model.Errors.Add($"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
-                        ModelState.AddModelError("DvlaLicenseNumber", $"DVLA License Number is required for {EnumHelper.GetDescription(model.ResultServiceType)}");
-                        return View(model);
-                    }
-                }
-
                 //if (string.IsNullOrEmpty(model.TaxIdentificationNumber))
                 //{
                 //    ModelState.AddModelError("TaxIdentificationNumber", "Please enter tax identification number");
@@ -233,8 +223,6 @@ namespace DVLA.UI.Areas.Registration.Controllers
                     CreatedBy = null,
                     //PassportNumber = model.IdentityType == IdentityType.InternationalPassport ? model.IdentityNumber : null,
                     //NationalID = model.IdentityType == IdentityType.NationalIDCard ? model.IdentityNumber : null,
-                    DvlaLicenseNumber = model.DvlaLicenseNumber,
-                    InvoiceNumber = model.InvoiceNumber,
                     TestExpiryDate = Utility.GetExpiryDate(model.PassResult)
                 };
 

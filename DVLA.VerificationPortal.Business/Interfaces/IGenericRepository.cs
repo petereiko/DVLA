@@ -19,6 +19,8 @@ namespace DVLA.VerificationPortal.Domain.Interfaces
 
 
         IEnumerable<T> GetAll(bool isTracking = true, params Expression<Func<T, object>>[] includes);
+        Task<IEnumerable<T>> GetLastRecordsAsync(int count, bool isTracking = true, params Expression<Func<T, object>>[] includes);
+        IEnumerable<T> GetLastRecords(int count, bool isTracking = true, params Expression<Func<T, object>>[] includes);
 
         Task<IEnumerable<T>> FilterAsync(
     Expression<Func<T, bool>> predicate,

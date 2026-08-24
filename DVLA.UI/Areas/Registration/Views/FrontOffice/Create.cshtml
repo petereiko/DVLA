@@ -64,28 +64,6 @@
                                         </select>
                                         @Html.ValidationMessageFor(model => model.ResultServiceType, "", new { @class = "text-danger" })
                                     </div>
-                                    <div class="col-4">
-
-                                        @if (Model.ResultServiceType == ResultServiceType.RenewalOfDriverLicence || Model.ResultServiceType == ResultServiceType.AccidentReport || Model.ResultServiceType == ResultServiceType.UpgradeOfDriverLicence || Model.ResultServiceType == ResultServiceType.ReplacementOfDriverLicence)
-                                        {
-                                            <div id="dvla-licensenumber-area">
-                                                <span>DVLA License Number</span>
-                                                <input type="text" class="form-control" asp-for="DvlaLicenseNumber" />
-                                                @Html.ValidationMessageFor(Model => Model.DvlaLicenseNumber, "", new { @class = "text-danger" })
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <div style="display:none" id="dvla-licensenumber-area">
-                                                <span>DVLA License Number</span>
-                                                <input type="text" class="form-control" asp-for="DvlaLicenseNumber" />
-                                                @Html.ValidationMessageFor(Model => Model.DvlaLicenseNumber, "", new { @class = "text-danger" })
-                                            </div>
-                                        }
-
-
-
-                                    </div>
                                 </div>
                                 <br />
 
@@ -173,31 +151,18 @@
 
                                                 </div>
 
-                                            </div>
-
-                                            <div class="row">
-
-                                                @* <div class="col-md-3">
-                                                    <label>Identity Type</label><br />
-                                                    @foreach (var item in Model.IdentityTypes)
-                                                    {
-                                                        <label>
-                                                            <input type="radio"
-                                                                   name="IdentityType"
-                                                                   value="@item.Value"
-                                                                   @(item.Value == ((int?)Model.IdentityType)?.ToString() ? "checked" : "") />
-                                                            @item.Text
-                                                        </label>
-                                                        <br />
-                                                    }
-                                                    <span asp-validation-for="IdentityType" class="text-danger"></span>
-                                                </div> *@
-                                                
-                                                <div class="col-md-3">
-                                                    Invoice Number
-                                                    @Html.TextBoxFor(model => model.InvoiceNumber, new { @class = "form-control", @autocomplete = "off" })
-                                                    @Html.ValidationMessageFor(model => model.InvoiceNumber, "", new { @class = "text-danger" })
-
+                                                <div class="col-sm">
+                                                    <input type="hidden" asp-for="IdentityType" />
+                                                    <div id="identity-number-area" style="display:none">
+                                                        <label id="identity-number-label">Ghana Card Number</label>
+                                                        <input type="text"
+                                                               id="identity-number-input"
+                                                               class="form-control"
+                                                               value="@(string.IsNullOrEmpty(Model.GhanaCardNumber) ? Model.PassportNumber : Model.GhanaCardNumber)"
+                                                               autocomplete="off" />
+                                                        <span asp-validation-for="GhanaCardNumber" class="text-danger"></span>
+                                                        <span asp-validation-for="PassportNumber" class="text-danger"></span>
+                                                    </div>
                                                 </div>
 
                                             </div>
@@ -244,35 +209,34 @@
         });
         })
 
-             $("#ResultServiceType").change(function () {
-            var serviceType = $(this).val();
-            if (serviceType == 1) {
-                $("#LearnerType").css("display", "block");
-                $("#LearnerDriversLicenceType").rules("add", {
-                    required: true,
-                    messages: "Learner Drivers Licence Type is required",
-                });
-            } else {
-                $("#LearnerType").css("display", "none");
-                $("#LearnerDriversLicenceType").rules("remove", "required");
-            }
-        });
     </script>
     <script>
         $(function(){
-            $('#ResultServiceType').change(function(){
-                let serviceType=$(this).val();
+            function updateIdentityNumberInput() {
+                const nationality = ($('#Nationality').val() || '').toLowerCase();
+                const isGhanaian = nationality === 'ghana' || nationality === 'ghanaian';
+                const hasNationality = nationality.length > 0;
+                const input = $('#identity-number-input');
 
-                serviceType=Number(serviceType);
-                if(serviceType===2||serviceType===3||serviceType===4||serviceType===5){
-                    $('#dvla-licensenumber-area').show();
-                }
-                else{
-                    $('#dvla-licensenumber-area').hide();
+                $('#identity-number-area').toggle(hasNationality);
+
+                if (isGhanaian) {
+                    $('#identity-number-label').text('Ghana Card Number');
+                    $('#IdentityType').val('@((int)IdentityType.NationalIDCard)');
+                    input.attr('name', 'GhanaCardNumber');
+                    input.attr('placeholder', 'Enter your Ghana Card Number');
+                } else {
+                    $('#identity-number-label').text('Passport Number');
+                    $('#IdentityType').val('@((int)IdentityType.InternationalPassport)');
+                    input.attr('name', 'PassportNumber');
+                    input.attr('placeholder', 'Enter your Passport Number');
                 }
 
-            });
+                input.prop('required', hasNationality);
+            }
+
+            $('#Nationality').change(updateIdentityNumberInput);
+            updateIdentityNumberInput();
         })
     </script>
 }
-

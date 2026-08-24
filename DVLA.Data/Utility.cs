@@ -48,7 +48,7 @@ namespace DVLA.Data
                     expiryDate = now.AddMonths(6);
                     break;
                 case PassResult.Unlimited:
-                    expiryDate = now.AddYears(2);
+                    expiryDate = now.AddMonths(12);
                     break;
                 default: break;
             }

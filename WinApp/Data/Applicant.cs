@@ -32,9 +32,6 @@ namespace WinApp.Data
         public string DVLAReferenceNo { get; set; }
 
         [StringLength(50)]
-        public string InvoiceNumber { get; set; }
-
-        [StringLength(50)]
         public string FirstName { get; set; }
 
         [StringLength(50)]

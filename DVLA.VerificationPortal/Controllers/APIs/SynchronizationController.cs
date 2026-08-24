@@ -11,25 +11,18 @@ namespace DVLA.VerificationPortal.Controllers.APIs
     [Route("api/[controller]")]
     [ApiController]
     [ApiKey]
-    public class SynchronizationController : ControllerBase
+    public class SynchronizationController(
+        ISearchResultService searchService,
+        ILogger<SynchronizationController> logger,
+        IOptometristFirmSynchronization optometristFirmSyncService)
+        : ControllerBase
     {
-        private readonly ISearchResultService _searchService;
-        private readonly ILogger<SynchronizationController> _logger;
-        private readonly IOptometristFirmSynchronization _optometristFirmSyncService;
-
-        public SynchronizationController(ISearchResultService searchService, ILogger<SynchronizationController> logger, IOptometristFirmSynchronization optometristFirmSyncService)
-        {
-            _searchService = searchService;
-            _logger = logger;
-            _optometristFirmSyncService = optometristFirmSyncService;
-        }
-
         [HttpPost("push-visual-assessment")]
         public async Task<IActionResult> PushVisualAssessmentResults(VisualAssessmentResultDto model)
         {
-            _logger.LogInformation("Synchronization Endpoint started");
-            MessageResponse result = await _searchService.Push(model);
-            _logger.LogInformation("Synchronization Endpoint ended");
+            logger.LogInformation("Synchronization Endpoint started");
+            MessageResponse result = await searchService.Push(model);
+            logger.LogInformation("Synchronization Endpoint ended");
             if (result.Success)
                 return Ok(result);
             return BadRequest(result.Message);
@@ -39,7 +32,7 @@ namespace DVLA.VerificationPortal.Controllers.APIs
         public async Task<IActionResult> UpdateAuthDoctor(UpdateDocRequestDto model)
         {
             //_logger.LogInformation("Synchronization Endpoint started");
-            MessageResponse result = await _searchService.UpdateAuthDoctor(model);
+            MessageResponse result = await searchService.UpdateAuthDoctor(model);
             //_logger.LogInformation("Synchronization Endpoint ended");
             if (result.Success)
                 return Ok(result);
@@ -60,7 +53,7 @@ namespace DVLA.VerificationPortal.Controllers.APIs
             {
                 return BadRequest(ModelState);
             }
-            MessageResponse response = await _optometristFirmSyncService.SyncOptometristFirm(model);
+            MessageResponse response = await optometristFirmSyncService.SyncOptometristFirm(model);
             return Ok(response);
         }
 
@@ -68,7 +61,7 @@ namespace DVLA.VerificationPortal.Controllers.APIs
         [HttpPost("sync-optometrist-firms")]
         public async Task<IActionResult> SyncOptometristFirms([FromBody] List<OptometristFirm> model)
         {
-            List<int> response = await _optometristFirmSyncService.SyncOptometristFirms(model);
+            List<int> response = await optometristFirmSyncService.SyncOptometristFirms(model);
             return Ok(response);
         }
 
